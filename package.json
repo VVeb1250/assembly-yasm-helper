@@ -1,0 +1,100 @@
+{
+	"name": "assembly-yasm-helper",
+	"publisher": "VVeb1250",
+	"displayName": "Assembly YASM Helper",
+	"description": "Language support and smart autocomplete for YASM/NASM Assembler",
+	"version": "1.0.3",
+	"engines": {
+		"vscode": "^1.48.0"
+	},
+	"categories": [
+		"Programming Languages"
+	],
+	"activationEvents": [
+		"onLanguage:assembly"
+	],
+	"main": "./out/extension.js",
+	"contributes": {
+		"keybindings": [
+			{
+				"key": "tab",
+				"command": "tab",
+				"when": "suggestWidgetVisible && editorLangId == assembly"
+			}
+		],
+		"languages": [
+			{
+				"id": "assembly",
+				"aliases": [
+					"Assembly (YASM)",
+					"Assembly",
+					"assembly",
+					"YASM",
+					"NASM"
+				],
+				"extensions": [
+					".asm",
+					".s",
+					".S"
+				],
+				"configuration": "./language-configuration.json"
+			}
+		],
+		"grammars": [
+			{
+				"language": "assembly",
+				"scopeName": "source.asm",
+				"path": "./syntaxes/assembly.tmLanguage.json"
+			}
+		],
+		"snippets": [
+			{
+				"language": "assembly",
+				"path": "./snippets.json"
+			}
+		],
+		"themes": [
+			{
+				"label": "Assembly Dark (YASM)",
+				"id": "tasmDark",
+				"uiTheme": "vs-dark",
+				"path": "./themes/tasmDark.tmTheme.json"
+			},
+			{
+				"label": "Assembly Light (YASM)",
+				"id": "tasmLight",
+				"uiTheme": "vs",
+				"path": "./themes/tasmLight.tmTheme.json"
+			},
+			{
+				"label": "Assembly High Contrast (YASM)",
+				"id": "tasmHC",
+				"uiTheme": "hc-black",
+				"path": "./themes/tasmHC.tmTheme.json"
+			}
+		]
+	},
+	"scripts": {},
+	"devDependencies": {
+		"@types/glob": "^7.1.3",
+		"@types/mocha": "^8.0.0",
+		"@types/node": "^14.0.27",
+		"@types/vscode": "^1.48.0",
+		"@typescript-eslint/eslint-plugin": "^3.8.0",
+		"@typescript-eslint/parser": "^3.8.0",
+		"eslint": "^7.6.0",
+		"glob": "^7.1.6",
+		"mocha": "^8.0.1",
+		"typescript": "^3.9.7",
+		"vscode": "^1.1.37",
+		"vscode-test": "^1.4.0"
+	},
+	"dependencies": {
+		"vsce": "^1.78.0"
+	},
+	"__metadata": {
+		"installedTimestamp": 1771779188107,
+		"targetPlatform": "undefined",
+		"size": 6466113
+	}
+}

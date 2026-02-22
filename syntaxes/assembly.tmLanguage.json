@@ -1,0 +1,298 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Assembly (TASM)",
+	"patterns": [
+		{ "include": "#comment" },
+		{ "include": "#const" },
+		{ "include": "#args" },
+		{ "include": "#func" },
+		{ "include": "#struc" },
+		{ "include": "#macro" },
+		{ "include": "#keywords" },
+		{ "include": "#strings" },		
+		{ "include": "#labels" },
+		{ "include": "#sections" },
+		{ "include": "#variables" }
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.assembly",
+				"match": "(?i)\\b(hlt|nop|xadd|xchg|cmpxchg|ror|rol|rcl|rcr|into|iret|loopne|loopnz|enter|leave|shrd|shld|fwait|wait|xlat|les|xchg|rep|mod|movs|lea|str|req|push|call|mov|ret|pop|int|loop|loope|loopz|lea|add|sub|mul|neg|div|idiv|imul|pusha|popa|inc|dec|jmp|jle|jge|ge|jl|jc|jnc|jz|jnz|je|jne|cmp|and|or|xor|not|ja|jb|jae|jbe|jcxz|in|out|shl|shr)\\b"
+			},
+			{
+				"name":"keyword.control.flags.assmebly",
+				"match": "(?i)\\b(lahf|sahf|pushf|pushfw|pushfd|popf|popfd|popfw|std|cld|sti|cli|stc|clc|cmc)\\b"
+			},
+			{
+				"name":"keyword.math2.assembly",
+				"match": "(?i)\\b(daa|das|aaa|aas|aad|aam)\\b"
+			},
+			{
+				"name":"keyword.advacned.assembly",
+				"match": "(?i)\\b(pascal|c|fortran)\\b"
+			},
+			{
+				"name":"keyword.string.assembly",
+				"match": "(?i)\\b(ins|insb|insw|insd|outs|outsb|outsd|outw|cmps|cmpsb|cmpsw|cmpsd|lods|lobsb|lobsw|lodsd|scas|scasb|scasb|scasw|repnz|repz|stos|movs|movsb|movsw|movsd)\\b"
+			},
+			{
+				"name":"keyword.legacy.assembly",
+				"match": "(?i)\\b(c|req|abs|wrt)\\b"
+			},
+			{
+				"name":"keyword.control.assembly",
+				"match": "(?i)\\b(dt|db|dw|dd|dq|real4|real8|df|arg|uses)\\b"
+			},
+			{
+				"name":"keyword.control.less.assembly",
+				"match": "(?i)\\b(byte|word|qword|dword|tbyte)\\b"
+			},
+			{
+				"name":"keyword.size.assembly",
+				"match": "(?i)\\b(small|large|medium|flat|stdcall|tiny|huge|compact)\\b"
+			},
+			{	
+				"name": "keyword.valued.assembly",
+				"match": "(?i)\\b(CODESEG|DATASEG|MASM|IDEAL|MODEL|STACK|width|length|ge|le|this|times)\\b|@data"
+			},
+			{
+				"name":"keyword.less.preCompiled.assembly",
+				"match": "(?i)\\b(global|method|local|label|proc|endp|struct|struc|ends|end|include|incbin|offset|equ|dup|ptr|if|while|macro|endm|invoke)\\b"
+			},
+			{
+				"name":"keyword.less.conditional.assembly",
+				"match": "(?i)\\b(abs|if|else|endif|ife|ifb|ifnb|ifdef|ifndef|ifdif|ifndif|if1|if2|irp|for|rept)\\b"
+			},
+			{
+				"name":"variable.register.assembly",
+				"match": "(?i)\\b(ax|bx|cx|dx|sp|bp|di|si|bl|bh|cl|ch|al|ah|dl|dh)\\b"
+			},
+			{
+				"name":"variable.register.segement.assembly",
+				"match": "(?i)\\b(ds|es|ss|cs|fs|gs)\\b"
+			},
+			{
+				"name":"variable.register.64.assembly",
+				"match": "(?i)\\b(rax|rbx|rcx|rdx|rsp|rbp|rdi|rsi)\\b"
+			},
+			{
+				"name":"variable.register.float.assembly",
+				"match": "(?i)\\b(st1|st0|st2|st3|st4|st5|st6|st7|st)\\b"
+			},
+			{
+				"name":"variable.register.debug.assembly",
+				"match": "(?i)\\b(db1|db0|db2|db3|db6|db7)\\b"
+			},
+			{
+				"name":"variable.register.test.assembly",
+				"match": "\\b(tr6|tr7)\\b"
+			},
+			{
+				"name":"variable.register.32.assembly",
+				"match": "(?i)\\b(eax|ebx|ecx|edx|esp|ebp|edi|esi)\\b"
+			}
+		]
+		},
+		"labels": {
+			"patterns": [
+				{
+					"name": "constant",
+					"match": "(?i)([\\w_\\d]*)::?"
+				}
+			]
+		},
+		"strings": {
+			"patterns":
+			[
+				{
+					"name": "string.quoted.double.assembly",
+					"begin": "\"",
+					"end": "\"",
+					"patterns": [
+						{
+							"name": "constant.character.escape.assembly",
+							"match": "\\\\."
+						}
+					]
+				},
+				{
+					"name":"string.quoted.single",
+					"begin": "'",
+					"end": "'",
+					"patterns": [
+						{
+							"name": "constant.character.escape.assembly",
+							"match": "\\\\."
+						}
+					]
+				}
+			]
+		},
+		"const":{
+		"patterns": [
+			{
+				"name": "constant.numeric",
+				"match": "(?i)\\b\\d[\\dA-F]*[hdb]?\\b"
+			}
+		]
+		},
+		"sections": {
+			"patterns": [
+				{
+					"match": "(?i)\\b(section|segment)\\s+([.a-zA-Z_][a-zA-Z0-9_]*)",
+					"captures": {
+						"1": { "name": "keyword.control.assembly" },
+						"2": { "name": "entity.name.section.assembly" }
+					}
+				}
+			]
+		},
+		"variables": {
+			"patterns": [
+				{
+					"name": "variable.other.assembly",
+					"match": "(?i)\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
+				}
+			]
+		},
+		"comment":{			
+			"name":"comment.line",
+			"begin": ";",
+			"end": "\n",
+			"patterns": [
+				{
+					"name": "constant.character.escape.assembly",
+					"match": "\\\\."
+				}
+			]			
+		},
+		"func":
+		{
+			"patterns": [
+				{
+					"match": "(?i)(proc)\\W([\\w_\\d]*)(\\W?pascal\\W?(far|near)?|\\W?far|\\W?near)?",
+					"captures": {
+						"1": {"name":"keyword"},
+						"2": {"name":"support.function"},
+						"3": {"name": "keyword.control"}
+					}
+				},
+				{
+					"match": "(?i)([\\w_\\d]*)\\W(proc)(\\W?pascal\\W?(far|near)?|\\W?far|\\W?near)?",
+					"captures": {
+						"2": {"name":"keyword"},
+						"1": {"name":"support.function"},
+						"3": {"name": "keyword.control"}
+					}
+				},
+				{
+					"match": "(?i)(endp) ([\\w_\\d]*)",
+					"captures": {
+						"1": {"name":"keyword"},
+						"2": {"name":"support.function"}
+					}
+				},
+				{
+					"match": "(?i)([\\w_\\d]*) (endp)",
+					"captures": {
+						"1": {"name":"support.function"},
+						"2": {"name":"keyword"}
+					}
+				},
+				{
+					"match": "(?i)(call)\\W([\\w_\\d]*)",
+					"captures": {
+						"1": {"name":"keyword"},
+						"2": {"name":"support.function"}
+					}
+				}
+			]
+		},
+		"args":{
+			"patterns": [
+				{
+					"begin": "(?i)(arg|local)[ \t]{1,}([\\w_\\d@]*)(:(word|byte|dword|qword)(:(\\d*))?)?",
+					"end": "\n|;",
+					"beginCaptures": {
+						"1": {"name":"keyword.control.less"},
+						"2": {"name":"variable.parameter"},
+						"4": {"name":"keyword"},
+						"6": {"name": "constant.numeric"}
+					},
+					"patterns": [
+						{
+							"match": ",[ \t]*([\\w_\\d@]*)(:(word|byte|dword|qword)(:(\\d*))?)?",
+							"captures": {
+								"1": {"name":"variable.parameter"},
+								"3": {"name":"keyword"},
+								"5": {"name": "constant.numeric"}
+							}
+						}
+					]
+				}
+			]
+		},
+		"struc":{
+			"patterns": [
+				{
+					"match": "(?i)(struc)\\W([\\w_\\d]*)\\W?((global)(\\W[\\w_\\d]*)?)?\\W?(method)?",
+					"captures": {
+						"1": {"name":"keyword.control"},
+						"2": {"name":"support.class"},
+						"4": {"name":"keyword"},
+						"5": {"name":"support.class"},
+						"6": {"name":"keyword"}
+					}
+				},
+				{
+					"match": "(?i)(ends)\\W([\\w_\\d]*)",
+					"captures": {
+						"1": {"name":"keyword.control"},
+						"2": {"name":"support.class"}
+					}
+				},
+				{
+					"match": "(?i)([\\w_\\d]*):([\\w_\\d]{1,})",
+					"captures": {
+						"1": {"name":"support.class"},
+						"2": {"name":"support.function"}
+					}
+				}
+			]
+		},
+		"macro": {
+			"patterns": [
+				{
+					"match": "(?i)([\\w_\\d]*)\\W(equ)\\W",
+					"captures": {
+						"1": {"name":"support.other"},
+						"2": {"name": "keyword.less"}
+					}
+				},{
+					"match": "(?i)(endm)\\W([\\w_\\d]*)",
+					"captures": {
+						"2": {"name":"support.other"},
+						"1": {"name": "keyword"}
+					}
+				},{
+					"begin": "(?i)(macro)\\W([\\w_\\d]*)(\\W([\\w_\\d]*))?",
+					"end": "\n|;",
+					"beginCaptures": {
+						"1": {"name": "keyword"},
+						"2": {"name": "support.other"},
+						"4": {"name": "variable.parameter"}
+					},
+					"patterns": [{
+						"match": ",[ \t]*([\\w_\\d]*)",
+						"captures": {
+							"1": {"name": "variable.parameter"}
+						}
+					}]
+				}
+			]
+		}
+	},
+		
+	"scopeName": "source.asm"
+}
