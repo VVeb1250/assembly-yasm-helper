@@ -27,4 +27,4 @@ Welcome to **Assembly YASM Helper**! This extension provides advanced language s
 * Visual Studio Code v1.48.0 or higher.
 
 ## 👨‍💻 Publisher
-Developed by **Roncho** and customized for smooth YASM Assembly coding by **Roncho**.
+Developed by **Roncho** and customized for smooth YASM Assembly coding by **VVeb1250**.
