@@ -4,12 +4,14 @@ const { SymbolRegistry } = require("./registry");
 const { DocumentScanner } = require("./scanner");
 const { TasmHoverProvider } = require("./providers/hoverProvider");
 const { AsmCompletionProvider } = require("./providers/completionProvider");
+const { DiagnosticProvider } = require("./providers/diagnosticProvider");
 
 class ExtensionManager {
     constructor(context) {
         this.context = context;
         this.registry = new SymbolRegistry();
         this.scanner = new DocumentScanner(this.registry);
+        this.diagnostics = new DiagnosticProvider(this.registry);
     }
 
     activate() {
@@ -26,7 +28,9 @@ class ExtensionManager {
             )
         );
 
-        // Catch event when a file is opened, saved, or edited
+        this.context.subscriptions.push(this.diagnostics.collection);
+
+        // scan + analyze ทุกครั้งที่ไฟล์เปลี่ยน
         vscode.workspace.onDidChangeTextDocument(e => this.triggerScan(e.document));
         vscode.workspace.onDidOpenTextDocument(doc => this.triggerScan(doc));
         vscode.workspace.onDidSaveTextDocument(doc => this.triggerScan(doc));
@@ -36,12 +40,13 @@ class ExtensionManager {
     }
 
     async triggerScan(document) {
-        if (!document) return;
+        if (!document || document.languageId !== 'assembly') return;
         let docText = [];
         for (let i = 0; i < document.lineCount; i++) {
             docText.push(document.lineAt(i).text);
         }
         await this.scanner.scan(docText);
+        this.diagnostics.analyze(document);
     }
 }
 

@@ -17,7 +17,7 @@
 	"activationEvents": [
 		"onLanguage:assembly"
 	],
-	"main": "./dist/extension.js",
+	"main": "./out/extension.js",
 	"contributes": {
 		"configurationDefaults": {
 			"[assembly]": {
@@ -84,8 +84,8 @@
 		]
 	},
 	"scripts": {
-    	"build": "esbuild ./out/extension.js --bundle --outfile=./dist/extension.js --external:vscode --platform=node --minify",
-    	"package": "npm run build && vsce package"
+		"build": "esbuild ./out/extension.js --bundle --outfile=./dist/extension.js --external:vscode --platform=node --minify",
+		"package": "npm run build && vsce package --main ./dist/extension.js"
 	},
 	"devDependencies": {
 		"@types/glob": "^7.1.3",
