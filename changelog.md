@@ -29,3 +29,7 @@
 ## 1.0.3
 - Not use AutoSuggestion when TAB 
 - Adjust KEYWORD_DICONTARY
+
+## 1.0.4
+- fix word suggestion for smooter coding
+- add 0x numberic declaretion
