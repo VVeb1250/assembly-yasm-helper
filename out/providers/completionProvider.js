@@ -34,11 +34,12 @@ class AsmCompletionProvider {
         let item = new vscode.CompletionItem(name, this.getItemKind(type));
         item.detail = detail;
         item.documentation = doc;
+        item.sortText = "01_" + name; // set priority
         if (insertText) item.insertText = insertText;
         return item;
     }
 
-    async provideCompletionItems(document, position, token, context) {
+async provideCompletionItems(document, position, token, context) {
         let completions = new vscode.CompletionList();
         
         // 1. update from lastet data from doc
@@ -49,21 +50,27 @@ class AsmCompletionProvider {
         // 2. current typing line
         let line = document.getText(new vscode.Range(position.line, 0, position.line, position.character));
         
-        // skip completion if typing String or Comment
-        if (line.match(/(\")/g) || line.match(/^[^\"]*#[^\{].*$/)) return completions; 
+        // skip Auto-complete if in Comment of YASM (;)
+        if (line.match(/(\")/g) || line.includes(';')) return completions; 
 
-        let words = Utils.splitLine(line).map(w => w.toLowerCase());
-        let isRootLevel = !line.match(/^\s/); // is left most?
-        let hasSpace = line.includes(' ') || line.includes('\t'); // already tab or spacebar?
+        let trimmedLine = line.trimStart();
+        let isRootLevel = (line.length === trimmedLine.length); // is Root Level?
+        
+        // sperate word using whitespace (space, tab)
+        let words = trimmedLine.length > 0 ? trimmedLine.split(/[\s\t]+/).map(w => w.toLowerCase()) : [];
+        
+        // FIX : add check typing parameter (Operand) or not 
+        // (if more than 1 word or finish typing and last is space)
+        let isTypingOperand = words.length > 1 || (words.length === 1 && /[\s\t]$/.test(line));
 
         // ==========================================
         // 1: Root-Level Suggestions
         // ==========================================
-        if (words.length === 0 || (words.length === 1 && !hasSpace)) {
+        if (words.length === 0 || (words.length === 1 && !isTypingOperand)) {
             if (isRootLevel) {
-                completions.items.push(this.createItem("section .data", KeywordType.savedWord, "(Section)", "Initialized data", "section .data\n\t"));
+                completions.items.push(this.createItem("section .data", KeywordType.savedWord, "(Section)", "Initialized data", "section .data\n"));
                 completions.items.push(this.createItem("section .text", KeywordType.savedWord, "(Section)", "Code section", "section .text\n"));
-                completions.items.push(this.createItem("section .bss", KeywordType.savedWord, "(Section)", "Uninitialized data", "section .bss\n\t"));
+                completions.items.push(this.createItem("section .bss", KeywordType.savedWord, "(Section)", "Uninitialized data", "section .bss\n"));
                 completions.items.push(this.createItem("global", KeywordType.savedWord, "(Scope)", "Global symbol", "global"));
                 completions.items.push(this.createItem("extern", KeywordType.savedWord, "(Scope)", "External symbol", "extern"));
             }
@@ -73,14 +80,14 @@ class AsmCompletionProvider {
         // 2: Section / Global command
         // ==========================================
         if (words.length > 0 && words[0] === "section") {
-            if (hasSpace) {
+            if (isTypingOperand) {
                 ["data", "text", "bss"].forEach(sec => completions.items.push(this.createItem("." + sec, KeywordType.savedWord, "", "", "." + sec)));
             }
             return completions;
         }
 
         if (words.length > 0 && (words[0] === "global" || words[0] === "extern")) {
-            if (hasSpace) {
+            if (isTypingOperand) {
                 completions.items.push(this.createItem("_start", KeywordType.label, "(Entry)", "Standard execution entry point"));
                 this.registry.labels.forEach(l => completions.items.push(this.createItem(l, KeywordType.label, "(Label)")));
                 this.registry.procs.forEach(p => completions.items.push(this.createItem(p.name, KeywordType.method, "(Procedure)")));
@@ -102,25 +109,21 @@ class AsmCompletionProvider {
         }
 
         // ==========================================
-        // 4: .data and .bss
+        // 4: .data และ .bss 
         // ==========================================
-        if (isDataSection && !isRootLevel) {
-            let trimmedLine = line.trimStart();
-            
-            // ถ้าย่อหน้าเข้ามาแล้ว แต่ยังไม่เคาะวรรคเลย (กำลังตั้งชื่อตัวแปร) ปิดเมนูกวนใจ
-            if (trimmedLine.length === 0 || !/[\s\t]/.test(trimmedLine)) {
+        if (isDataSection) {
+            if (!isTypingOperand) {
                 return completions; 
             }
             
-            // ถ้าพิมพ์ชื่อตัวแปรเสร็จแล้ว เคาะวรรค -> แนะนำ db, dw, resb
-            let match = trimmedLine.match(/^([^\s\t]+)[\s\t]+([^\s\t]*)$/);
-            if (match) {
+            // FIX : disable isRootLevel. if firstword complete -> suggest db, dw
+            if (words.length === 1 || (words.length === 2 && !/[\s\t]$/.test(line))) {
                 const dataKeywords = ["db", "dw", "dd", "dq", "dt", "equ", "resb", "resw", "resd", "resq"];
                 dataKeywords.forEach(k => completions.items.push(this.createItem(k, KeywordType.memoryAllocation, "(Define/Reserve)")));
                 return completions;
             }
             
-            // ถ้าพิมพ์เกิน 2 คำไปแล้ว (เช่น msg db ...) ให้เงียบไว้
+            // more than 2 word, then stop Data section suggest
             return completions; 
         }
 
@@ -129,41 +132,55 @@ class AsmCompletionProvider {
         // ==========================================
         let isInsideBracket = line.lastIndexOf('[') > line.lastIndexOf(']');
         if (isInsideBracket) {
-            // อยู่ในวงเล็บ โชว์แค่ตัวแปรเท่านั้น
-            this.registry.vars.forEach(v => completions.items.push(this.createItem(v.name, KeywordType.variable, "(Variable)")));
+            // 1. add Variable (sortText 00)
+            this.registry.vars.forEach(v => {
+                let item = this.createItem(v.name, KeywordType.variable, "(Variable)");
+                item.sortText = "00_" + v.name;
+                completions.items.push(item);
+            });
+
+            // 2. add Register (sortText 01)
+            REGISTERS.forEach(r => {
+                let item = this.createItem(r, KeywordType.register, "(Register)");
+                item.sortText = "01_" + r;
+                completions.items.push(item);
+            });
             return completions;
         }
 
         // ==========================================
-        // 🚀 กฎที่ 6: การแนะนำ Register, ตัวแปร, ขนาดพอยเตอร์, และการ Jump
+        // 6: typing Operands or parameter
         // ==========================================
-        if (words.length > 0 && !isDataSection) {
+        if (isTypingOperand && !isDataSection) {
             let firstWord = words[0];
             let isJump = ["jmp","je","jne","jz","jnz","jg","jl","jge","jle","ja","jb","jae","jbe","call","loop","loope","loopne"].includes(firstWord);
             
             if (isJump) {
-                // คำสั่งกระโดด โชว์แค่ Label และ Procedure
+                // jump command show only Label and Procedure
                 this.registry.labels.forEach(l => completions.items.push(this.createItem(l, KeywordType.label, "(Label)")));
                 this.registry.procs.forEach(p => completions.items.push(this.createItem(p.name, KeywordType.method, "(Procedure)")));
-                return completions;
-            }
-
-            // ถ้ากำลังพิมพ์พารามิเตอร์หลังคำสั่ง (เช่น mov ...)
-            if (hasSpace) {
+            } else {
+                // normal command suggest Register, variable and size
                 REGISTERS.forEach(r => completions.items.push(this.createItem(r, KeywordType.register)));
                 this.registry.vars.forEach(v => completions.items.push(this.createItem(v.name, KeywordType.variable, "(Variable)")));
                 ["byte", "word", "dword", "qword"].forEach(s => completions.items.push(this.createItem(s, KeywordType.size, "(Size)")));
-                return completions; // จบตรงนี้ จะได้ไม่แสดงคำสั่ง Instruction ซ้ำซ้อนตอนหลังลูกน้ำ (,)
             }
+
+            return completions; 
         }
 
         // ==========================================
-        // 🚀 กฎที่ 7: พิมพ์คำสั่งทั่วไป (ย่อหน้าปกติที่ยังไม่เว้นวรรค)
+        // 7: Instructions
         // ==========================================
-        if (hasSpace && !isDataSection) {
+        // fix rule: 
+        // 1. not a parameter (no content before typing space)
+        // 2. not in Data Section
+        let isTypingOp = /[\s\t]/.test(trimmedLine); // have space in first word?
+
+        if (!isDataSection && !isTypingOp && trimmedLine.length > 0) {
             KEYWORD_DICONTARY.forEach(k => {
                 if ([KeywordType.instruction, KeywordType.memoryAllocation, KeywordType.precompiled].includes(k.type)) {
-                    // ซ่อนคำสั่ง root-level ถ้าย่อหน้าไปแล้ว
+                    // if not RootLevel, don't suggest section/global
                     if (!isRootLevel && ["section", "global", "extern"].includes(k.name)) return;
                     completions.items.push(this.createItem(k.name, k.type, Utils.getType(k.type), k.def));
                 }
@@ -171,7 +188,7 @@ class AsmCompletionProvider {
         }
 
         // ==========================================
-        // กรองไอเทมที่ซ้ำกันออก
+        // filter same item
         // ==========================================
         let uniqueItems = [];
         let labelsSeen = new Set();
