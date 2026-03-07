@@ -5,9 +5,9 @@
 	"description": "Language support and smart autocomplete for YASM/NASM Assembler",
 	"version": "1.0.4",
 	"repository": {
-        "type": "git",
-        "url": "https://github.com/VVeb1250/assembly-yasm-helper.git"
-    },
+		"type": "git",
+		"url": "https://github.com/VVeb1250/assembly-yasm-helper.git"
+	},
 	"engines": {
 		"vscode": "^1.48.0"
 	},
@@ -17,13 +17,13 @@
 	"activationEvents": [
 		"onLanguage:assembly"
 	],
-	"main": "./out/extension.js",
+	"main": "./dist/extension.js",
 	"contributes": {
 		"configurationDefaults": {
-            "[assembly]": {
-                "editor.wordBasedSuggestions": "off"
-            }
-        },
+			"[assembly]": {
+				"editor.wordBasedSuggestions": "off"
+			}
+		},
 		"keybindings": [
 			{
 				"key": "tab",
@@ -83,7 +83,10 @@
 			}
 		]
 	},
-	"scripts": {},
+	"scripts": {
+    	"build": "esbuild ./out/extension.js --bundle --outfile=./dist/extension.js --external:vscode --platform=node --minify",
+    	"package": "npm run build && vsce package"
+	},
 	"devDependencies": {
 		"@types/glob": "^7.1.3",
 		"@types/mocha": "^8.0.0",
@@ -91,14 +94,12 @@
 		"@types/vscode": "^1.48.0",
 		"@typescript-eslint/eslint-plugin": "^3.8.0",
 		"@typescript-eslint/parser": "^3.8.0",
+		"@vscode/vsce": "^3.7.1",
+		"esbuild": "^0.27.3",
 		"eslint": "^7.6.0",
 		"glob": "^7.1.6",
 		"mocha": "^8.0.1",
 		"typescript": "^3.9.7",
-		"vscode": "^1.1.37",
-		"vscode-test": "^1.4.0"
-	},
-	"dependencies": {
 		"vsce": "^1.78.0"
 	},
 	"__metadata": {

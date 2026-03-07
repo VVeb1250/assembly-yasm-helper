@@ -1,3 +1,21 @@
+# Dependencies
 node_modules/
-.vscode-test/
+
+# Build outputs
+out/
+dist/
+
+# Package output
 *.vsix
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VS Code local settings
+.vscode/settings.json
+.vscode/launch.json
