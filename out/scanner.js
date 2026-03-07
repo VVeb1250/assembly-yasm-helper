@@ -7,6 +7,7 @@ const { Info, Procedure, Label } = require("./data/structs");
 class DocumentScanner {
     constructor(registry) {
         this.registry = registry;
+        this.currentSection = ""; // add Section tracking
     }
 
     async scan(documentLines, clearPrevious = true) {
@@ -17,14 +18,32 @@ class DocumentScanner {
             }
         }
 
+        this.currentSection = ""; // reset Section when rescan
+
         for (let x = 0; x < documentLines.length; x++) {
             const line = documentLines[x];
             const cleanLine = Utils.clearSpace(line);
+            const lowerCleanLine = cleanLine.toLowerCase();
 
-            if (line.endsWith(':')) {
-                this.registry.labels.push(Utils.clearSpace(line.substring(0, line.length - 1)));
+            // ==========================================
+            // 1. Section change detector
+            // ==========================================
+            if (lowerCleanLine.startsWith("section") || lowerCleanLine.startsWith("segment")) {
+                let words = Utils.splitLine(line);
+                if (words.length > 1) {
+                    this.currentSection = words[1].toLowerCase(); // ex. ".data", ".text", ".bss"
+                }
+                continue; // read next line
             }
-            if (cleanLine.startsWith('label')) {
+
+            // ==========================================
+            // 2. find Labels
+            // ==========================================
+            if (line.endsWith(':')) {
+                let labelName = Utils.clearSpace(line.substring(0, line.length - 1));
+                this.registry.labels.push(labelName);
+            }
+            if (lowerCleanLine.startsWith('label')) {
                 let firstSpace = line.indexOf(' ', line.indexOf('l'));
                 let spaceOne = line.indexOf(' ', firstSpace + 1);
                 let length = spaceOne - firstSpace;
@@ -32,7 +51,17 @@ class DocumentScanner {
                 this.registry.labelsEE.push(new Label(name, line.substring(line.indexOf(' ', line.indexOf(name)))));
             }
 
-            let isVar = line.includes(" db") || line.includes(" dw") || line.includes(" dd") || line.includes(" dq") || line.includes(" dt");
+            // ==========================================
+            // 3. detect Variables (and record Section)
+            // ==========================================
+            // add resb, resw, resd, resq for .bss
+            let isVar = lowerCleanLine.includes("db") || lowerCleanLine.includes("dw") || 
+                        lowerCleanLine.includes("dd") || lowerCleanLine.includes("dq") || 
+                        lowerCleanLine.includes("dt") || lowerCleanLine.includes("resb") ||
+                        lowerCleanLine.includes("resw") || lowerCleanLine.includes("resd") ||
+                        lowerCleanLine.includes("resq") || 
+                        this.registry.structs.some(s => line.includes(s));
+
             if (isVar && clearPrevious) {
                 let first = cleanLine.charAt(0);
                 let fistInd = line.indexOf(first);
@@ -42,12 +71,16 @@ class DocumentScanner {
                 if (space1 > -1 && space2 > -1) {
                     this.registry.vars.push({
                         name: Utils.clearSpace(line.substring(fistInd, space1)),
-                        type: Utils.clearSpace(line.substring(space1, space2))
+                        type: Utils.clearSpace(line.substring(space1, space2)),
+                        section: this.currentSection // <--- add Section of variable
                     });
                 }
             }
 
-            if (cleanLine.startsWith("proc")) {
+            // ==========================================
+            // 4. detect Procedures
+            // ==========================================
+            if (lowerCleanLine.startsWith("proc")) {
                 let des = new Info("", "");
                 let text = [];
                 let ptr = x;
@@ -68,7 +101,34 @@ class DocumentScanner {
                 let spaceOne = line.indexOf(' ', firstSpace + 1);
                 let name = spaceOne > -1 ? cleanLine.substr(cleanLine.indexOf('c') + 1, spaceOne - firstSpace - 1) : cleanLine.substring(cleanLine.indexOf('c') + 1);
                 des.name = name;
-                if (!this.registry.findProcedure(name)) this.registry.procs.push(new Procedure(name, des));
+
+                if (!this.registry.findProcedure(name)) {
+                    let proc = new Procedure(name, des);
+                    proc.section = this.currentSection; // <--- add Section for Procedure
+                    this.registry.procs.push(proc);
+                }
+            }
+
+            // ==========================================
+            // 5. detect Includes
+            // ==========================================
+            if (lowerCleanLine.startsWith("include")) {
+                let fileNameMatch = line.match(/['"](.*?)['"]/);
+                if (fileNameMatch && vscode.workspace.workspaceFolders) {
+                    let fileName = vscode.workspace.workspaceFolders[0].uri.fsPath + '\\' + fileNameMatch[1];
+                    if (fstream.existsSync(fileName) && !this.registry.includedFiles.includes(fileName)) {
+                        let filedata = fstream.readFileSync(fileName, 'utf8');
+                        this.registry.includedFiles.push(fileName.replace(/\\/g, '/'));
+                        
+                        // save current Section, cuz include may change Section
+                        let oldSection = this.currentSection;
+                        
+                        await this.scan(filedata.split('\n'), false);
+                        
+                        // return Section for main file
+                        this.currentSection = oldSection; 
+                    }
+                }
             }
         }
     }
