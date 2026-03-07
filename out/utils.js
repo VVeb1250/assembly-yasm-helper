@@ -42,6 +42,9 @@ class Utils {
     }
 
     static isNumberStr(str) {
+        // 0x prefix style (e.g. 0x1F, 0xFF)
+        if (/^0x[0-9a-fA-F]+$/i.test(str)) return true;
+        // suffix style: must start with digit
         if (!/^[0-9]/.test(str)) return false;
         let sub = (str.endsWith('h') || str.endsWith('b') || str.endsWith('d')) ? 1 : 0;
         const possibleNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
@@ -52,12 +55,19 @@ class Utils {
     }
 
     static getNumMsg(word) {
-        let base = word.endsWith('h') ? 16 : word.endsWith('b') ? 2 : 10;
-        let value = Number.parseInt(word, base);
-        let s = `(${base === 16 ? "Hexadecimal" : base === 10 ? "Decimal" : "Binary"} Number) ${word}:\n`;
+        let base, value;
+        // 0x prefix style
+        if (/^0x/i.test(word)) {
+            base = 16;
+            value = Number.parseInt(word, 16);
+        } else {
+            base = word.endsWith('h') ? 16 : word.endsWith('b') ? 2 : 10;
+            value = Number.parseInt(word, base);
+        }
+        let s = `(${base === 16 ? "Hexadecimal" : base === 2 ? "Binary" : "Decimal"} Number) ${word}:\n`;
         if (base !== 10) s += `\tDecimal: ${value.toString(10)}\n`;
-        if (base !== 16) s += `\tHexa: ${value.toString(16)}h\n`;
-        if (base !== 2) s += `\tBinary: ${value.toString(2)}b\n`;
+        if (base !== 16) s += `\tHex: ${value.toString(16)}h / 0x${value.toString(16).toUpperCase()}\n`;
+        if (base !== 2)  s += `\tBinary: ${value.toString(2)}b\n`;
         return s;
     }
 }
