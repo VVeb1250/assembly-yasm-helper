@@ -5,6 +5,7 @@ const { DocumentScanner } = require("./scanner");
 const { TasmHoverProvider } = require("./providers/hoverProvider");
 const { AsmCompletionProvider } = require("./providers/completionProvider");
 const { DiagnosticProvider } = require("./providers/diagnosticProvider");
+const { CompilerProvider } = require("./providers/compilerProvider");
 
 class ExtensionManager {
     constructor(context) {
@@ -12,10 +13,10 @@ class ExtensionManager {
         this.registry = new SymbolRegistry();
         this.scanner = new DocumentScanner(this.registry);
         this.diagnostics = new DiagnosticProvider(this.registry);
+        this.compiler = new CompilerProvider();
     }
 
     activate() {
-        // Register various features with the assembly language
         this.context.subscriptions.push(
             vscode.languages.registerHoverProvider('assembly', new TasmHoverProvider(this.registry))
         );
@@ -29,17 +30,19 @@ class ExtensionManager {
         );
 
         this.context.subscriptions.push(this.diagnostics.collection);
+        this.context.subscriptions.push(this.compiler.collection);
 
         // scan + analyze ทุกครั้งที่ไฟล์เปลี่ยน
         vscode.workspace.onDidChangeTextDocument(e => this.triggerScan(e.document));
         vscode.workspace.onDidOpenTextDocument(doc => this.triggerScan(doc));
-        vscode.workspace.onDidSaveTextDocument(doc => this.triggerScan(doc));
+        // compiler รันเฉพาะตอน save เพราะต้องเขียน temp file
+        vscode.workspace.onDidSaveTextDocument(doc => this.triggerScan(doc, true));
         vscode.window.onDidChangeActiveTextEditor(editor => {
             if (editor) this.triggerScan(editor.document);
         });
     }
 
-    async triggerScan(document) {
+    async triggerScan(document, runCompiler = false) {
         if (!document || document.languageId !== 'assembly') return;
         let docText = [];
         for (let i = 0; i < document.lineCount; i++) {
@@ -47,8 +50,24 @@ class ExtensionManager {
         }
         await this.scanner.scan(docText);
         this.diagnostics.analyze(document);
+
+        // รัน compiler เฉพาะตอน save หรือถูกสั่งโดยตรง
+        if (runCompiler) {
+            await this.compiler.analyze(document);
+        }
     }
 }
+
+function activate(context) {
+    const manager = new ExtensionManager(context);
+    manager.activate();
+}
+exports.activate = activate;
+
+function deactivate() {
+    // cleanup
+}
+exports.deactivate = deactivate;
 
 function activate(context) {
     const manager = new ExtensionManager(context);
