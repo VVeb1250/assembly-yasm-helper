@@ -2,7 +2,7 @@
 const vscode = require("vscode");
 const { Utils } = require("../utils");
 const { KeywordType } = require("../data/enums");
-const { KEYWORD_DICONTARY, REGISTERS } = require("../data/keywords");
+const { KEYWORD_DICONTARY, REGISTERS, AVX_REGISTERS, PREPROCESSOR } = require("../data/keywords");
 
 class AsmCompletionProvider {
     constructor(registry, scanner) {
@@ -50,9 +50,10 @@ async provideCompletionItems(document, position, token, context) {
         // 2. current typing line
         let line = document.getText(new vscode.Range(position.line, 0, position.line, position.character));
         
-        // skip Auto-complete if in Comment of YASM (;)
-        if (line.includes(';')) return null;
-        if (line.match(/(\")/g)) return null;
+        // skip Auto-complete if in Comment (;) or inside string (' or ")
+        if (line.includes(';')) return completions;
+        const quoteMatches = line.match(/['"]/g);
+        if (quoteMatches && quoteMatches.length % 2 !== 0) return completions;
 
         let trimmedLine = line.trimStart();
         let isRootLevel = (line.length === trimmedLine.length); // is Root Level?
@@ -63,6 +64,23 @@ async provideCompletionItems(document, position, token, context) {
         // FIX : add check typing parameter (Operand) or not 
         // (if more than 1 word or finish typing and last is space)
         let isTypingOperand = words.length > 1 || (words.length === 1 && /[\s\t]$/.test(line));
+
+        // ==========================================
+        // 0: YASM Preprocessor (% prefix)
+        // ==========================================
+        if (trimmedLine.startsWith('%') || (words.length === 1 && !isTypingOperand && trimmedLine.startsWith('%'))) {
+
+            PREPROCESSOR.forEach(p => completions.items.push(this.createItem(p.name, KeywordType.precompiled, p.detail, p.doc)));
+            
+            // also suggest known macros and defines from registry
+            if (this.registry.macros) {
+                this.registry.macros.forEach(m => completions.items.push(this.createItem(m, KeywordType.macro, "(Macro)")));
+            }
+            if (this.registry.defines) {
+                this.registry.defines.forEach(d => completions.items.push(this.createItem(d, KeywordType.macro, "(Define)")));
+            }
+            return completions;
+        }
 
         // ==========================================
         // 1: Root-Level Suggestions
@@ -114,7 +132,7 @@ async provideCompletionItems(document, position, token, context) {
         // ==========================================
         if (isDataSection) {
             if (!isTypingOperand) {
-                return completions; 
+                return completions;
             }
             
             // FIX : disable isRootLevel. if firstword complete -> suggest db, dw
@@ -125,7 +143,7 @@ async provideCompletionItems(document, position, token, context) {
             }
             
             // more than 2 word, then stop Data section suggest
-            return completions; 
+            return completions;
         }
 
         // ==========================================
@@ -142,6 +160,11 @@ async provideCompletionItems(document, position, token, context) {
 
             // 2. add Register (sortText 01)
             REGISTERS.forEach(r => {
+                let item = this.createItem(r, KeywordType.register, "(Register)");
+                item.sortText = "01_" + r;
+                completions.items.push(item);
+            });
+            AVX_REGISTERS.forEach(r => {
                 let item = this.createItem(r, KeywordType.register, "(Register)");
                 item.sortText = "01_" + r;
                 completions.items.push(item);
@@ -163,8 +186,16 @@ async provideCompletionItems(document, position, token, context) {
             } else {
                 // normal command suggest Register, variable and size
                 REGISTERS.forEach(r => completions.items.push(this.createItem(r, KeywordType.register)));
+                AVX_REGISTERS.forEach(r => completions.items.push(this.createItem(r, KeywordType.register)));
                 this.registry.vars.forEach(v => completions.items.push(this.createItem(v.name, KeywordType.variable, "(Variable)")));
-                ["byte", "word", "dword", "qword"].forEach(s => completions.items.push(this.createItem(s, KeywordType.size, "(Size)")));
+                ["byte", "word", "dword", "qword", "tword", "oword", "yword", "zword"].forEach(s => completions.items.push(this.createItem(s, KeywordType.size, "(Size)")));
+                // suggest known defines/macros as operands
+                if (this.registry.defines) {
+                    this.registry.defines.forEach(d => completions.items.push(this.createItem(d, KeywordType.macro, "(Define)")));
+                }
+                if (this.registry.macros) {
+                    this.registry.macros.forEach(m => completions.items.push(this.createItem(m, KeywordType.macro, "(Macro)")));
+                }
             }
 
             return completions; 

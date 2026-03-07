@@ -39,9 +39,11 @@ class DocumentScanner {
             // ==========================================
             // 2. find Labels
             // ==========================================
-            if (line.endsWith(':')) {
-                let labelName = Utils.clearSpace(line.substring(0, line.length - 1));
-                this.registry.labels.push(labelName);
+            // strip inline comment before checking colon (e.g. "myLabel:  ; comment")
+            let lineNoComment = line.split(';')[0].trimEnd();
+            if (lineNoComment.endsWith(':')) {
+                let labelName = Utils.clearSpace(lineNoComment.substring(0, lineNoComment.length - 1));
+                if (labelName.length > 0) this.registry.labels.push(labelName);
             }
             if (lowerCleanLine.startsWith('label')) {
                 let firstSpace = line.indexOf(' ', line.indexOf('l'));
@@ -78,7 +80,7 @@ class DocumentScanner {
             }
 
             // ==========================================
-            // 4. detect Procedures
+            // 4. detect Procedures (MASM/TASM compat)
             // ==========================================
             if (lowerCleanLine.startsWith("proc")) {
                 let des = new Info("", "");
@@ -110,9 +112,9 @@ class DocumentScanner {
             }
 
             // ==========================================
-            // 5. detect Includes
+            // 5. detect Includes (YASM: %include, TASM: include)
             // ==========================================
-            if (lowerCleanLine.startsWith("include")) {
+            if (lowerCleanLine.startsWith("%include") || lowerCleanLine.startsWith("include")) {
                 let fileNameMatch = line.match(/['"](.*?)['"]/);
                 if (fileNameMatch && vscode.workspace.workspaceFolders) {
                     let fileName = vscode.workspace.workspaceFolders[0].uri.fsPath + '\\' + fileNameMatch[1];
@@ -127,6 +129,34 @@ class DocumentScanner {
                         
                         // return Section for main file
                         this.currentSection = oldSection; 
+                    }
+                }
+            }
+
+            // ==========================================
+            // 6. detect Macros (YASM: %macro ... %endmacro)
+            // ==========================================
+            if (lowerCleanLine.startsWith("%macro")) {
+                let words = Utils.splitLine(line);
+                if (words.length > 1) {
+                    let macroName = words[1];
+                    if (!this.registry.macros) this.registry.macros = [];
+                    if (!this.registry.macros.includes(macroName)) {
+                        this.registry.macros.push(macroName);
+                    }
+                }
+            }
+
+            // ==========================================
+            // 7. detect Defines (YASM: %define)
+            // ==========================================
+            if (lowerCleanLine.startsWith("%define") || lowerCleanLine.startsWith("%assign")) {
+                let words = Utils.splitLine(line);
+                if (words.length > 1) {
+                    let defineName = words[1];
+                    if (!this.registry.defines) this.registry.defines = [];
+                    if (!this.registry.defines.includes(defineName)) {
+                        this.registry.defines.push(defineName);
                     }
                 }
             }

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.KEYWORD_DICONTARY = exports.REGISTERS = void 0;
+exports.KEYWORD_DICONTARY = exports.REGISTERS = exports.PREPROCESSOR = exports.AVX_REGISTERS = void 0;
 const enums_1 = require("./enums");
 const structs_1 = require("./structs");
 exports.REGISTERS = [
@@ -23,6 +23,28 @@ exports.REGISTERS = [
     // Control & Debug Registers
     "cr0", "cr2", "cr3", "cr4", "cr8",
     "dr0", "dr1", "dr2", "dr3", "dr6", "dr7"
+];
+// AVX / AVX-512 registers (generated dynamically)
+exports.AVX_REGISTERS = [
+    ...Array.from({length: 16}, (_, i) => `ymm${i}`),  // AVX (ymm0-ymm15)
+    ...Array.from({length: 32}, (_, i) => `zmm${i}`),  // AVX-512 (zmm0-zmm31)
+    ...Array.from({length: 8},  (_, i) => `k${i}`),    // AVX-512 mask (k0-k7)
+];
+exports.PREPROCESSOR = [
+    { name: "%include",  detail: "(Preprocessor)", doc: "Include another file" },
+    { name: "%macro",    detail: "(Preprocessor)", doc: "Define a multi-line macro" },
+    { name: "%endmacro", detail: "(Preprocessor)", doc: "End macro definition" },
+    { name: "%define",   detail: "(Preprocessor)", doc: "Define a single-line macro" },
+    { name: "%assign",   detail: "(Preprocessor)", doc: "Define a numeric macro" },
+    { name: "%undef",    detail: "(Preprocessor)", doc: "Undefine a macro" },
+    { name: "%ifdef",    detail: "(Preprocessor)", doc: "If macro is defined" },
+    { name: "%ifndef",   detail: "(Preprocessor)", doc: "If macro is not defined" },
+    { name: "%if",       detail: "(Preprocessor)", doc: "Conditional assembly" },
+    { name: "%elif",     detail: "(Preprocessor)", doc: "Else if condition" },
+    { name: "%else",     detail: "(Preprocessor)", doc: "Else branch" },
+    { name: "%endif",    detail: "(Preprocessor)", doc: "End conditional block" },
+    { name: "%rep",      detail: "(Preprocessor)", doc: "Repeat block" },
+    { name: "%endrep",   detail: "(Preprocessor)", doc: "End repeat block" },
 ];
 exports.KEYWORD_DICONTARY = [
     // ==========================================
