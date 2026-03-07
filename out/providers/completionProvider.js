@@ -34,7 +34,7 @@ class AsmCompletionProvider {
         let item = new vscode.CompletionItem(name, this.getItemKind(type));
         item.detail = detail;
         item.documentation = doc;
-        item.sortText = "01_" + name; // set priority
+        item.sortText = "00_" + name; // set priority
         if (insertText) item.insertText = insertText;
         return item;
     }
@@ -51,7 +51,8 @@ async provideCompletionItems(document, position, token, context) {
         let line = document.getText(new vscode.Range(position.line, 0, position.line, position.character));
         
         // skip Auto-complete if in Comment of YASM (;)
-        if (line.match(/(\")/g) || line.includes(';')) return completions; 
+        if (line.includes(';')) return null;
+        if (line.match(/(\")/g)) return null;
 
         let trimmedLine = line.trimStart();
         let isRootLevel = (line.length === trimmedLine.length); // is Root Level?
@@ -68,9 +69,9 @@ async provideCompletionItems(document, position, token, context) {
         // ==========================================
         if (words.length === 0 || (words.length === 1 && !isTypingOperand)) {
             if (isRootLevel) {
-                completions.items.push(this.createItem("section .data", KeywordType.savedWord, "(Section)", "Initialized data", "section .data\n"));
-                completions.items.push(this.createItem("section .text", KeywordType.savedWord, "(Section)", "Code section", "section .text\n"));
-                completions.items.push(this.createItem("section .bss", KeywordType.savedWord, "(Section)", "Uninitialized data", "section .bss\n"));
+                completions.items.push(this.createItem("section .data", KeywordType.savedWord, "(Section)", "Initialized data", "section .data"));
+                completions.items.push(this.createItem("section .text", KeywordType.savedWord, "(Section)", "Code section", "section .text"));
+                completions.items.push(this.createItem("section .bss", KeywordType.savedWord, "(Section)", "Uninitialized data", "section .bss"));
                 completions.items.push(this.createItem("global", KeywordType.savedWord, "(Scope)", "Global symbol", "global"));
                 completions.items.push(this.createItem("extern", KeywordType.savedWord, "(Scope)", "External symbol", "extern"));
             }
@@ -81,7 +82,7 @@ async provideCompletionItems(document, position, token, context) {
         // ==========================================
         if (words.length > 0 && words[0] === "section") {
             if (isTypingOperand) {
-                ["data", "text", "bss"].forEach(sec => completions.items.push(this.createItem("." + sec, KeywordType.savedWord, "", "", "." + sec)));
+                ["data", "text", "bss"].forEach(sec => completions.items.push(this.createItem("." + sec, KeywordType.savedWord, "", "", sec)));
             }
             return completions;
         }
