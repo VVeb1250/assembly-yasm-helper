@@ -15,11 +15,20 @@ class CompilerProvider {
     // ==========================================
     async analyze(document) {
         const config = vscode.workspace.getConfiguration('assembly');
+        const enabled      = config.get('enableCompilerCheck', false);
         const compilerPath = config.get('compilerPath', '');
         const compilerType = config.get('compilerType', 'yasm');
+        const compilerFormat  = config.get('compilerFormat', 'elf64');
+        const debugInfo    = config.get('compilerDebugInfo', 'dwarf2');
+        const outputExt    = config.get('outputExtension', 'o');
 
-        // ถ้าไม่มี compilerPath → ไม่ทำอะไร
+        // ถ้าไม่ได้ตั้งค่า → หาเอง
         if (!compilerPath) {
+            compilerPath = await this._findCompiler(compilerType);
+        }
+
+        // ถ้าไม่ได้เปิดใช้หรือไม่มี compilerPath → ไม่ทำอะไร
+        if (!enabled || !compilerPath) {
             this.collection.delete(document.uri);
             return;
         }
@@ -30,15 +39,30 @@ class CompilerProvider {
             return;
         }
 
-        const diagnostics = await this._runCompiler(document, compilerPath, compilerType);
+        const diagnostics = await this._runCompiler(document, compilerPath, compilerType, compilerFormat, debugInfo, outputExt);
         this.collection.set(document.uri, diagnostics);
+    }
+
+    // ==========================================
+    // Find compiler
+    // ==========================================
+    async _findCompiler(compilerType) {
+        const cmd = process.platform === 'win32' ? 'where' : 'which';
+        return new Promise((resolve) => {
+            cp.exec(`${cmd} ${compilerType}`, (err, stdout) => {
+                if (err || !stdout.trim()) {
+                    resolve('');
+                    return;
+                }
+                resolve(stdout.trim().split('\n')[0]); // เอาแค่ path แรก
+            });
+        });
     }
 
     // ==========================================
     // Run compiler and parse output
     // ==========================================
-    async _runCompiler(document, compilerPath, compilerType) {
-        // เขียนไฟล์ temp เพราะ compiler ต้องการไฟล์จริง
+    async _runCompiler(document, compilerPath, compilerType, compilerFormat, debugInfo, outputExt) {
         const tmpFile = path.join(os.tmpdir(), `asm_check_${Date.now()}.asm`);
         try {
             fs.writeFileSync(tmpFile, document.getText(), 'utf8');
@@ -46,14 +70,16 @@ class CompilerProvider {
             return [];
         }
 
-        const args = this._buildArgs(compilerType, tmpFile);
+        const args = this._buildArgs(compilerType, tmpFile, compilerFormat, debugInfo, outputExt);
+        const outputFile = tmpFile.replace('.asm', `.${outputExt}`);
 
         return new Promise((resolve) => {
             cp.execFile(compilerPath, args, { timeout: 10000 }, (err, stdout, stderr) => {
-                fs.unlink(tmpFile, () => {}); // cleanup temp file
+                // cleanup temp files
+                fs.unlink(tmpFile, () => {});
+                fs.unlink(outputFile, () => {});
 
                 if (!err) {
-                    // compile สำเร็จ → clear diagnostics
                     resolve([]);
                     return;
                 }
@@ -71,13 +97,11 @@ class CompilerProvider {
     // ==========================================
     // Build compiler arguments
     // ==========================================
-    _buildArgs(compilerType, inputFile) {
-        if (compilerType === 'nasm') {
-            // nasm -f elf64 -o /dev/null file.asm
-            return ["-f", "elf64", "-o", os.devNull, inputFile];
-        }
-        // yasm -f elf64 -o /dev/null file.asm
-        return ["-f", "elf64", "-o", os.devNull, inputFile];
+    _buildArgs(compilerType, inputFile, format, debugInfo, outputExt) {
+        const outputFile = inputFile.replace('.asm', `.${outputExt}`);
+        const args = [`-f${format}`, inputFile, "-o", outputFile];
+        if (debugInfo !== 'none') args.splice(1, 0, `-g${debugInfo}`);
+        return args;
     }
 
     // ==========================================

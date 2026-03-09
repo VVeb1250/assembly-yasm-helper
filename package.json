@@ -24,6 +24,62 @@
 				"editor.wordBasedSuggestions": "off"
 			}
 		},
+		"configuration": {
+			"title": "Assembly YASM Helper",
+			"properties": {
+				"assembly.compilerPath": {
+					"type": "string",
+					"default": "",
+					"description": "Path to YASM/NASM compiler executable (e.g. /usr/bin/yasm or C:\\yasm\\yasm.exe)"
+				},
+				"assembly.compilerType": {
+					"type": "string",
+					"default": "yasm",
+					"enum": ["yasm", "nasm"],
+					"enumDescriptions": [
+						"YASM Assembler",
+						"NASM Assembler"
+					],
+					"description": "Assembler type to use for error checking"
+				},
+				"assembly.compilerFormat": {
+					"type": "string",
+					"default": "elf64",
+					"enum": ["elf32", "elf64", "win32", "win64", "macho32", "macho64"],
+					"enumDescriptions": [
+						"ELF 32-bit (Linux x86)",
+						"ELF 64-bit (Linux x64)",
+						"PE 32-bit (Windows x86)",
+						"PE 64-bit (Windows x64)",
+						"Mach-O 32-bit (macOS x86)",
+						"Mach-O 64-bit (macOS x64)"
+					],
+					"description": "Output format for the assembler"
+				},
+				"assembly.compilerDebugInfo": {
+					"type": "string",
+					"default": "dwarf2",
+					"enum": ["none", "dwarf2", "stabs"],
+					"enumDescriptions": [
+						"No debug info",
+						"DWARF2 debug info (-gdwarf2)",
+						"Stabs debug info (-stabs)"
+					],
+					"description": "Debug info format"
+				},
+				"assembly.outputExtension": {
+					"type": "string",
+					"default": "o",
+					"enum": ["o", "obj"],
+					"description": "Output file extension"
+				},
+				"assembly.enableCompilerCheck": {
+					"type": "boolean",
+					"default": false,
+					"description": "Enable compiler-based error checking on save"
+				}
+			}
+		},
 		"keybindings": [
 			{
 				"key": "tab",
