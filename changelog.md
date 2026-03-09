@@ -33,3 +33,8 @@
 ## 1.0.4
 - fix word suggestion for smooter coding
 - add 0x numberic declaretion
+
+## 1.0.5
+- add code Diagnostic
+- add compiler and Diagnostic for compiler
+- can configure compiler
