@@ -75,7 +75,7 @@
 				},
 				"assembly.enableCompilerCheck": {
 					"type": "boolean",
-					"default": false,
+					"default": true,
 					"description": "Enable compiler-based error checking on save"
 				}
 			}

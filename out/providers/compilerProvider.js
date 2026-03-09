@@ -8,6 +8,10 @@ const os = require("os");
 class CompilerProvider {
     constructor() {
         this.collection = vscode.languages.createDiagnosticCollection("assembly-compiler");
+
+        // status bar item
+        this.statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+        this.statusBar.show();
     }
 
     // ==========================================
@@ -15,48 +19,49 @@ class CompilerProvider {
     // ==========================================
     async analyze(document) {
         const config = vscode.workspace.getConfiguration('assembly');
-        const enabled      = config.get('enableCompilerCheck', false);
-        const compilerPath = config.get('compilerPath', '');
-        const compilerType = config.get('compilerType', 'yasm');
-        const compilerFormat  = config.get('compilerFormat', 'elf64');
-        const debugInfo    = config.get('compilerDebugInfo', 'dwarf2');
-        const outputExt    = config.get('outputExtension', 'o');
+        const enabled        = config.get('enableCompilerCheck', false);
+        const compilerType   = config.get('compilerType', 'yasm');
+        const compilerFormat = config.get('compilerFormat', 'elf64');
+        const debugInfo      = config.get('compilerDebugInfo', 'dwarf2');
+        const outputExt      = config.get('outputExtension', 'o');
 
-        // ถ้าไม่ได้ตั้งค่า → หาเอง
+        if (!enabled) {
+            this.collection.delete(document.uri);
+            this.statusBar.text = '';
+            return;
+        }
+
+        // หา compiler path จาก settings หรือหาเองอัตโนมัติ
+        let compilerPath = config.get('compilerPath', '');
         if (!compilerPath) {
             compilerPath = await this._findCompiler(compilerType);
         }
 
-        // ถ้าไม่ได้เปิดใช้หรือไม่มี compilerPath → ไม่ทำอะไร
-        if (!enabled || !compilerPath) {
+        if (!compilerPath) {
             this.collection.delete(document.uri);
+            this.statusBar.text = `$(warning) ${compilerType.toUpperCase()}: compiler not found`;
+            this.statusBar.tooltip = `Install ${compilerType} or set 'assembly.compilerPath' in settings`;
             return;
         }
 
         // ตรวจว่า compiler มีอยู่จริง
         if (!fs.existsSync(compilerPath)) {
-            vscode.window.showWarningMessage(`Assembly: Compiler not found at '${compilerPath}'`);
+            this.statusBar.text = `$(warning) ${compilerType.toUpperCase()}: not found at '${compilerPath}'`;
+            this.statusBar.tooltip = `Check 'assembly.compilerPath' in settings`;
             return;
         }
 
+        this.statusBar.text = `$(sync~spin) ${compilerType.toUpperCase()}: compiling...`;
         const diagnostics = await this._runCompiler(document, compilerPath, compilerType, compilerFormat, debugInfo, outputExt);
         this.collection.set(document.uri, diagnostics);
-    }
 
-    // ==========================================
-    // Find compiler
-    // ==========================================
-    async _findCompiler(compilerType) {
-        const cmd = process.platform === 'win32' ? 'where' : 'which';
-        return new Promise((resolve) => {
-            cp.exec(`${cmd} ${compilerType}`, (err, stdout) => {
-                if (err || !stdout.trim()) {
-                    resolve('');
-                    return;
-                }
-                resolve(stdout.trim().split('\n')[0]); // เอาแค่ path แรก
-            });
-        });
+        if (diagnostics.length === 0) {
+            this.statusBar.text = `$(check) ${compilerType.toUpperCase()}: ok`;
+        } else {
+            const errors   = diagnostics.filter(d => d.severity === vscode.DiagnosticSeverity.Error).length;
+            const warnings = diagnostics.filter(d => d.severity === vscode.DiagnosticSeverity.Warning).length;
+            this.statusBar.text = `$(error) ${compilerType.toUpperCase()}: ${errors} error(s), ${warnings} warning(s)`;
+        }
     }
 
     // ==========================================
@@ -162,8 +167,22 @@ class CompilerProvider {
         return diag;
     }
 
+    // ==========================================
+    // Auto-find compiler using which/where
+    // ==========================================
+    async _findCompiler(compilerType) {
+        const cmd = process.platform === 'win32' ? 'where' : 'which';
+        return new Promise((resolve) => {
+            cp.exec(`${cmd} ${compilerType}`, (err, stdout) => {
+                if (err || !stdout.trim()) { resolve(''); return; }
+                resolve(stdout.trim().split('\n')[0].trim());
+            });
+        });
+    }
+
     dispose() {
         this.collection.dispose();
+        this.statusBar.dispose();
     }
 }
 
