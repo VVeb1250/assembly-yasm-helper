@@ -7,9 +7,11 @@ class SymbolRegistry {
     constructor() {
 
         // keyword map
-        this.keywordMap = new Map(
-            KEYWORD_DICTIONARY.map(k => [k.name.toLowerCase(), k])
-        );
+        this.keywordMap = new Map();
+
+        for (const k of KEYWORD_DICTIONARY) {
+            this.keywordMap.set(k.name.toLowerCase(), k);
+        }
 
         this.clear();
     }
