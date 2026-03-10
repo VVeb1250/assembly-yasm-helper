@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.KEYWORD_DICONTARY = exports.REGISTERS = exports.PREPROCESSOR = exports.AVX_REGISTERS = void 0;
+exports.KEYWORD_DICTIONARY = exports.REGISTERS = exports.PREPROCESSOR = exports.AVX_REGISTERS = void 0;
 const enums_1 = require("./enums");
 const structs_1 = require("./structs");
 exports.REGISTERS = [
@@ -46,7 +46,7 @@ exports.PREPROCESSOR = [
     { name: "%rep",      detail: "(Preprocessor)", doc: "Repeat block" },
     { name: "%endrep",   detail: "(Preprocessor)", doc: "End repeat block" },
 ];
-exports.KEYWORD_DICONTARY = [
+exports.KEYWORD_DICTIONARY = [
     // ==========================================
     // Scope & Section Modifiers (YASM/NASM/TASM)
     // ==========================================

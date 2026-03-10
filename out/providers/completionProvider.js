@@ -2,7 +2,7 @@
 const vscode = require("vscode");
 const { Utils } = require("../utils");
 const { KeywordType } = require("../data/enums");
-const { KEYWORD_DICONTARY, REGISTERS, AVX_REGISTERS, PREPROCESSOR } = require("../data/keywords");
+const { KEYWORD_DICTIONARY, REGISTERS, AVX_REGISTERS, PREPROCESSOR } = require("../data/keywords");
 
 class AsmCompletionProvider {
     constructor(registry, scanner) {
@@ -210,7 +210,7 @@ async provideCompletionItems(document, position, token, context) {
         let isTypingOp = /[\s\t]/.test(trimmedLine); // have space in first word?
 
         if (!isDataSection && !isTypingOp && trimmedLine.length > 0) {
-            KEYWORD_DICONTARY.forEach(k => {
+            KEYWORD_DICTIONARY.forEach(k => {
                 if ([KeywordType.instruction, KeywordType.memoryAllocation, KeywordType.precompiled].includes(k.type)) {
                     // if not RootLevel, don't suggest section/global
                     if (!isRootLevel && ["section", "global", "extern"].includes(k.name)) return;

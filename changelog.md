@@ -13,7 +13,7 @@
 
 ## 1.0.3
 - Not use AutoSuggestion when TAB 
-- Adjust KEYWORD_DICONTARY
+- Adjust KEYWORD_DICTIONARY
 
 ## [1.0.2] - Custom YASM Smart Release
 ### Added

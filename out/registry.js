@@ -1,6 +1,6 @@
 "use strict";
 
-const { KEYWORD_DICONTARY } = require("./data/keywords");
+const { KEYWORD_DICTIONARY } = require("./data/keywords");
 
 class SymbolRegistry {
 
@@ -8,7 +8,7 @@ class SymbolRegistry {
 
         // keyword map
         this.keywordMap = new Map(
-            KEYWORD_DICONTARY.map(k => [k.name.toLowerCase(), k])
+            KEYWORD_DICTIONARY.map(k => [k.name.toLowerCase(), k])
         );
 
         this.clear();

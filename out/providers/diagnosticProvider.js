@@ -1,6 +1,6 @@
 "use strict";
 const vscode = require("vscode");
-const { KEYWORD_DICONTARY } = require("../data/keywords");
+const { KEYWORD_DICTIONARY } = require("../data/keywords");
 const { KeywordType, AllowKinds } = require("../data/enums");
 
 // Register size groups for size mismatch detection
@@ -29,7 +29,7 @@ for (const [bits, regs] of Object.entries(REG_SIZE)) {
 }
 
 // keyword lookup map (name → KeywordDef)
-const KEYWORD_MAP = new Map(KEYWORD_DICONTARY.map(k => [k.name.toLowerCase(), k]));
+const KEYWORD_MAP = new Map(KEYWORD_DICTIONARY.map(k => [k.name.toLowerCase(), k]));
 
 class DiagnosticProvider {
     constructor(registry) {
