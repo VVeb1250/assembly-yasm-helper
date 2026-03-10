@@ -23,8 +23,8 @@ class ExtensionManager {
 
         this.context.subscriptions.push(
             vscode.languages.registerCompletionItemProvider(
-                'assembly', 
-                new AsmCompletionProvider(this.registry, this.scanner), 
+                'assembly',
+                new AsmCompletionProvider(this.registry, this.scanner),
                 ' ', '.', '[', ','
             )
         );
@@ -35,11 +35,12 @@ class ExtensionManager {
         // scan + analyze ทุกครั้งที่ไฟล์เปลี่ยน
         vscode.workspace.onDidChangeTextDocument(e => this.triggerScan(e.document));
         vscode.workspace.onDidOpenTextDocument(doc => this.triggerScan(doc));
-        // compiler รันเฉพาะตอน save เพราะต้องเขียน temp file
-        vscode.workspace.onDidSaveTextDocument(doc => this.triggerScan(doc, true));
         vscode.window.onDidChangeActiveTextEditor(editor => {
             if (editor) this.triggerScan(editor.document);
         });
+
+        // compiler รันเฉพาะตอน save
+        vscode.workspace.onDidSaveTextDocument(doc => this.triggerScan(doc, true));
     }
 
     async triggerScan(document, runCompiler = false) {
@@ -51,7 +52,6 @@ class ExtensionManager {
         await this.scanner.scan(docText);
         this.diagnostics.analyze(document);
 
-        // รัน compiler เฉพาะตอน save หรือถูกสั่งโดยตรง
         if (runCompiler) {
             await this.compiler.analyze(document);
         }
@@ -64,18 +64,5 @@ function activate(context) {
 }
 exports.activate = activate;
 
-function deactivate() {
-    // cleanup
-}
-exports.deactivate = deactivate;
-
-function activate(context) {
-    const manager = new ExtensionManager(context);
-    manager.activate();
-}
-exports.activate = activate;
-
-function deactivate() {
-    // Code for cleanup when closing the Extension (if any)
-}
+function deactivate() {}
 exports.deactivate = deactivate;
