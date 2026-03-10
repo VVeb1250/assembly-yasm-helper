@@ -11,94 +11,75 @@
     "tokenColors": [
         {
             "scope": "comment",
-            "settings":{
-                "foreground":"#7AA04B"
-            }
+            "settings": { "foreground": "#7AA04B" }
         },
         {
             "scope": "constant.numeric",
-            "settings":{
-                "foreground":"#A3D98C"
-            }
+            "settings": { "foreground": "#A3D98C" }
         },
         {
             "scope": "constant",
-            "settings":{
-                "foreground":"#BBCBCB"
-            }
+            "settings": { "foreground": "#BBCBCB" }
         },
         {
             "scope": "string.quoted.single",
-            "settings":{
-                "foreground":"#5C9962"
-            }
+            "settings": { "foreground": "#5C9962" }
         },
         {
             "scope": "string.quoted.double",
-            "settings":{
-                "foreground":"#D28E8E"
-            }
+            "settings": { "foreground": "#D28E8E" }
+        },
+        {
+            "scope": "string.quoted.other.assembly",
+            "settings": { "foreground": "#CE9178" }
         },
         {
             "scope": "keyword",
-            "settings":{
-                "foreground": "#3794CD"
-            }
+            "settings": { "foreground": "#3794CD" }
         },
         {
             "scope": "keyword.control.less",
-            "settings":{
-                "foreground": "#4275B3",
-                "fontStyle": "bold"
-            }
+            "settings": { "foreground": "#4275B3", "fontStyle": "bold" }
         },
         {
             "scope": "keyword.less",
-            "settings":{
-                "foreground": "#9EC8E5"
-            }
+            "settings": { "foreground": "#9EC8E5" }
         },
         {
             "scope": "keyword.size",
-            "settings":{
-                "foreground": "#B351EC"
-            }
+            "settings": { "foreground": "#B351EC" }
+        },
+        {
+            "scope": "keyword.control.preprocessor.assembly",
+            "settings": { "foreground": "#C586C0" }
         },
         {
             "scope": "variable.register",
-            "settings":{
-                "foreground": "#A2C3BB"
-            }
+            "settings": { "foreground": "#A2C3BB" }
         },
         {
             "scope": "keyword.valued",
-            "settings":{
-                "foreground": "#B2B1B4"
-            }
+            "settings": { "foreground": "#B2B1B4" }
         },
         {
             "scope": "support.function",
-            "settings":{
-                "foreground": "#FFE291"
-            }
+            "settings": { "foreground": "#FFE291" }
         },
         {
             "scope": "support.class",
-            "settings":{
-                "foreground": "#5FC0CF"
-            }
+            "settings": { "foreground": "#5FC0CF" }
         },
         {
             "scope": "support.other",
-            "settings":{
-                "foreground": "#cf3dff"
-            }
+            "settings": { "foreground": "#cf3dff" }
         },
         {
             "scope": "variable.parameter",
-            "settings":{
-                "foreground": "#a2a2a2"
-            }
+            "settings": { "foreground": "#a2a2a2" }
+        },
+        {
+            "scope": "entity.name.section.assembly",
+            "settings": { "foreground": "#5FC0CF" }
         }
     ]
 }

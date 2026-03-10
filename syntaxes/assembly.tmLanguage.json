@@ -1,142 +1,111 @@
 {
 	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
-	"name": "Assembly (TASM)",
+	"name": "Assembly (YASM)",
 	"patterns": [
 		{ "include": "#comment" },
+		{ "include": "#comment_block" },
+		{ "include": "#strings" },
+		{ "include": "#preprocessor" },
 		{ "include": "#const" },
-		{ "include": "#args" },
+		{ "include": "#sections" },
 		{ "include": "#func" },
 		{ "include": "#struc" },
 		{ "include": "#macro" },
+		{ "include": "#args" },
 		{ "include": "#keywords" },
-		{ "include": "#strings" },		
 		{ "include": "#labels" },
-		{ "include": "#sections" },
 		{ "include": "#variables" }
 	],
 	"repository": {
-		"keywords": {
-			"patterns": [{
-				"name": "keyword.assembly",
-				"match": "(?i)\\b(hlt|nop|xadd|xchg|cmpxchg|ror|rol|rcl|rcr|into|iret|loopne|loopnz|enter|leave|shrd|shld|fwait|wait|xlat|les|xchg|rep|mod|movs|lea|str|req|push|call|mov|ret|pop|int|loop|loope|loopz|lea|add|sub|mul|neg|div|idiv|imul|pusha|popa|inc|dec|jmp|jle|jge|ge|jl|jc|jnc|jz|jnz|je|jne|cmp|and|or|xor|not|ja|jb|jae|jbe|jcxz|in|out|shl|shr)\\b"
-			},
-			{
-				"name":"keyword.control.flags.assmebly",
-				"match": "(?i)\\b(lahf|sahf|pushf|pushfw|pushfd|popf|popfd|popfw|std|cld|sti|cli|stc|clc|cmc)\\b"
-			},
-			{
-				"name":"keyword.math2.assembly",
-				"match": "(?i)\\b(daa|das|aaa|aas|aad|aam)\\b"
-			},
-			{
-				"name":"keyword.advacned.assembly",
-				"match": "(?i)\\b(pascal|c|fortran)\\b"
-			},
-			{
-				"name":"keyword.string.assembly",
-				"match": "(?i)\\b(ins|insb|insw|insd|outs|outsb|outsd|outw|cmps|cmpsb|cmpsw|cmpsd|lods|lobsb|lobsw|lodsd|scas|scasb|scasb|scasw|repnz|repz|stos|movs|movsb|movsw|movsd)\\b"
-			},
-			{
-				"name":"keyword.legacy.assembly",
-				"match": "(?i)\\b(c|req|abs|wrt)\\b"
-			},
-			{
-				"name":"keyword.control.assembly",
-				"match": "(?i)\\b(dt|db|dw|dd|dq|real4|real8|df|arg|uses)\\b"
-			},
-			{
-				"name":"keyword.control.less.assembly",
-				"match": "(?i)\\b(byte|word|qword|dword|tbyte)\\b"
-			},
-			{
-				"name":"keyword.size.assembly",
-				"match": "(?i)\\b(small|large|medium|flat|stdcall|tiny|huge|compact)\\b"
-			},
-			{	
-				"name": "keyword.valued.assembly",
-				"match": "(?i)\\b(CODESEG|DATASEG|MASM|IDEAL|MODEL|STACK|width|length|ge|le|this|times)\\b|@data"
-			},
-			{
-				"name":"keyword.less.preCompiled.assembly",
-				"match": "(?i)\\b(global|method|local|label|proc|endp|struct|struc|ends|end|include|incbin|offset|equ|dup|ptr|if|while|macro|endm|invoke)\\b"
-			},
-			{
-				"name":"keyword.less.conditional.assembly",
-				"match": "(?i)\\b(abs|if|else|endif|ife|ifb|ifnb|ifdef|ifndef|ifdif|ifndif|if1|if2|irp|for|rept)\\b"
-			},
-			{
-				"name":"variable.register.assembly",
-				"match": "(?i)\\b(ax|bx|cx|dx|sp|bp|di|si|bl|bh|cl|ch|al|ah|dl|dh)\\b"
-			},
-			{
-				"name":"variable.register.segement.assembly",
-				"match": "(?i)\\b(ds|es|ss|cs|fs|gs)\\b"
-			},
-			{
-				"name":"variable.register.64.assembly",
-				"match": "(?i)\\b(rax|rbx|rcx|rdx|rsp|rbp|rdi|rsi)\\b"
-			},
-			{
-				"name":"variable.register.float.assembly",
-				"match": "(?i)\\b(st1|st0|st2|st3|st4|st5|st6|st7|st)\\b"
-			},
-			{
-				"name":"variable.register.debug.assembly",
-				"match": "(?i)\\b(db1|db0|db2|db3|db6|db7)\\b"
-			},
-			{
-				"name":"variable.register.test.assembly",
-				"match": "\\b(tr6|tr7)\\b"
-			},
-			{
-				"name":"variable.register.32.assembly",
-				"match": "(?i)\\b(eax|ebx|ecx|edx|esp|ebp|edi|esi)\\b"
-			}
-		]
+
+		"comment": {
+			"name": "comment.line.semicolon.assembly",
+			"begin": ";",
+			"end": "\n"
 		},
-		"labels": {
-			"patterns": [
-				{
-					"name": "constant",
-					"match": "(?i)([\\w_\\d]*)::?"
-				}
-			]
+
+		"comment_block": {
+			"name": "comment.block.assembly",
+			"begin": "/\\*",
+			"end": "\\*/"
 		},
+
 		"strings": {
-			"patterns":
-			[
+			"patterns": [
 				{
 					"name": "string.quoted.double.assembly",
 					"begin": "\"",
-					"end": "\"",
+					"end": "\"|\n",
 					"patterns": [
-						{
-							"name": "constant.character.escape.assembly",
-							"match": "\\\\."
-						}
+						{ "name": "constant.character.escape.assembly", "match": "\\\\." }
 					]
 				},
 				{
-					"name":"string.quoted.single",
+					"name": "string.quoted.single.assembly",
 					"begin": "'",
-					"end": "'",
+					"end": "'|\n",
 					"patterns": [
-						{
-							"name": "constant.character.escape.assembly",
-							"match": "\\\\."
-						}
+						{ "name": "constant.character.escape.assembly", "match": "\\\\." }
+					]
+				},
+				{
+					"name": "string.quoted.other.assembly",
+					"begin": "`",
+					"end": "`|\n",
+					"patterns": [
+						{ "name": "constant.character.escape.assembly", "match": "\\\\." }
 					]
 				}
 			]
 		},
-		"const":{
-		"patterns": [
-			{
-				"name": "constant.numeric",
-				"match": "(?i)\\b\\d[\\dA-F]*[hdb]?\\b"
-			}
-		]
+
+		"preprocessor": {
+			"patterns": [
+				{
+					"match": "(?i)(%macro)\\s+([\\w_]+)",
+					"captures": {
+						"1": { "name": "keyword.control.preprocessor.assembly" },
+						"2": { "name": "support.other.macro.assembly" }
+					}
+				},
+				{
+					"match": "(?i)(%endmacro|%endrep)",
+					"name": "keyword.control.preprocessor.assembly"
+				},
+				{
+					"match": "(?i)(%define|%assign|%undef)\\s+([\\w_]+)",
+					"captures": {
+						"1": { "name": "keyword.control.preprocessor.assembly" },
+						"2": { "name": "support.other.define.assembly" }
+					}
+				},
+				{
+					"match": "(?i)(%include)\\s+([\"'][^\"']+[\"'])",
+					"captures": {
+						"1": { "name": "keyword.control.preprocessor.assembly" },
+						"2": { "name": "string.quoted.assembly" }
+					}
+				},
+				{
+					"match": "(?i)(%ifdef|%ifndef|%if|%elif|%else|%endif|%rep)",
+					"name": "keyword.control.preprocessor.assembly"
+				}
+			]
 		},
+
+		"const": {
+			"patterns": [
+				{
+					"name": "constant.numeric.hex.assembly",
+					"match": "(?i)\\b0x[0-9a-fA-F]+\\b"
+				},
+				{
+					"name": "constant.numeric.assembly",
+					"match": "(?i)\\b\\d[\\dA-F]*[hdb]?\\b"
+				}
+			]
+		},
+
 		"sections": {
 			"patterns": [
 				{
@@ -148,6 +117,226 @@
 				}
 			]
 		},
+
+		"keywords": {
+			"patterns": [
+				{
+					"name": "keyword.assembly",
+					"match": "(?i)\\b(hlt|nop|xadd|xchg|cmpxchg|ror|rol|rcl|rcr|into|iret|loopne|loopnz|enter|leave|shrd|shld|fwait|wait|xlat|les|rep|mov|movzx|movsx|movsxd|lea|push|pop|call|ret|int|loop|loope|loopz|add|sub|mul|neg|div|idiv|imul|pusha|pushad|popa|popad|inc|dec|jmp|jle|jge|jl|jg|jc|jnc|jz|jnz|je|jne|ja|jb|jae|jbe|jcxz|jecxz|jrcxz|js|jns|jo|jno|in|out|shl|shr|sal|sar|and|or|xor|not|test|cmp|cbw|cwd|cdq|cqo|syscall|sysret)\\b"
+				},
+				{
+					"name": "keyword.control.flags.assembly",
+					"match": "(?i)\\b(lahf|sahf|pushf|pushfw|pushfd|pushfq|popf|popfd|popfw|popfq|std|cld|sti|cli|stc|clc|cmc)\\b"
+				},
+				{
+					"name": "keyword.string.assembly",
+					"match": "(?i)\\b(ins|insb|insw|insd|outs|outsb|outsd|cmps|cmpsb|cmpsw|cmpsd|cmpsq|lods|lodsb|lodsw|lodsd|lodsq|scas|scasb|scasw|scasd|scasq|stos|stosb|stosw|stosd|stosq|movs|movsb|movsw|movsd|movsq|repnz|repz|repe|repne)\\b"
+				},
+				{
+					"name": "keyword.math.assembly",
+					"match": "(?i)\\b(daa|das|aaa|aas|aad|aam)\\b"
+				},
+				{
+					"name": "keyword.control.assembly",
+					"match": "(?i)\\b(db|dw|dd|dq|dt|resb|resw|resd|resq|rest|equ|dup)\\b"
+				},
+				{
+					"name": "keyword.control.less.assembly",
+					"match": "(?i)\\b(byte|word|dword|qword|tbyte|oword|yword|zword|ptr)\\b"
+				},
+				{
+					"name": "keyword.size.assembly",
+					"match": "(?i)\\b(small|large|medium|flat|stdcall|tiny|huge|compact)\\b"
+				},
+				{
+					"name": "keyword.valued.assembly",
+					"match": "(?i)\\b(CODESEG|DATASEG|MASM|IDEAL|MODEL|STACK|global|extern|common|default|bits|align|times)\\b|@data"
+				},
+				{
+					"name": "keyword.less.precompiled.assembly",
+					"match": "(?i)\\b(proc|endp|struc|ends|end|include|incbin|offset|invoke|local|label|arg|uses)\\b"
+				},
+				{
+					"name": "keyword.less.conditional.assembly",
+					"match": "(?i)\\b(if|else|endif|ife|ifb|ifnb|ifdef|ifndef|ifdif|ifndif|if1|if2|irp|for|rept|while)\\b"
+				},
+				{
+					"name": "variable.register.8.assembly",
+					"match": "(?i)\\b(al|bl|cl|dl|ah|bh|ch|dh|sil|dil|bpl|spl|r8b|r9b|r10b|r11b|r12b|r13b|r14b|r15b)\\b"
+				},
+				{
+					"name": "variable.register.16.assembly",
+					"match": "(?i)\\b(ax|bx|cx|dx|sp|bp|di|si|r8w|r9w|r10w|r11w|r12w|r13w|r14w|r15w)\\b"
+				},
+				{
+					"name": "variable.register.32.assembly",
+					"match": "(?i)\\b(eax|ebx|ecx|edx|esp|ebp|edi|esi|r8d|r9d|r10d|r11d|r12d|r13d|r14d|r15d)\\b"
+				},
+				{
+					"name": "variable.register.64.assembly",
+					"match": "(?i)\\b(rax|rbx|rcx|rdx|rsp|rbp|rdi|rsi|r8|r9|r10|r11|r12|r13|r14|r15|rip|rflags)\\b"
+				},
+				{
+					"name": "variable.register.segment.assembly",
+					"match": "(?i)\\b(ds|es|ss|cs|fs|gs)\\b"
+				},
+				{
+					"name": "variable.register.float.assembly",
+					"match": "(?i)\\b(st[0-7]|st)\\b"
+				},
+				{
+					"name": "variable.register.xmm.assembly",
+					"match": "(?i)\\b(xmm([0-9]|1[0-5]))\\b"
+				},
+				{
+					"name": "variable.register.ymm.assembly",
+					"match": "(?i)\\b(ymm([0-9]|1[0-5]))\\b"
+				},
+				{
+					"name": "variable.register.zmm.assembly",
+					"match": "(?i)\\b(zmm([0-9]|[12][0-9]|3[01]))\\b"
+				},
+				{
+					"name": "variable.register.mask.assembly",
+					"match": "(?i)\\b(k[0-7])\\b"
+				},
+				{
+					"name": "variable.register.debug.assembly",
+					"match": "(?i)\\b(dr[0-3]|dr6|dr7|cr[02348])\\b"
+				}
+			]
+		},
+
+		"labels": {
+			"patterns": [
+				{
+					"name": "support.function.label.assembly",
+					"match": "(?i)^\\s*([\\w_][\\w\\d_]*)\\s*:"
+				}
+			]
+		},
+
+		"func": {
+			"patterns": [
+				{
+					"match": "(?i)(proc)\\s+([\\w_\\d]+)(\\s*(?:pascal|c)?\\s*(?:far|near)?)?",
+					"captures": {
+						"1": { "name": "keyword.control.assembly" },
+						"2": { "name": "support.function.assembly" },
+						"3": { "name": "keyword.control.assembly" }
+					}
+				},
+				{
+					"match": "(?i)([\\w_\\d]+)\\s+(proc)(\\s*(?:pascal|c)?\\s*(?:far|near)?)?",
+					"captures": {
+						"1": { "name": "support.function.assembly" },
+						"2": { "name": "keyword.control.assembly" },
+						"3": { "name": "keyword.control.assembly" }
+					}
+				},
+				{
+					"match": "(?i)(endp)\\s+([\\w_\\d]+)",
+					"captures": {
+						"1": { "name": "keyword.control.assembly" },
+						"2": { "name": "support.function.assembly" }
+					}
+				},
+				{
+					"match": "(?i)([\\w_\\d]+)\\s+(endp)",
+					"captures": {
+						"1": { "name": "support.function.assembly" },
+						"2": { "name": "keyword.control.assembly" }
+					}
+				},
+				{
+					"match": "(?i)(call)\\s+([\\w_\\d]+)",
+					"captures": {
+						"1": { "name": "keyword.assembly" },
+						"2": { "name": "support.function.assembly" }
+					}
+				}
+			]
+		},
+
+		"struc": {
+			"patterns": [
+				{
+					"match": "(?i)(struc|struct)\\s+([\\w_\\d]+)",
+					"captures": {
+						"1": { "name": "keyword.control.assembly" },
+						"2": { "name": "support.class.assembly" }
+					}
+				},
+				{
+					"match": "(?i)(ends)\\s+([\\w_\\d]+)",
+					"captures": {
+						"1": { "name": "keyword.control.assembly" },
+						"2": { "name": "support.class.assembly" }
+					}
+				}
+			]
+		},
+
+		"macro": {
+			"patterns": [
+				{
+					"match": "(?i)([\\w_\\d]+)\\s+(equ)\\s",
+					"captures": {
+						"1": { "name": "support.other.assembly" },
+						"2": { "name": "keyword.control.assembly" }
+					}
+				},
+				{
+					"match": "(?i)(endm)\\s*([\\w_\\d]*)",
+					"captures": {
+						"1": { "name": "keyword.control.assembly" },
+						"2": { "name": "support.other.assembly" }
+					}
+				},
+				{
+					"begin": "(?i)(macro)\\s+([\\w_\\d]+)",
+					"end": "\n|;",
+					"beginCaptures": {
+						"1": { "name": "keyword.control.assembly" },
+						"2": { "name": "support.other.assembly" }
+					},
+					"patterns": [
+						{
+							"match": ",?\\s*([\\w_\\d]+)",
+							"captures": {
+								"1": { "name": "variable.parameter.assembly" }
+							}
+						}
+					]
+				}
+			]
+		},
+
+		"args": {
+			"patterns": [
+				{
+					"begin": "(?i)(arg|local)[ \\t]+([\\w_\\d@]*)(:(word|byte|dword|qword)(:(\\d*))?)?",
+					"end": "\n|;",
+					"beginCaptures": {
+						"1": { "name": "keyword.control.assembly" },
+						"2": { "name": "variable.parameter.assembly" },
+						"4": { "name": "keyword.control.less.assembly" },
+						"6": { "name": "constant.numeric.assembly" }
+					},
+					"patterns": [
+						{
+							"match": ",[ \\t]*([\\w_\\d@]*)(:(word|byte|dword|qword)(:(\\d*))?)?",
+							"captures": {
+								"1": { "name": "variable.parameter.assembly" },
+								"3": { "name": "keyword.control.less.assembly" },
+								"5": { "name": "constant.numeric.assembly" }
+							}
+						}
+					]
+				}
+			]
+		},
+
 		"variables": {
 			"patterns": [
 				{
@@ -155,144 +344,7 @@
 					"match": "(?i)\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
 				}
 			]
-		},
-		"comment":{			
-			"name":"comment.line",
-			"begin": ";",
-			"end": "\n",
-			"patterns": [
-				{
-					"name": "constant.character.escape.assembly",
-					"match": "\\\\."
-				}
-			]			
-		},
-		"func":
-		{
-			"patterns": [
-				{
-					"match": "(?i)(proc)\\W([\\w_\\d]*)(\\W?pascal\\W?(far|near)?|\\W?far|\\W?near)?",
-					"captures": {
-						"1": {"name":"keyword"},
-						"2": {"name":"support.function"},
-						"3": {"name": "keyword.control"}
-					}
-				},
-				{
-					"match": "(?i)([\\w_\\d]*)\\W(proc)(\\W?pascal\\W?(far|near)?|\\W?far|\\W?near)?",
-					"captures": {
-						"2": {"name":"keyword"},
-						"1": {"name":"support.function"},
-						"3": {"name": "keyword.control"}
-					}
-				},
-				{
-					"match": "(?i)(endp) ([\\w_\\d]*)",
-					"captures": {
-						"1": {"name":"keyword"},
-						"2": {"name":"support.function"}
-					}
-				},
-				{
-					"match": "(?i)([\\w_\\d]*) (endp)",
-					"captures": {
-						"1": {"name":"support.function"},
-						"2": {"name":"keyword"}
-					}
-				},
-				{
-					"match": "(?i)(call)\\W([\\w_\\d]*)",
-					"captures": {
-						"1": {"name":"keyword"},
-						"2": {"name":"support.function"}
-					}
-				}
-			]
-		},
-		"args":{
-			"patterns": [
-				{
-					"begin": "(?i)(arg|local)[ \t]{1,}([\\w_\\d@]*)(:(word|byte|dword|qword)(:(\\d*))?)?",
-					"end": "\n|;",
-					"beginCaptures": {
-						"1": {"name":"keyword.control.less"},
-						"2": {"name":"variable.parameter"},
-						"4": {"name":"keyword"},
-						"6": {"name": "constant.numeric"}
-					},
-					"patterns": [
-						{
-							"match": ",[ \t]*([\\w_\\d@]*)(:(word|byte|dword|qword)(:(\\d*))?)?",
-							"captures": {
-								"1": {"name":"variable.parameter"},
-								"3": {"name":"keyword"},
-								"5": {"name": "constant.numeric"}
-							}
-						}
-					]
-				}
-			]
-		},
-		"struc":{
-			"patterns": [
-				{
-					"match": "(?i)(struc)\\W([\\w_\\d]*)\\W?((global)(\\W[\\w_\\d]*)?)?\\W?(method)?",
-					"captures": {
-						"1": {"name":"keyword.control"},
-						"2": {"name":"support.class"},
-						"4": {"name":"keyword"},
-						"5": {"name":"support.class"},
-						"6": {"name":"keyword"}
-					}
-				},
-				{
-					"match": "(?i)(ends)\\W([\\w_\\d]*)",
-					"captures": {
-						"1": {"name":"keyword.control"},
-						"2": {"name":"support.class"}
-					}
-				},
-				{
-					"match": "(?i)([\\w_\\d]*):([\\w_\\d]{1,})",
-					"captures": {
-						"1": {"name":"support.class"},
-						"2": {"name":"support.function"}
-					}
-				}
-			]
-		},
-		"macro": {
-			"patterns": [
-				{
-					"match": "(?i)([\\w_\\d]*)\\W(equ)\\W",
-					"captures": {
-						"1": {"name":"support.other"},
-						"2": {"name": "keyword.less"}
-					}
-				},{
-					"match": "(?i)(endm)\\W([\\w_\\d]*)",
-					"captures": {
-						"2": {"name":"support.other"},
-						"1": {"name": "keyword"}
-					}
-				},{
-					"begin": "(?i)(macro)\\W([\\w_\\d]*)(\\W([\\w_\\d]*))?",
-					"end": "\n|;",
-					"beginCaptures": {
-						"1": {"name": "keyword"},
-						"2": {"name": "support.other"},
-						"4": {"name": "variable.parameter"}
-					},
-					"patterns": [{
-						"match": ",[ \t]*([\\w_\\d]*)",
-						"captures": {
-							"1": {"name": "variable.parameter"}
-						}
-					}]
-				}
-			]
 		}
 	},
-		
 	"scopeName": "source.asm"
 }

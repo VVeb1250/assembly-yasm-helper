@@ -125,19 +125,19 @@
 				"label": "Assembly Dark (YASM)",
 				"id": "tasmDark",
 				"uiTheme": "vs-dark",
-				"path": "./themes/tasmDark.tmTheme.json"
+				"path": "./Themes/tasmDark.tmTheme.json"
 			},
 			{
 				"label": "Assembly Light (YASM)",
 				"id": "tasmLight",
 				"uiTheme": "vs",
-				"path": "./themes/tasmLight.tmTheme.json"
+				"path": "./Themes/tasmLight.tmTheme.json"
 			},
 			{
 				"label": "Assembly High Contrast (YASM)",
 				"id": "tasmHC",
 				"uiTheme": "hc-black",
-				"path": "./themes/tasmHC.tmTheme.json"
+				"path": "./Themes/tasmHC.tmTheme.json"
 			}
 		]
 	},
