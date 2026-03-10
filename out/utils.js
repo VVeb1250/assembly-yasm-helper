@@ -1,75 +1,89 @@
 "use strict";
-const { KeywordType, AllowKinds } = require("./data/enums");
+
+const { KeywordType } = require("./data/enums");
 
 class Utils {
+
+    static typeMap = {
+        [KeywordType.instruction]: "(Command)",
+        [KeywordType.memoryAllocation]: "(Memory)",
+        [KeywordType.precompiled]: "(Instruction)",
+        [KeywordType.register]: "(Register)",
+        [KeywordType.savedWord]: "(Saved)",
+        [KeywordType.size]: "(Size)",
+        [KeywordType.label]: "(Label)",
+        [KeywordType.macro]: "(Macro)",
+        [KeywordType.method]: "(Procedure)",
+        [KeywordType.structure]: "(Structure)",
+        [KeywordType.variable]: "(Variable)"
+    };
+
     static getType(type) {
-        const types = {
-            [KeywordType.instruction]: "(Command)",
-            [KeywordType.memoryAllocation]: "(Memory)",
-            [KeywordType.precompiled]: "(Instruction)",
-            [KeywordType.register]: "(Register)",
-            [KeywordType.savedWord]: "(Saved)",
-            [KeywordType.size]: "(Size)",
-            [KeywordType.label]: "(Label)",
-            [KeywordType.macro]: "(Macro)",
-            [KeywordType.method]: "(Procedure)",
-            [KeywordType.structure]: "(Structure)",
-            [KeywordType.variable]: "(Variable)"
-        };
-        return types[type] || "(Unknown)";
+        return Utils.typeMap[type] || "(Unknown)";
     }
 
     static clearSpace(str) {
-        return str.replace(/[\n\t ]/g, "");
+        return str.trim();
     }
 
     static splitLine(line) {
-        const lineCutters = [' ', ',', '\t', '[', ']'];
-        let array = [];
-        let word = "";
-        for (let i = 0; i < line.length; i++) {
-            if (lineCutters.includes(line[i])) {
-                word = Utils.clearSpace(word);
-                if (word.length > 0) array.push(word);
-                word = "";
-                continue;
-            }
-            word += line[i];
-        }
-        word = Utils.clearSpace(word);
-        if (word.length > 0) array.push(word);
-        return array;
+
+        return line
+            .split(/[,\s\[\]\(\)]+/)
+            .filter(Boolean);
+
     }
 
     static isNumberStr(str) {
-        // 0x prefix style (e.g. 0x1F, 0xFF)
-        if (/^0x[0-9a-fA-F]+$/i.test(str)) return true;
-        // suffix style: must start with digit
-        if (!/^[0-9]/.test(str)) return false;
-        let sub = (str.endsWith('h') || str.endsWith('b') || str.endsWith('d')) ? 1 : 0;
-        const possibleNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
-        for (let i = 1; i < str.length - sub; i++) {
-            if (!possibleNumbers.includes(str[i].toLowerCase())) return false;
-        }
-        return true;
+
+        return (
+            /^0x[0-9a-f]+$/i.test(str) ||
+            /^[0-9]+$/i.test(str) ||
+            /^[0-9a-f]+h$/i.test(str) ||
+            /^[01]+b$/i.test(str) ||
+            /^[0-9]+d$/i.test(str)
+        );
+
     }
 
     static getNumMsg(word) {
-        let base, value;
-        // 0x prefix style
+
+        let base;
+        let value;
+
         if (/^0x/i.test(word)) {
+
             base = 16;
             value = Number.parseInt(word, 16);
+
+        } else if (word.endsWith("h")) {
+
+            base = 16;
+            value = Number.parseInt(word.slice(0, -1), 16);
+
+        } else if (word.endsWith("b")) {
+
+            base = 2;
+            value = Number.parseInt(word.slice(0, -1), 2);
+
         } else {
-            base = word.endsWith('h') ? 16 : word.endsWith('b') ? 2 : 10;
-            value = Number.parseInt(word, base);
+
+            base = 10;
+            value = Number.parseInt(word, 10);
+
         }
+
+        if (Number.isNaN(value)) return null;
+
         let s = `(${base === 16 ? "Hexadecimal" : base === 2 ? "Binary" : "Decimal"} Number) ${word}:\n`;
+
         if (base !== 10) s += `\tDecimal: ${value.toString(10)}\n`;
         if (base !== 16) s += `\tHex: ${value.toString(16)}h / 0x${value.toString(16).toUpperCase()}\n`;
-        if (base !== 2)  s += `\tBinary: ${value.toString(2)}b\n`;
+        if (base !== 2) s += `\tBinary: ${value.toString(2)}b\n`;
+
         return s;
     }
+
 }
 
 module.exports = { Utils };

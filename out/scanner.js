@@ -1,165 +1,286 @@
 "use strict";
+
 const vscode = require("vscode");
-const fstream = require("fs");
+const fs = require("fs");
+const path = require("path");
+const { AsmTokenizer } = require("./tokenizer");
+
 const { Utils } = require("./utils");
 const { Info, Procedure, Label } = require("./data/structs");
 
 class DocumentScanner {
+
     constructor(registry) {
+        this.tokenizer = new AsmTokenizer();
+
         this.registry = registry;
-        this.currentSection = ""; // add Section tracking
+        this.currentSection = "";
+
+        // regex cache
+        this.varRegex = /\b(db|dw|dd|dq|dt|resb|resw|resd|resq|equ)\b/i;
+        this.labelRegex = /^\s*([A-Za-z_.$?][\w.$?]*):/;
+        this.procRegex = /^\s*([A-Za-z_.$?][\w.$?]*)\s+proc\b/i;
+
+        this.macroRegex = /^\s*%macro\b/i;
+        this.defineRegex = /^\s*%(define|assign)\b/i;
     }
 
     async scan(documentLines, clearPrevious = true) {
+
         if (clearPrevious) {
             this.registry.clear();
+
             if (vscode.window.activeTextEditor) {
-                this.registry.includedFiles.push(vscode.window.activeTextEditor.document.uri.path);
+                const file = vscode.window.activeTextEditor.document.uri.fsPath;
+                this.registry.includedFiles.push(path.normalize(file));
             }
         }
 
-        this.currentSection = ""; // reset Section when rescan
+        this.currentSection = "";
 
         for (let x = 0; x < documentLines.length; x++) {
+
             const line = documentLines[x];
+
             const cleanLine = Utils.clearSpace(line);
             const lowerCleanLine = cleanLine.toLowerCase();
 
+            // remove comments safely
+            const lineNoComment = line.replace(/;.*$/, "").trim();
+
             // ==========================================
-            // 1. Section change detector
+            // 1. Section detection
             // ==========================================
-            if (lowerCleanLine.startsWith("section") || lowerCleanLine.startsWith("segment")) {
-                let words = Utils.splitLine(line);
+
+            if (
+                lowerCleanLine.startsWith("section") ||
+                lowerCleanLine.startsWith("segment")
+            ) {
+
+                let words = this.tokenizer.tokenize(line);
+
                 if (words.length > 1) {
-                    this.currentSection = words[1].toLowerCase(); // ex. ".data", ".text", ".bss"
+                    this.currentSection = words[1].toLowerCase();
                 }
-                continue; // read next line
+
+                continue;
             }
 
             // ==========================================
-            // 2. find Labels
+            // 2. Label detection
             // ==========================================
-            // strip inline comment before checking colon (e.g. "myLabel:  ; comment")
-            let lineNoComment = line.split(';')[0].trimEnd();
-            if (lineNoComment.endsWith(':')) {
-                let labelName = Utils.clearSpace(lineNoComment.substring(0, lineNoComment.length - 1));
-                if (labelName.length > 0) this.registry.labels.push(labelName);
+
+            const labelMatch = lineNoComment.match(this.labelRegex);
+
+            if (labelMatch) {
+
+                const labelName = labelMatch[1];
+
+                if (!this.registry.findLabel(labelName)) {
+                    this.registry.addLabel(labelName);
+                }
+
             }
-            if (lowerCleanLine.startsWith('label')) {
-                let firstSpace = line.indexOf(' ', line.indexOf('l'));
-                let spaceOne = line.indexOf(' ', firstSpace + 1);
-                let length = spaceOne - firstSpace;
-                let name = cleanLine.substr(firstSpace, length - 1);
-                this.registry.labelsEE.push(new Label(name, line.substring(line.indexOf(' ', line.indexOf(name)))));
+
+            // MASM label directive
+
+            if (lowerCleanLine.startsWith("label")) {
+
+                let words = this.tokenizer.tokenize(line);
+
+                if (words.length >= 2) {
+
+                    const name = words[1];
+
+                    this.registry.labelsEE.push(
+                        new Label(
+                            name,
+                            line.substring(line.indexOf(name) + name.length)
+                        )
+                    );
+                }
             }
 
             // ==========================================
-            // 3. detect Variables (and record Section)
+            // 3. Variable detection
             // ==========================================
-            // add resb, resw, resd, resq for .bss
-            let isVar = lowerCleanLine.includes("db") || lowerCleanLine.includes("dw") || 
-                        lowerCleanLine.includes("dd") || lowerCleanLine.includes("dq") || 
-                        lowerCleanLine.includes("dt") || lowerCleanLine.includes("resb") ||
-                        lowerCleanLine.includes("resw") || lowerCleanLine.includes("resd") ||
-                        lowerCleanLine.includes("resq") || 
-                        this.registry.structs.some(s => line.includes(s));
+
+            let words = this.tokenizer.tokenize(line);
+
+            const isVar =
+                words.length >= 2 &&
+                this.varRegex.test(words[1]);
 
             if (isVar && clearPrevious) {
-                let first = cleanLine.charAt(0);
-                let fistInd = line.indexOf(first);
-                let space1 = line.indexOf(' ', fistInd) > -1 ? line.indexOf(' ', fistInd) : line.indexOf('\t', fistInd);
-                let space2 = line.indexOf(' ', space1 + 1) > -1 ? line.indexOf(' ', space1 + 1) : line.indexOf('\t', space1 + 1);
-                
-                if (space1 > -1 && space2 > -1) {
-                    this.registry.vars.push({
-                        name: Utils.clearSpace(line.substring(fistInd, space1)),
-                        type: Utils.clearSpace(line.substring(space1, space2)),
-                        section: this.currentSection // <--- add Section of variable
-                    });
-                }
+
+                const name = words[0];
+                const type = words[1];
+
+                this.registry.addVariable({
+                    name: name,
+                    type: type,
+                    section: this.currentSection
+                });
+
             }
 
             // ==========================================
-            // 4. detect Procedures (MASM/TASM compat)
+            // 4. Procedure detection
             // ==========================================
-            if (lowerCleanLine.startsWith("proc")) {
+
+            const procMatch = cleanLine.match(this.procRegex);
+
+            if (procMatch) {
+
+                const name = procMatch[1];
+
                 let des = new Info("", "");
                 let text = [];
+
                 let ptr = x;
+
                 while (ptr - 1 >= 0) {
+
                     ptr--;
-                    if (Utils.clearSpace(documentLines[ptr]).startsWith(';')) {
-                        text.push(documentLines[ptr].substring(documentLines[ptr].indexOf(';') + 1));
-                    } else break;
-                }
-                
-                for (let t of text) {
-                    if (t.startsWith("@out: ")) des.output.push(t.substring(t.indexOf(' ', t.indexOf('@out: '))));
-                    else if (t.startsWith("@arg: ")) des.params.push(Utils.clearSpace(t.substring(t.indexOf(' ', t.indexOf('@arg: ')))));
-                    else des.des += t;
+
+                    const prevLine = Utils.clearSpace(documentLines[ptr]);
+
+                    if (prevLine.startsWith(";")) {
+
+                        text.push(
+                            documentLines[ptr].substring(
+                                documentLines[ptr].indexOf(";") + 1
+                            )
+                        );
+
+                    } else {
+                        break;
+                    }
                 }
 
-                let firstSpace = line.indexOf(' ', line.indexOf('c'));
-                let spaceOne = line.indexOf(' ', firstSpace + 1);
-                let name = spaceOne > -1 ? cleanLine.substr(cleanLine.indexOf('c') + 1, spaceOne - firstSpace - 1) : cleanLine.substring(cleanLine.indexOf('c') + 1);
+                for (let t of text) {
+
+                    if (t.startsWith("@out: ")) {
+
+                        des.output.push(
+                            t.substring(t.indexOf(" ", t.indexOf("@out: ")))
+                        );
+
+                    } else if (t.startsWith("@arg: ")) {
+
+                        des.params.push(
+                            Utils.clearSpace(
+                                t.substring(t.indexOf(" ", t.indexOf("@arg: ")))
+                            )
+                        );
+
+                    } else {
+
+                        des.des += t;
+
+                    }
+                }
+
                 des.name = name;
 
                 if (!this.registry.findProcedure(name)) {
+
                     let proc = new Procedure(name, des);
-                    proc.section = this.currentSection; // <--- add Section for Procedure
-                    this.registry.procs.push(proc);
+                    proc.section = this.currentSection;
+
+                    this.registry.addProcedure(proc);
+
                 }
+
             }
 
             // ==========================================
-            // 5. detect Includes (YASM: %include, TASM: include)
+            // 5. Include detection
             // ==========================================
-            if (lowerCleanLine.startsWith("%include") || lowerCleanLine.startsWith("include")) {
-                let fileNameMatch = line.match(/['"](.*?)['"]/);
-                if (fileNameMatch && vscode.workspace.workspaceFolders) {
-                    let fileName = vscode.workspace.workspaceFolders[0].uri.fsPath + '\\' + fileNameMatch[1];
-                    if (fstream.existsSync(fileName) && !this.registry.includedFiles.includes(fileName)) {
-                        let filedata = fstream.readFileSync(fileName, 'utf8');
-                        this.registry.includedFiles.push(fileName.replace(/\\/g, '/'));
-                        
-                        // save current Section, cuz include may change Section
-                        let oldSection = this.currentSection;
-                        
-                        await this.scan(filedata.split('\n'), false);
-                        
-                        // return Section for main file
-                        this.currentSection = oldSection; 
+
+            if (
+                lowerCleanLine.startsWith("%include") ||
+                lowerCleanLine.startsWith("include")
+            ) {
+
+                const fileNameMatch = line.match(/['"](.*?)['"]/);
+
+                if (fileNameMatch && vscode.window.activeTextEditor) {
+
+                    const baseDir = path.dirname(
+                        vscode.window.activeTextEditor.document.uri.fsPath
+                    );
+
+                    const fileName = path.resolve(
+                        baseDir,
+                        fileNameMatch[1]
+                    );
+
+                    const normalized = path.normalize(fileName);
+
+                    if (
+                        fs.existsSync(normalized) &&
+                        !this.registry.includedFiles.includes(normalized)
+                    ) {
+
+                        const filedata = fs.readFileSync(normalized, "utf8");
+
+                        this.registry.includedFiles.push(normalized);
+
+                        const oldSection = this.currentSection;
+
+                        await this.scan(
+                            filedata.split(/\r?\n/),
+                            false
+                        );
+
+                        this.currentSection = oldSection;
                     }
                 }
             }
 
             // ==========================================
-            // 6. detect Macros (YASM: %macro ... %endmacro)
+            // 6. Macro detection
             // ==========================================
-            if (lowerCleanLine.startsWith("%macro")) {
-                let words = Utils.splitLine(line);
+
+            if (this.macroRegex.test(line)) {
+
+                let words = this.tokenizer.tokenize(line);
+
                 if (words.length > 1) {
-                    let macroName = words[1];
-                    if (!this.registry.macros) this.registry.macros = [];
-                    if (!this.registry.macros.includes(macroName)) {
-                        this.registry.macros.push(macroName);
+
+                    const macroName = words[1];
+
+                    if (!this.registry.findMacro(macroName)) {
+                        this.registry.addMacro(macroName);
                     }
+
                 }
             }
 
             // ==========================================
-            // 7. detect Defines (YASM: %define)
+            // 7. Define detection
             // ==========================================
-            if (lowerCleanLine.startsWith("%define") || lowerCleanLine.startsWith("%assign")) {
-                let words = Utils.splitLine(line);
+
+            if (this.defineRegex.test(line)) {
+
+                let words = this.tokenizer.tokenize(line);
+
                 if (words.length > 1) {
-                    let defineName = words[1];
-                    if (!this.registry.defines) this.registry.defines = [];
+
+                    const defineName = words[1];
+
+                    if (!this.registry.defines) {
+                        this.registry.defines = [];
+                    }
+
                     if (!this.registry.defines.includes(defineName)) {
                         this.registry.defines.push(defineName);
                     }
+
                 }
             }
+
         }
     }
 }
