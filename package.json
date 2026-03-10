@@ -4,6 +4,8 @@
 	"displayName": "Assembly YASM Helper",
 	"description": "Language support and smart autocomplete for YASM/NASM Assembler",
 	"version": "1.0.5",
+	"license": "MIT",
+	"icon": "icon.png",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/VVeb1250/assembly-yasm-helper.git"
@@ -155,12 +157,6 @@
 		"eslint": "^7.6.0",
 		"glob": "^7.1.6",
 		"mocha": "^8.0.1",
-		"typescript": "^3.9.7",
-		"vsce": "^1.78.0"
-	},
-	"__metadata": {
-		"installedTimestamp": 1771779188107,
-		"targetPlatform": "undefined",
-		"size": 6466113
+		"typescript": "^3.9.7"
 	}
 }
