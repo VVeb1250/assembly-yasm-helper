@@ -37,7 +37,10 @@
 				"assembly.compilerType": {
 					"type": "string",
 					"default": "yasm",
-					"enum": ["yasm", "nasm"],
+					"enum": [
+						"yasm",
+						"nasm"
+					],
 					"enumDescriptions": [
 						"YASM Assembler",
 						"NASM Assembler"
@@ -47,7 +50,14 @@
 				"assembly.compilerFormat": {
 					"type": "string",
 					"default": "elf64",
-					"enum": ["elf32", "elf64", "win32", "win64", "macho32", "macho64"],
+					"enum": [
+						"elf32",
+						"elf64",
+						"win32",
+						"win64",
+						"macho32",
+						"macho64"
+					],
 					"enumDescriptions": [
 						"ELF 32-bit (Linux x86)",
 						"ELF 64-bit (Linux x64)",
@@ -61,7 +71,11 @@
 				"assembly.compilerDebugInfo": {
 					"type": "string",
 					"default": "dwarf2",
-					"enum": ["none", "dwarf2", "stabs"],
+					"enum": [
+						"none",
+						"dwarf2",
+						"stabs"
+					],
 					"enumDescriptions": [
 						"No debug info",
 						"DWARF2 debug info (-gdwarf2)",
@@ -72,7 +86,10 @@
 				"assembly.outputExtension": {
 					"type": "string",
 					"default": "o",
-					"enum": ["o", "obj"],
+					"enum": [
+						"o",
+						"obj"
+					],
 					"description": "Output file extension"
 				},
 				"assembly.enableCompilerCheck": {

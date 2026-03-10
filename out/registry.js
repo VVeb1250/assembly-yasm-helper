@@ -1,18 +1,10 @@
 "use strict";
 
-const { KEYWORD_DICTIONARY } = require("./data/keywords");
+const { KEYWORD_MAP } = require("./data/keywords");
 
 class SymbolRegistry {
 
     constructor() {
-
-        // keyword map
-        this.keywordMap = new Map();
-
-        for (const k of KEYWORD_DICTIONARY) {
-            this.keywordMap.set(k.name.toLowerCase(), k);
-        }
-
         this.clear();
     }
 
@@ -164,7 +156,8 @@ class SymbolRegistry {
     // --------------------------------
 
     getKeyword(word) {
-        return this.keywordMap.get(word.toLowerCase());
+        if (!word) return undefined;
+        return KEYWORD_MAP.get(word.toLowerCase());
     }
 
 }
