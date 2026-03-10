@@ -1,11 +1,19 @@
-## 1.0.0
-- IntelliSense autocomplete for TASM assembler
-- Provides info about instructions
+## 1.0.6
+- fix theme can useable
+- adjust syntax hilight
 
-## 1.0.1
-- Removed case sensetvity
-- Automatic case prefrence system
-- Improved syntax highlighting
+## 1.0.5
+- add code Diagnostic
+- add compiler and Diagnostic for compiler
+- can configure compiler
+
+## 1.0.4
+- fix word suggestion for smooter coding
+- add 0x numberic declaretion
+
+## 1.0.3
+- Not use AutoSuggestion when TAB 
+- Adjust KEYWORD_DICONTARY
 
 ## [1.0.2] - Custom YASM Smart Release
 ### Added
@@ -26,15 +34,11 @@
 - Fixed the annoying popup issue that occurred immediately after typing a comma (`,`).
 - Cleaned up obsolete metadata from `package.json` to allow successful `.vsix` packaging.
 
-## 1.0.3
-- Not use AutoSuggestion when TAB 
-- Adjust KEYWORD_DICONTARY
+## 1.0.1
+- Removed case sensetvity
+- Automatic case prefrence system
+- Improved syntax highlighting
 
-## 1.0.4
-- fix word suggestion for smooter coding
-- add 0x numberic declaretion
-
-## 1.0.5
-- add code Diagnostic
-- add compiler and Diagnostic for compiler
-- can configure compiler
+## 1.0.0
+- IntelliSense autocomplete for TASM assembler
+- Provides info about instructions
