@@ -1,81 +1,302 @@
 # Assembly YASM Helper
 
-Welcome to **Assembly YASM Helper**! This extension provides advanced language support, syntax highlighting, and highly intelligent autocomplete for **YASM / NASM** assembly development in Visual Studio Code.
+Advanced language support for **YASM / NASM Assembly** in Visual Studio Code.
+
+Assembly YASM Helper provides **smart autocomplete, syntax highlighting, diagnostics, and optional compiler integration** to improve productivity when writing assembly code.
 
 ---
 
-## 🚀 Key Features
+# 🚀 Features
 
-### ✏️ Intelligent Autocomplete (Context-Aware)
-- **`.data` & `.bss` Sections:** Smart suggestions for memory allocation (`db`, `dw`, `resb`, etc.) that only trigger *after* you finish typing your variable name
-- **`.text` Section:** Context-aware suggestions for instructions like `mov`, `add`, `mul`, `div`, etc. Automatically suggests Registers, defined Variables, and Pointer Sizes (`byte`, `word`, `dword`, `qword`, `oword`, `yword`, `zword`)
-- **Bracket Intelligence `[]`:** When typing inside memory brackets, the extension filters suggestions to only show relevant Variables and Registers
-- **Root-Level Suggestions:** Suggests structural keywords like `section .data`, `global`, and `extern` only at the beginning of a line
-- **YASM Preprocessor:** Full support for `%include`, `%macro`, `%define`, `%ifdef`, `%if`, `%rep` and more — triggered automatically when typing `%`
+## Intelligent Autocomplete
 
-### 🖥️ Register Support
-- Full general-purpose registers: 8-bit, 16-bit, 32-bit, 64-bit
-- SSE registers: `xmm0`–`xmm15`
-- AVX registers: `ymm0`–`ymm15`
-- AVX-512 registers: `zmm0`–`zmm31`, mask registers `k0`–`k7`
+Context-aware suggestions depending on where you type.
 
-### 🔍 Hover Information
-- Hover over any instruction, register, or variable to see its description and syntax
-- Hover over numbers to see conversion between Decimal, Hexadecimal, and Binary
-- Supports both suffix style (`1Fh`) and prefix style (`0x1F`)
+### Data Sections
 
-### 🔴 Code Diagnostics
-- **Duplicate labels** detection
-- **Unclosed blocks** — `proc/endp`, `%macro/%endmacro`, `%if/%endif`, `macro/endm`
-- **Undefined references** — jump/call to labels that don't exist, variables used but not declared
-- **Operand count** — detects missing or extra operands (e.g., `mov rax`)
-- **Operand type** — detects wrong operand types (e.g., `jmp 42`)
-- **Size mismatch** — detects register or memory size conflicts (e.g., `mov eax, rbx`, `mov dword[var], ax`)
+Inside `.data` and `.bss` sections the extension suggests memory allocation directives:
 
-### ⚙️ Compiler Integration (Optional)
-Run YASM or NASM directly from VS Code on save and see compiler errors inline:
-- Auto-detects compiler from system `PATH`
-- Configurable compiler path, format (`elf64`, `win64`, etc.), and debug info (`dwarf2`, etc.)
-- Status bar shows compile result: `✓ ok`, `✗ N error(s)`, or `⚠ compiler not found`
+```
+db   dw   dd   dq
+resb resw resd resq
+```
 
-### 🎨 Broad File Support
-Supports `.asm`, `.s`, and `.S` file extensions
+Suggestions appear **only after finishing the variable name**, preventing interruptions while typing.
+
+Example:
+
+```asm
+msg db "Hello World"
+buffer resb 64
+```
 
 ---
 
-## ⚙️ Compiler Setup (Optional)
+### Instruction Awareness
 
-To enable compiler-based error checking, configure in VS Code Settings:
+Inside `.text` sections the extension suggests:
+
+- Instructions
+- Registers
+- Defined variables
+- Pointer sizes
+
+Supported pointer sizes:
+
+```
+byte word dword qword oword yword zword
+```
+
+Example:
+
+```asm
+mov eax, dword [buffer]
+```
+
+---
+
+### Bracket Intelligence
+
+Inside memory brackets:
+
+```
+[ ... ]
+```
+
+Suggestions are filtered to show only relevant symbols:
+
+- Registers
+- Variables
+
+Example:
+
+```asm
+mov eax, [rbx + buffer]
+```
+
+---
+
+### Root-Level Suggestions
+
+Structural keywords are suggested only at the start of a line:
+
+```
+section .text
+section .data
+section .bss
+global
+extern
+```
+
+---
+
+### YASM Preprocessor Support
+
+Typing `%` triggers suggestions for YASM preprocessor directives.
+
+Supported directives include:
+
+```
+%include
+%macro
+%define
+%ifdef
+%ifndef
+%if
+%elif
+%else
+%endif
+%rep
+%endrep
+```
+
+---
+
+# 🎨 Syntax Highlighting
+
+Custom syntax highlighting for Assembly code:
+
+- Instructions
+- Registers
+- Labels
+- Variables
+- Numbers
+- Directives
+- Operators
+- Brackets `[] () {}`
+
+Example:
+
+```asm
+section .text
+global _start
+
+_start:
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, msg
+    mov rdx, 13
+    syscall
+```
+
+Memory expressions are also highlighted correctly:
+
+```asm
+mov eax, [rbx + var*4]
+```
+
+---
+
+# 🖥 Register Support
+
+Full register coverage including modern SIMD extensions.
+
+### General Purpose Registers
+- 8-bit
+- 16-bit
+- 32-bit
+- 64-bit
+
+### SSE Registers
+```
+xmm0 – xmm15
+```
+
+### AVX Registers
+```
+ymm0 – ymm15
+```
+
+### AVX-512 Registers
+```
+zmm0 – zmm31
+k0 – k7
+```
+
+---
+
+# 🔍 Hover Information
+
+Hover over instructions, registers, variables, or numbers to see additional information.
+
+Numbers display automatic conversions:
+
+- Decimal
+- Hexadecimal
+- Binary
+
+Supported formats:
+
+```
+0x1F
+1Fh
+```
+
+---
+
+# 🔴 Code Diagnostics
+
+Real-time analysis detects common assembly mistakes.
+
+### Label Problems
+- Duplicate labels
+- Jump to undefined labels
+
+### Unclosed Blocks
+
+Detects missing block endings:
+
+```
+proc / endp
+%macro / %endmacro
+%if / %endif
+macro / endm
+```
+
+### Operand Validation
+
+Examples:
+
+```asm
+mov rax        ; missing operand
+jmp 42         ; invalid operand
+mov eax, rbx   ; size mismatch
+mov dword[var], ax
+```
+
+---
+
+# ⚙ Compiler Integration (Optional)
+
+Compile automatically on save using **YASM or NASM**.
+
+Compiler errors appear directly inside VS Code.
+
+Features:
+
+- Automatic compiler detection from system PATH
+- Inline compiler diagnostics
+- Status bar compile results
+
+Status indicators:
+
+```
+✓ ok
+✗ N error(s)
+⚠ compiler not found
+```
+
+---
+
+# ⚙ Configuration
+
+Configure in **VS Code Settings**.
 
 | Setting | Default | Description |
-|---|---|---|
-| `assembly.enableCompilerCheck` | `true` | Enable compiler check on save |
-| `assembly.compilerPath` | *(auto)* | Path to compiler executable |
-| `assembly.compilerType` | `yasm` | `yasm` or `nasm` |
-| `assembly.compilerFormat` | `elf64` | Output format |
-| `assembly.compilerDebugInfo` | `dwarf2` | Debug info format |
-| `assembly.outputExtension` | `o` | Output file extension |
-
-If `compilerPath` is left empty, the extension will try to find the compiler automatically using `which`/`where`.
+|-------|-------|-------------|
+| assembly.enableCompilerCheck | true | Enable compiler check on save |
+| assembly.compilerPath | auto | Path to compiler executable |
+| assembly.compilerType | yasm | yasm or nasm |
+| assembly.compilerFormat | elf64 | Output format |
+| assembly.compilerDebugInfo | dwarf2 | Debug information format |
+| assembly.outputExtension | o | Output file extension |
 
 ---
 
-## 📦 How to Install (Manual VSIX)
+# 📂 Supported File Types
 
-1. Download the `.vsix` file
-2. Open Visual Studio Code
+The extension activates automatically for:
+
+```
+.asm
+.s
+.S
+```
+
+---
+
+# 📦 Manual Installation
+
+Install manually using a `.vsix` file.
+
+1. Download the `.vsix`
+2. Open VS Code
 3. Go to **Extensions** (`Ctrl+Shift+X`)
-4. Click `···` → **Install from VSIX...**
-5. Select the downloaded file and install
-6. Restart VS Code
+4. Click **...**
+5. Select **Install from VSIX**
+6. Choose the downloaded file
+7. Restart VS Code
 
 ---
 
-## 📋 Requirements
-- Visual Studio Code **v1.48.0** or higher
-- YASM or NASM installed (optional, for compiler integration)
+# 📋 Requirements
+
+- Visual Studio Code **v1.48.0 or newer**
+- YASM or NASM installed *(optional for compiler integration)*
 
 ---
 
-## 👨‍💻 Publisher
-Developed by **Roncho**, extended and maintained by **VVeb1250**
+# 👨‍💻 Publisher
+
+Developed by **Roncho**  
+Extended and maintained by **VVeb1250**

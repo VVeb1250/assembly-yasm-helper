@@ -7,7 +7,10 @@
 		{ "include": "#comments" },
 		{ "include": "#strings" },
 		{ "include": "#labels" },
+		{ "include": "#globals" },
+		{ "include": "#call_targets" },
 		{ "include": "#directives" },
+		{ "include": "#sections" },
 		{ "include": "#instructions" },
 		{ "include": "#registers" },
 		{ "include": "#numbers" },
@@ -82,16 +85,41 @@
 			]
 		},
 
-		"directives": {
+		"globals": {
 			"patterns": [
 				{
-					"match": "(?i)\\b(section|segment)\\b",
-					"name": "keyword.control.asm"
-				},
+					"match": "(?i)\\b(global|extern)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+					"captures": {
+						"1": {
+						"name": "keyword.control.asm"
+						},
+						"2": {
+						"name": "entity.name.function.asm"
+						}
+					}
+				}
+			]
+		},
+
+		"call_targets": {
+			"patterns": [
 				{
-					"match": "(?i)\\b(global|extern|align|bits|default|times)\\b",
-					"name": "keyword.control.asm"
-				},
+					"match": "(?i)\\b(jmp|je|jne|jg|jge|jl|jle|ja|jb|call)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+					"captures": {
+						"1": {
+						"name": "keyword.control.asm"
+						},
+						"2": {
+						"name": "entity.name.function.asm"
+						}
+					}
+				}
+			]
+		},
+
+
+		"directives": {
+			"patterns": [
 				{
 					"match": "(?i)\\b(db|dw|dd|dq|dt|resb|resw|resd|resq|equ)\\b",
 					"name": "keyword.control.asm"
@@ -99,6 +127,25 @@
 				{
 					"match": "(?i)\\b(byte|word|dword|qword|tbyte|ptr)\\b",
 					"name": "keyword.control.asm"
+				}
+			]
+		},
+		"sections": {
+			"patterns": [
+				{
+					"begin": "(?i)\\b(section|segment)\\b",
+					"beginCaptures": {
+						"1": {
+						"name": "keyword.control.asm"
+						}
+					},
+					"end": "$",
+					"patterns": [
+						{
+						"match": "\\.[A-Za-z_][A-Za-z0-9_]*",
+						"name": "entity.name.section.asm"
+						}
+					]
 				}
 			]
 		},
@@ -169,7 +216,7 @@
 		},
 
 		"variables": {
-			"match": "[A-Za-z_][A-Za-z0-9_]*",
+			"match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b",
 			"name": "variable.name.asm"
 		}
 
