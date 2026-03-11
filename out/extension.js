@@ -26,7 +26,7 @@ class ExtensionManager {
             vscode.languages.registerCompletionItemProvider(
                 'assembly',
                 new AsmCompletionProvider(this.registry, this.scanner),
-                ' ', '.', '[', ','
+                ' ', '.', '[', ',', '\t', '+', '*', '('
             )
         );
 

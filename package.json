@@ -3,7 +3,7 @@
 	"publisher": "VVeb1250",
 	"displayName": "Assembly YASM Helper",
 	"description": "Language support and smart autocomplete for YASM/NASM Assembler",
-	"version": "1.0.6",
+	"version": "1.1.0",
 	"license": "MIT",
 	"icon": "icon.png",
 	"repository": {
@@ -23,7 +23,9 @@
 	"contributes": {
 		"configurationDefaults": {
 			"[assembly]": {
-				"editor.wordBasedSuggestions": "off"
+				"editor.wordBasedSuggestions": "off",
+				"editor.autoClosingBrackets": "always",
+				"editor.bracketPairColorization.enabled": true
 			}
 		},
 		"configuration": {
@@ -121,7 +123,7 @@
 					".s",
 					".S"
 				],
-				"configuration": "./language-configuration.json"
+				"configuration": "./configs/language-configuration.json"
 			}
 		],
 		"grammars": [

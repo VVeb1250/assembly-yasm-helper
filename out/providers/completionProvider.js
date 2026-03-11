@@ -6,6 +6,7 @@ const { KeywordType } = require("../data/enums");
 const { KEYWORD_MAP, REGISTERS, AVX_REGISTERS, PREPROCESSOR } = require("../data/keywords");
 const { OperandType } = require("../data/operandTypes");
 const { INSTRUCTION_SIGNATURES } = require("../data/instructionSignatures");
+const { MemoryAddressParser } = require("../engine/memoryAddressParser");
 
 class AsmCompletionProvider {
 
@@ -31,6 +32,7 @@ class AsmCompletionProvider {
             "yword",
             "zword"
         ];
+        this.scales = ["1","2","4","8"];
 
         // cache keyword list
         this.keywordList = Array.from(KEYWORD_MAP.values());
@@ -50,7 +52,8 @@ class AsmCompletionProvider {
             [KeywordType.structure]: vscode.CompletionItemKind.Struct,
             [KeywordType.label]: vscode.CompletionItemKind.Unit,
             [KeywordType.macro]: vscode.CompletionItemKind.Color,
-            [KeywordType.file]: vscode.CompletionItemKind.File
+            [KeywordType.file]: vscode.CompletionItemKind.File,
+            [KeywordType.constant]: vscode.CompletionItemKind.Value
         };
 
         return kinds[kind] || vscode.CompletionItemKind.Text;
@@ -189,31 +192,59 @@ class AsmCompletionProvider {
            BRACKET MEMORY
         ======================================= */
 
-        const open = line.lastIndexOf('[');
-        const close = line.lastIndexOf(']');
-
+        const open = line.lastIndexOf("[");
+        const close = line.lastIndexOf("]");
         const isInsideBracket = open !== -1 && open > close;
 
         if (isInsideBracket) {
+            const expr = line.slice(open + 1);
+            const state = MemoryAddressParser.parse(expr);
 
-            for (const v of this.registry.vars) {
-                completions.items.push(
-                    this.createItem(v.name, KeywordType.variable)
-                );
+            switch (state) {
+                case "BASE":
+                    for (const v of this.registry.vars) {
+                        completions.items.push(
+                            this.createItem(v.name, KeywordType.variable)
+                        );
+                    }
+                    for (const r of REGISTERS) {
+                        completions.items.push(
+                            this.createItem(r, KeywordType.register)
+                        );
+                    }
+                    break;
+
+                case "PLUS":
+                    completions.items.push(
+                        this.createItem("+", KeywordType.operator)
+                    );
+                    break;
+
+                case "INDEX":
+                    for (const r of REGISTERS) {
+                        completions.items.push(
+                            this.createItem(r, KeywordType.register)
+                        );
+                    }
+                    completions.items.push(
+                        this.createItem("0", KeywordType.constant)
+                    );
+                    break;
+
+                case "STAR":
+                    completions.items.push(
+                        this.createItem("*", KeywordType.operator)
+                    );
+                    break;
+
+                case "SCALE":
+                    for (const s of ["1","2","4","8"]) {
+                        completions.items.push(
+                            this.createItem(s, KeywordType.constant)
+                        );
+                    }
+                    break;
             }
-
-            for (const r of REGISTERS) {
-                completions.items.push(
-                    this.createItem(r, KeywordType.register)
-                );
-            }
-
-            for (const r of AVX_REGISTERS) {
-                completions.items.push(
-                    this.createItem(r, KeywordType.register)
-                );
-            }
-
             return completions;
         }
 
@@ -246,13 +277,16 @@ class AsmCompletionProvider {
                     )
                 );
             }
-            /* MEMORY */
+            /* SIZE */
             if (allowed & OperandType.MEM) {
                 for (const s of this.sizeKeywords) {
                     completions.items.push(
                         this.createItem(s, KeywordType.size, "(Size)")
                     );
                 }
+            }
+            /* MEMORY */
+            if (allowed & OperandType.MEM) {
                 for (const v of this.registry.vars) {
                     completions.items.push(
                         this.createItem(v.name, KeywordType.variable)
@@ -270,11 +304,6 @@ class AsmCompletionProvider {
                 this.registry.labels.forEach(l =>
                     completions.items.push(
                         this.createItem(l, KeywordType.label)
-                    )
-                );
-                this.registry.labelsEE.forEach(l =>
-                    completions.items.push(
-                        this.createItem(l.name, KeywordType.label)
                     )
                 );
                 this.registry.procs.forEach(p =>
