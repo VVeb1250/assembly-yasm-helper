@@ -14,6 +14,7 @@ class ExtensionManager {
         this.scanner = new DocumentScanner(this.registry);
         this.diagnostics = new DiagnosticProvider(this.registry);
         this.compiler = new CompilerProvider();
+        this.isScanning = false;
     }
 
     activate() {
@@ -25,7 +26,7 @@ class ExtensionManager {
             vscode.languages.registerCompletionItemProvider(
                 'assembly',
                 new AsmCompletionProvider(this.registry, this.scanner),
-                ' ', '.', '[', ','
+                ' ', '.', '[', ',', '\t', '+', '*', '('
             )
         );
 
@@ -33,7 +34,22 @@ class ExtensionManager {
         this.context.subscriptions.push(this.compiler.collection);
 
         // scan + analyze ทุกครั้งที่ไฟล์เปลี่ยน
-        vscode.workspace.onDidChangeTextDocument(e => this.triggerScan(e.document));
+        // use subscriptions for fix Memory Leak
+        this.context.subscriptions.push(
+            vscode.workspace.onDidChangeTextDocument(e => this.triggerScan(e.document))
+        );
+        this.context.subscriptions.push(
+            vscode.workspace.onDidOpenTextDocument(doc => this.triggerScan(doc))
+        );
+        this.context.subscriptions.push(
+            vscode.window.onDidChangeActiveTextEditor(editor => {
+                if (editor) this.triggerScan(editor.document);
+            })
+        );
+        this.context.subscriptions.push(
+            vscode.workspace.onDidSaveTextDocument(doc => this.triggerScan(doc, true))
+        );
+
         vscode.workspace.onDidOpenTextDocument(doc => this.triggerScan(doc));
         vscode.window.onDidChangeActiveTextEditor(editor => {
             if (editor) this.triggerScan(editor.document);
@@ -41,19 +57,27 @@ class ExtensionManager {
 
         // compiler รันเฉพาะตอน save
         vscode.workspace.onDidSaveTextDocument(doc => this.triggerScan(doc, true));
+
+        if (vscode.window.activeTextEditor) {
+            this.triggerScan(vscode.window.activeTextEditor.document);
+        }
     }
 
     async triggerScan(document, runCompiler = false) {
-        if (!document || document.languageId !== 'assembly') return;
-        let docText = [];
-        for (let i = 0; i < document.lineCount; i++) {
-            docText.push(document.lineAt(i).text);
-        }
-        await this.scanner.scan(docText);
-        this.diagnostics.analyze(document);
+        // if (this.isScanning) return;
+        this.isScanning = true;
 
-        if (runCompiler) {
-            await this.compiler.analyze(document);
+        try {
+            if (!document || document.languageId !== 'assembly' || document.uri.scheme !== 'file') return;
+            const docText = document.getText().split(/\r?\n/);
+            await this.scanner.scan(docText);
+            this.diagnostics.analyze(document);
+    
+            if (runCompiler) {
+                await this.compiler.analyze(document);
+            }
+        } finally {
+            this.isScanning = false;
         }
     }
 }

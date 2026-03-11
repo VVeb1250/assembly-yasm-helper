@@ -3,7 +3,7 @@
 	"publisher": "VVeb1250",
 	"displayName": "Assembly YASM Helper",
 	"description": "Language support and smart autocomplete for YASM/NASM Assembler",
-	"version": "1.0.6",
+	"version": "1.1.0",
 	"license": "MIT",
 	"icon": "icon.png",
 	"repository": {
@@ -23,7 +23,9 @@
 	"contributes": {
 		"configurationDefaults": {
 			"[assembly]": {
-				"editor.wordBasedSuggestions": "off"
+				"editor.wordBasedSuggestions": "off",
+				"editor.autoClosingBrackets": "always",
+				"editor.bracketPairColorization.enabled": true
 			}
 		},
 		"configuration": {
@@ -37,7 +39,10 @@
 				"assembly.compilerType": {
 					"type": "string",
 					"default": "yasm",
-					"enum": ["yasm", "nasm"],
+					"enum": [
+						"yasm",
+						"nasm"
+					],
 					"enumDescriptions": [
 						"YASM Assembler",
 						"NASM Assembler"
@@ -47,7 +52,14 @@
 				"assembly.compilerFormat": {
 					"type": "string",
 					"default": "elf64",
-					"enum": ["elf32", "elf64", "win32", "win64", "macho32", "macho64"],
+					"enum": [
+						"elf32",
+						"elf64",
+						"win32",
+						"win64",
+						"macho32",
+						"macho64"
+					],
 					"enumDescriptions": [
 						"ELF 32-bit (Linux x86)",
 						"ELF 64-bit (Linux x64)",
@@ -61,7 +73,11 @@
 				"assembly.compilerDebugInfo": {
 					"type": "string",
 					"default": "dwarf2",
-					"enum": ["none", "dwarf2", "stabs"],
+					"enum": [
+						"none",
+						"dwarf2",
+						"stabs"
+					],
 					"enumDescriptions": [
 						"No debug info",
 						"DWARF2 debug info (-gdwarf2)",
@@ -72,7 +88,10 @@
 				"assembly.outputExtension": {
 					"type": "string",
 					"default": "o",
-					"enum": ["o", "obj"],
+					"enum": [
+						"o",
+						"obj"
+					],
 					"description": "Output file extension"
 				},
 				"assembly.enableCompilerCheck": {
@@ -104,7 +123,7 @@
 					".s",
 					".S"
 				],
-				"configuration": "./language-configuration.json"
+				"configuration": "./configs/language-configuration.json"
 			}
 		],
 		"grammars": [

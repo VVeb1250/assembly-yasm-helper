@@ -1,6 +1,7 @@
 "use strict";
+
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.KEYWORD_DICONTARY = exports.REGISTERS = exports.PREPROCESSOR = exports.AVX_REGISTERS = void 0;
+exports.KEYWORD_DICTIONARY = exports.REGISTERS = exports.PREPROCESSOR = exports.AVX_REGISTERS = void 0;
 const enums_1 = require("./enums");
 const structs_1 = require("./structs");
 exports.REGISTERS = [
@@ -46,274 +47,313 @@ exports.PREPROCESSOR = [
     { name: "%rep",      detail: "(Preprocessor)", doc: "Repeat block" },
     { name: "%endrep",   detail: "(Preprocessor)", doc: "End repeat block" },
 ];
-exports.KEYWORD_DICONTARY = [
-    // ==========================================
-    // Scope & Section Modifiers (YASM/NASM/TASM)
-    // ==========================================
-    new structs_1.KeywordDef("section", "Defines a section (e.g., section .data)", enums_1.KeywordType.savedWord, "section", 0),
-    new structs_1.KeywordDef("segment", "Defines a segment (Alternative to section)", enums_1.KeywordType.savedWord, "segment", 0),
-    new structs_1.KeywordDef("global", "Declares a global/public symbol", enums_1.KeywordType.savedWord, "global", 0),
-    new structs_1.KeywordDef("extern", "Declares an external symbol from another module", enums_1.KeywordType.savedWord, "extern", 0),
-    new structs_1.KeywordDef("common", "Declares common uninitialized data", enums_1.KeywordType.savedWord, "common", 0),
-    new structs_1.KeywordDef("default rel", "Use RIP-relative addressing by default (x64)", enums_1.KeywordType.savedWord, "default rel", 0),
-    new structs_1.KeywordDef("bits", "Specify target processor mode (16, 32, or 64)", enums_1.KeywordType.savedWord, "bits ", 0),
-    new structs_1.KeywordDef("align", "Aligns the next instruction/data to a boundary", enums_1.KeywordType.savedWord, "align ", 0),
 
-    // ==========================================
-    // Memory Models (TASM / MASM)
-    // ==========================================
-    new structs_1.KeywordDef("tiny", "Code and data in 1 segment (Max 64KB, COM files)", enums_1.KeywordType.size, "tiny", 0),
-    new structs_1.KeywordDef("small", "1 Code segment, 1 Data segment (Max 128KB)", enums_1.KeywordType.size, "small", 0),
-    new structs_1.KeywordDef("medium", "Multiple Code segments, 1 Data segment", enums_1.KeywordType.size, "medium", 0),
-    new structs_1.KeywordDef("compact", "1 Code segment, Multiple Data segments", enums_1.KeywordType.size, "compact", 0),
-    new structs_1.KeywordDef("large", "Multiple Code and Data segments", enums_1.KeywordType.size, "large", 0),
-    new structs_1.KeywordDef("huge", "Like large, but arrays can exceed 64KB", enums_1.KeywordType.size, "huge", 0),
-    new structs_1.KeywordDef("flat", "32-bit or 64-bit continuous unsegmented memory", enums_1.KeywordType.size, "flat", 0),
-    new structs_1.KeywordDef("stdcall", "Standard calling convention (Arguments pushed right-to-left)", enums_1.KeywordType.size, "stdcall", 0),
+const { KeywordType, AllowKinds } = enums_1;
 
-    // ==========================================
-    // Memory Allocation (Initialized - YASM/NASM/TASM)
-    // ==========================================
-    new structs_1.KeywordDef("db", "Define Byte (8-bit)", enums_1.KeywordType.memoryAllocation, "db "),
-    new structs_1.KeywordDef("dw", "Define Word (16-bit)", enums_1.KeywordType.memoryAllocation, "dw "),
-    new structs_1.KeywordDef("dd", "Define Doubleword (32-bit)", enums_1.KeywordType.memoryAllocation, "dd "),
-    new structs_1.KeywordDef("dq", "Define Quadword (64-bit)", enums_1.KeywordType.memoryAllocation, "dq "),
-    new structs_1.KeywordDef("dt", "Define Tenbytes (80-bit)", enums_1.KeywordType.memoryAllocation, "dt "),
+function INST(name, def, op = 2, allow = AllowKinds.all) {
+    return new structs_1.KeywordDef(name, def, KeywordType.instruction, undefined, op, allow);
+}
+function DIR(name, def, op = 0, allow) {
+    return new structs_1.KeywordDef(name, def, KeywordType.savedWord, undefined, op, allow);
+}
+function MEM(name, def) {
+    return new structs_1.KeywordDef(name, def, KeywordType.memoryAllocation, name + " ");
+}
+function PRE(name, def, op = 0) {
+    return new structs_1.KeywordDef(name, def, KeywordType.precompiled, name, op);
+}
+function SIZE(name, def) {
+    return new structs_1.KeywordDef(name, def, KeywordType.size, name, 0);
+}
+function REG(name, def) {
+    return new structs_1.KeywordDef(name, def, KeywordType.register, name, 0);
+}
 
-    // ==========================================
-    // Memory Allocation (Uninitialized - YASM/NASM)
-    // ==========================================
-    new structs_1.KeywordDef("resb", "Reserve Bytes", enums_1.KeywordType.memoryAllocation, "resb "),
-    new structs_1.KeywordDef("resw", "Reserve Words (16-bit)", enums_1.KeywordType.memoryAllocation, "resw "),
-    new structs_1.KeywordDef("resd", "Reserve Doublewords (32-bit)", enums_1.KeywordType.memoryAllocation, "resd "),
-    new structs_1.KeywordDef("resq", "Reserve Quadwords (64-bit)", enums_1.KeywordType.memoryAllocation, "resq "),
-    new structs_1.KeywordDef("rest", "Reserve Tenbytes (80-bit)", enums_1.KeywordType.memoryAllocation, "rest "),
+exports.KEYWORD_DICTIONARY = [
+    /* ================= SECTION / SCOPE ================= */
 
-    // ==========================================
-    // Memory Locating (Size Pointers)
-    // ==========================================
-    new structs_1.KeywordDef("byte", "Locates 1 byte of memory", enums_1.KeywordType.memoryAllocation, "byte", -1),
-    new structs_1.KeywordDef("word", "Locates 2 bytes of memory", enums_1.KeywordType.memoryAllocation, "word", -1),
-    new structs_1.KeywordDef("dword", "Locates 4 bytes of memory", enums_1.KeywordType.memoryAllocation, "dword", -1),
-    new structs_1.KeywordDef("qword", "Locates 8 bytes of memory", enums_1.KeywordType.memoryAllocation, "qword", -1),
-    new structs_1.KeywordDef("tbyte", "Locates 10 bytes of memory", enums_1.KeywordType.memoryAllocation, "tbyte", -1),
+    DIR("section","Defines a section (e.g., section .data)"),
+    DIR("segment","Defines a segment"),
+    DIR("global","Declares a global symbol"),
+    DIR("extern","Declares an external symbol"),
+    DIR("common","Declares common uninitialized data"),
+    DIR("default rel","Use RIP-relative addressing"),
+    DIR("bits","Specify target processor mode"),
+    DIR("align","Aligns next instruction/data"),
 
-    // ==========================================
-    // TASM / MASM Specific Directives
-    // ==========================================
-    new structs_1.KeywordDef("DATASEG", "Start of the data segment (TASM/MASM)", enums_1.KeywordType.savedWord, "DATASEG", 0),
-    new structs_1.KeywordDef("IDEAL", "Switches to IDEAL mode (TASM)", enums_1.KeywordType.savedWord, "IDEAL", 0),
-    new structs_1.KeywordDef("MASM", "Switches to MASM mode (TASM)", enums_1.KeywordType.savedWord, "MASM", 0),
-    new structs_1.KeywordDef("CODESEG", "Start of the code segment (TASM/MASM)", enums_1.KeywordType.savedWord, "CODESEG", 0),
-    new structs_1.KeywordDef("MODEL", "Defines the memory model", enums_1.KeywordType.savedWord, "MODEL [size]", 1, enums_1.AllowKinds.size),
-    new structs_1.KeywordDef("STACK", "Sets the size of the stack", enums_1.KeywordType.savedWord, "STACK [constant]", 1, enums_1.AllowKinds.constants),
+    /* ================= MEMORY MODELS ================= */
 
-    // ==========================================
-    // Macros & Preprocessors (YASM / NASM / TASM)
-    // ==========================================
-    new structs_1.KeywordDef("%macro", "Starts a multi-line macro (NASM/YASM)", enums_1.KeywordType.precompiled, "%macro "),
-    new structs_1.KeywordDef("%endmacro", "Ends a macro (NASM/YASM)", enums_1.KeywordType.precompiled, "%endmacro", 0),
-    new structs_1.KeywordDef("%define", "Single-line macro or constant (NASM/YASM)", enums_1.KeywordType.precompiled, "%define "),
-    new structs_1.KeywordDef("%include", "Include another source file (NASM/YASM)", enums_1.KeywordType.precompiled, "%include "),
-    new structs_1.KeywordDef("macro", "Creates a new macro (TASM/MASM)", enums_1.KeywordType.precompiled, "macro [name]", 1),
-    new structs_1.KeywordDef("endm", "Ends a macro definition (TASM/MASM)", enums_1.KeywordType.precompiled, "endm", 0),
-    new structs_1.KeywordDef("equ", "Constant Equate (Evaluated immediately)", enums_1.KeywordType.precompiled, "equ "),
-    new structs_1.KeywordDef("dup", "Allocates uninitialized values count times", enums_1.KeywordType.precompiled, "dup([values])", 1),
-    new structs_1.KeywordDef("include", "Includes a file in this file", enums_1.KeywordType.precompiled, "include "),
+    SIZE("tiny","Code and data in one segment"),
+    SIZE("small","One code and one data segment"),
+    SIZE("medium","Multiple code segments"),
+    SIZE("compact","Multiple data segments"),
+    SIZE("large","Multiple code and data segments"),
+    SIZE("huge","Large with >64KB arrays"),
+    SIZE("flat","Flat 32/64 bit memory model"),
+    SIZE("stdcall","Standard calling convention"),
 
-    // ==========================================
-    // Basic Instructions & Data Transfer
-    // ==========================================
-    new structs_1.KeywordDef("mov", "Moves value from source to destination"),
-    new structs_1.KeywordDef("movzx", "Move with Zero-Extend (e.g., byte to word)", enums_1.KeywordType.instruction, "movzx "),
-    new structs_1.KeywordDef("movsx", "Move with Sign-Extend (e.g., byte to word)", enums_1.KeywordType.instruction, "movsx "),
-    new structs_1.KeywordDef("xchg", "Exchanges the contents of two operands"),
-    new structs_1.KeywordDef("xadd", "Exchanges and adds operands"),
-    new structs_1.KeywordDef("cmpxchg", "Compare and exchange"),
-    new structs_1.KeywordDef("lea", "Load Effective Address", enums_1.KeywordType.instruction, undefined, 2, enums_1.AllowKinds.variables | enums_1.AllowKinds.memory),
-    new structs_1.KeywordDef("nop", "No Operation (Does nothing)", enums_1.KeywordType.instruction, "nop", 0),
+    /* ================= MEMORY ALLOCATION ================= */
 
-    // ==========================================
-    // Arithmetic Instructions
-    // ==========================================
-    new structs_1.KeywordDef("add", "Adds source operand to destination"),
-    new structs_1.KeywordDef("sub", "Subtracts source operand from destination"),
-    new structs_1.KeywordDef("inc", "Increments operand by 1", enums_1.KeywordType.instruction, "inc ", 1),
-    new structs_1.KeywordDef("dec", "Decrements operand by 1", enums_1.KeywordType.instruction, "dec ", 1),
-    new structs_1.KeywordDef("neg", "Two's complement negation", enums_1.KeywordType.instruction, "neg ", 1),
-    new structs_1.KeywordDef("cmp", "Compares operands (Subtracts without saving result)"),
-    new structs_1.KeywordDef("mul", "Unsigned multiplication", enums_1.KeywordType.instruction, "mul ", 1),
-    new structs_1.KeywordDef("imul", "Signed multiplication", enums_1.KeywordType.instruction, "imul ", 1),
-    new structs_1.KeywordDef("div", "Unsigned division", enums_1.KeywordType.instruction, "div ", 1),
-    new structs_1.KeywordDef("idiv", "Signed division", enums_1.KeywordType.instruction, "idiv ", 1),
+    MEM("db","Define byte"),
+    MEM("dw","Define word"),
+    MEM("dd","Define doubleword"),
+    MEM("dq","Define quadword"),
+    MEM("dt","Define tenbytes"),
+
+    MEM("resb","Reserve bytes"),
+    MEM("resw","Reserve words"),
+    MEM("resd","Reserve dwords"),
+    MEM("resq","Reserve qwords"),
+    MEM("rest","Reserve tenbytes"),
+
+    MEM("byte","1 byte memory pointer"),
+    MEM("word","2 byte memory pointer"),
+    MEM("dword","4 byte memory pointer"),
+    MEM("qword","8 byte memory pointer"),
+    MEM("tbyte","10 byte memory pointer"),
+
+    /* ================= TASM DIRECTIVES ================= */
+
+    DIR("DATASEG","Start data segment"),
+    DIR("IDEAL","Switch to IDEAL mode"),
+    DIR("MASM","Switch to MASM mode"),
+    DIR("CODESEG","Start code segment"),
+
+    new structs_1.KeywordDef(
+    "MODEL",
+    "Defines memory model",
+    KeywordType.savedWord,
+    "MODEL [size]",
+    1,
+    AllowKinds.size
+    ),
+
+    new structs_1.KeywordDef(
+    "STACK",
+    "Defines stack size",
+    KeywordType.savedWord,
+    "STACK [constant]",
+    1,
+    AllowKinds.constants
+    ),
+
+    /* ================= PREPROCESSOR ================= */
+
+    PRE("%macro","Start NASM macro"),
+    PRE("%endmacro","End NASM macro"),
+    PRE("%define","Define macro"),
+    PRE("%include","Include file"),
+
+    PRE("macro","Define macro",1),
+    PRE("endm","End macro"),
+    PRE("equ","Constant equate"),
+    PRE("dup","Duplicate values",1),
+    PRE("include","Include file"),
+
+    /* ================= DATA TRANSFER ================= */
+
+    INST("mov","Move value"),
+    INST("movzx","Move with zero extend"),
+    INST("movsx","Move with sign extend"),
+    INST("xchg","Exchange operands"),
+    INST("xadd","Exchange and add"),
+    INST("cmpxchg","Compare and exchange"),
+
+    INST("lea","Load effective address",2,
+    AllowKinds.variables | AllowKinds.memory),
+
+    INST("nop","No operation",0),
+
+    /* ================= ARITHMETIC ================= */
+
+    INST("add","Add"),
+    INST("sub","Subtract"),
+    INST("inc","Increment",1),
+    INST("dec","Decrement",1),
+    INST("neg","Negate",1),
+    INST("cmp","Compare"),
+    INST("mul","Unsigned multiply",1),
+    INST("imul","Signed multiply",1),
+    INST("div","Unsigned divide",1),
+    INST("idiv","Signed divide",1),
+
+    INST("cbw","Convert byte to word",0),
+    INST("cwd","Convert word to dword",0),
+    INST("cdq","Convert dword to qword",0),
+    INST("cqo","Convert qword to octoword",0),
+
+    /* ================= LOGIC ================= */
+
+    INST("and","Logical AND"),
+    INST("or","Logical OR"),
+    INST("xor","Logical XOR"),
+    INST("not","Bitwise NOT",1),
+    INST("test","Logical compare"),
+
+    INST("shl","Shift left"),
+    INST("shr","Shift right"),
+    INST("sal","Arithmetic shift left"),
+    INST("sar","Arithmetic shift right"),
+
+    INST("rol","Rotate left"),
+    INST("ror","Rotate right"),
+    INST("rcl","Rotate through carry left"),
+    INST("rcr","Rotate through carry right"),
+
+    INST("shld","Double shift left"),
+    INST("shrd","Double shift right"),
+
+    /* ================= SYSTEM ================= */
+
+    INST("int","Software interrupt",1,AllowKinds.constants),
+    INST("into","Interrupt on overflow",0),
+    INST("iret","Interrupt return",0),
+    INST("syscall","System call",0),
+    INST("sysret","Return from syscall",0),
+    INST("hlt","Halt processor",0),
+    INST("in","Input from port"),
+    INST("out","Output to port"),
+
+    /* ================= STACK ================= */
+
+    INST("push","Push operand",1),
+    INST("pop","Pop operand",1),
+
+    INST("pushf","Push FLAGS",0),
+    INST("pushfd","Push EFLAGS",0),
+    INST("pushfq","Push RFLAGS",0),
+
+    INST("popf","Pop FLAGS",0),
+    INST("popfd","Pop EFLAGS",0),
+    INST("popfq","Pop RFLAGS",0),
+
+    INST("pusha","Push all registers",0),
+    INST("pushad","Push all registers",0),
+    INST("popa","Pop all registers",0),
+    INST("popad","Pop all registers",0),
+
+    /* ================= CONTROL FLOW ================= */
+
+    INST("jmp","Jump",1,AllowKinds.label),
+    INST("call","Call procedure",1,AllowKinds.label),
+    INST("ret","Return",0),
+
+    INST("enter","Create stack frame",2),
+    INST("leave","Destroy stack frame",0),
+
+    INST("je","Jump if equal",1,AllowKinds.label),
+    INST("jne","Jump if not equal",1,AllowKinds.label),
+    INST("ja","Jump if above",1,AllowKinds.label),
+    INST("jae","Jump if above or equal",1,AllowKinds.label),
+    INST("jb","Jump if below",1,AllowKinds.label),
+    INST("jbe","Jump if below or equal",1,AllowKinds.label),
+
+    INST("jg","Jump if greater",1,AllowKinds.label),
+    INST("jge","Jump if greater or equal",1,AllowKinds.label),
+    INST("jl","Jump if less",1,AllowKinds.label),
+    INST("jle","Jump if less or equal",1,AllowKinds.label),
+
+    INST("jc","Jump if carry",1,AllowKinds.label),
+    INST("jnc","Jump if not carry",1,AllowKinds.label),
+    INST("jz","Jump if zero",1,AllowKinds.label),
+    INST("jnz","Jump if not zero",1,AllowKinds.label),
+
+    INST("js","Jump if sign",1,AllowKinds.label),
+    INST("jns","Jump if not sign",1,AllowKinds.label),
+
+    INST("jo","Jump if overflow",1,AllowKinds.label),
+    INST("jno","Jump if not overflow",1,AllowKinds.label),
+
+    INST("jcxz","Jump if CX zero",1,AllowKinds.label),
+    INST("jecxz","Jump if ECX zero",1,AllowKinds.label),
+    INST("jrcxz","Jump if RCX zero",1,AllowKinds.label),
+
+    /* ================= STRING OPS ================= */
+
+    INST("rep","Repeat instruction",1),
+    INST("repz","Repeat if zero",1),
+    INST("repnz","Repeat if not zero",1),
+
+    INST("cld","Clear direction flag",0),
+    INST("std","Set direction flag",0),
+
+    INST("scasb","Scan byte",0),
+    INST("scasw","Scan word",0),
+    INST("scasd","Scan dword",0),
+    INST("scasq","Scan qword",0),
+
+    INST("cmpsb","Compare byte strings",0),
+    INST("cmpsw","Compare word strings",0),
+    INST("cmpsd","Compare dword strings",0),
+    INST("cmpsq","Compare qword strings",0),
+
+    INST("stosb","Store byte string",0),
+    INST("stosw","Store word string",0),
+    INST("stosd","Store dword string",0),
+    INST("stosq","Store qword string",0),
+
+    INST("lodsb","Load byte string",0),
+    INST("lodsw","Load word string",0),
+    INST("lodsd","Load dword string",0),
+    INST("lodsq","Load qword string",0),
+
+    INST("movsb","Move byte string",0),
+    INST("movsw","Move word string",0),
+    INST("movsd","Move dword string",0),
+    INST("movsq","Move qword string",0),
+
+    /* ================= LOOPS ================= */
+
+    INST("loop","Loop until RCX=0",1,AllowKinds.label),
+    INST("loope","Loop while equal",1,AllowKinds.label),
+    INST("loopne","Loop while not equal",1,AllowKinds.label),
+
+    /* ================= FLAGS ================= */
+
+    INST("stc","Set carry flag",0),
+    INST("clc","Clear carry flag",0),
+    INST("cmc","Complement carry flag",0),
+
+    INST("sti","Enable interrupts",0),
+    INST("cli","Disable interrupts",0),
+
+    INST("lahf","Load flags into AH",0),
+    INST("sahf","Store AH into flags",0),
+
+    /* ================= LEGACY ================= */
+
+    INST("daa","Decimal adjust after add",0),
+    INST("das","Decimal adjust after sub",0),
+    INST("aaa","ASCII adjust after add",0),
+    INST("aas","ASCII adjust after sub",0),
+    INST("aam","ASCII adjust after multiply",0),
+    INST("aad","ASCII adjust before divide",0),
+
+    /* ================= STRUCTURES ================= */
+
+    PRE("proc","Define procedure"),
+    PRE("endp","End procedure"),
+    PRE("struc","Define structure"),
+    PRE("ends","End structure"),
+
+    /* ================= FPU ================= */
+
+    REG("st0","FPU register 0"),
+    REG("st1","FPU register 1"),
+    REG("st2","FPU register 2"),
+    REG("st3","FPU register 3"),
+    REG("st4","FPU register 4"),
+    REG("st5","FPU register 5"),
+    REG("st6","FPU register 6"),
+    REG("st7","FPU register 7"),
     
-    // Size Conversions (Crucial for Div/Idiv)
-    new structs_1.KeywordDef("cbw", "Convert Byte to Word (AL -> AX)", enums_1.KeywordType.instruction, "cbw", 0),
-    new structs_1.KeywordDef("cwd", "Convert Word to Doubleword (AX -> DX:AX)", enums_1.KeywordType.instruction, "cwd", 0),
-    new structs_1.KeywordDef("cdq", "Convert Doubleword to Quadword (EAX -> EDX:EAX)", enums_1.KeywordType.instruction, "cdq", 0),
-    new structs_1.KeywordDef("cqo", "Convert Quadword to Octoword (RAX -> RDX:RAX) [64-bit]", enums_1.KeywordType.instruction, "cqo", 0),
-
-    // ==========================================
-    // Bitwise Logic & Shifts
-    // ==========================================
-    new structs_1.KeywordDef("and", "Logical AND operation"),
-    new structs_1.KeywordDef("or", "Logical OR operation"),
-    new structs_1.KeywordDef("xor", "Logical Exclusive OR"),
-    new structs_1.KeywordDef("not", "One's complement negation (Bitwise NOT)", enums_1.KeywordType.instruction, "not ", 1),
-    new structs_1.KeywordDef("test", "Logical Compare (AND without saving result)"),
-    new structs_1.KeywordDef("shl", "Shift Logical Left (Multiplies by 2)"),
-    new structs_1.KeywordDef("shr", "Shift Logical Right (Unsigned division by 2)"),
-    new structs_1.KeywordDef("sal", "Shift Arithmetic Left (Same as SHL)"),
-    new structs_1.KeywordDef("sar", "Shift Arithmetic Right (Signed division by 2)"),
-    new structs_1.KeywordDef("rol", "Rotate Left"),
-    new structs_1.KeywordDef("ror", "Rotate Right"),
-    new structs_1.KeywordDef("rcl", "Rotate Left through Carry"),
-    new structs_1.KeywordDef("rcr", "Rotate Right through Carry"),
-    new structs_1.KeywordDef("shld", "Double precision shift left"),
-    new structs_1.KeywordDef("shrd", "Double precision shift right"),
-
-    // ==========================================
-    // System & Interrupts
-    // ==========================================
-    new structs_1.KeywordDef("int", "Software Interrupt", enums_1.KeywordType.instruction, "int ", 1, enums_1.AllowKinds.constants),
-    new structs_1.KeywordDef("into", "Interrupt on Overflow", enums_1.KeywordType.instruction, "into", 0),
-    new structs_1.KeywordDef("iret", "Interrupt Return", enums_1.KeywordType.instruction, "iret", 0),
-    new structs_1.KeywordDef("syscall", "Fast System Call (64-bit OS)", enums_1.KeywordType.instruction, "syscall", 0),
-    new structs_1.KeywordDef("sysret", "Return from Fast System Call", enums_1.KeywordType.instruction, "sysret", 0),
-    new structs_1.KeywordDef("hlt", "Halt processor", enums_1.KeywordType.instruction, "hlt", 0),
-    new structs_1.KeywordDef("in", "Read from hardware port"),
-    new structs_1.KeywordDef("out", "Write to hardware port"),
-
-    // ==========================================
-    // Stack Operations
-    // ==========================================
-    new structs_1.KeywordDef("push", "Push operand onto stack", enums_1.KeywordType.instruction, "push ", 1),
-    new structs_1.KeywordDef("pop", "Pop value from stack into operand", enums_1.KeywordType.instruction, "pop ", 1),
-    new structs_1.KeywordDef("pushf", "Push 16-bit FLAGS", enums_1.KeywordType.instruction, "pushf", 0),
-    new structs_1.KeywordDef("pushfd", "Push 32-bit EFLAGS", enums_1.KeywordType.instruction, "pushfd", 0),
-    new structs_1.KeywordDef("pushfq", "Push 64-bit RFLAGS", enums_1.KeywordType.instruction, "pushfq", 0),
-    new structs_1.KeywordDef("popf", "Pop 16-bit FLAGS", enums_1.KeywordType.instruction, "popf", 0),
-    new structs_1.KeywordDef("popfd", "Pop 32-bit EFLAGS", enums_1.KeywordType.instruction, "popfd", 0),
-    new structs_1.KeywordDef("popfq", "Pop 64-bit RFLAGS", enums_1.KeywordType.instruction, "popfq", 0),
-    new structs_1.KeywordDef("pusha", "Push all 16-bit general registers", enums_1.KeywordType.instruction, "pusha", 0),
-    new structs_1.KeywordDef("pushad", "Push all 32-bit general registers", enums_1.KeywordType.instruction, "pushad", 0),
-    new structs_1.KeywordDef("popa", "Pop all 16-bit general registers", enums_1.KeywordType.instruction, "popa", 0),
-    new structs_1.KeywordDef("popad", "Pop all 32-bit general registers", enums_1.KeywordType.instruction, "popad", 0),
-
-    // ==========================================
-    // Control Flow & Jump Instructions
-    // ==========================================
-    new structs_1.KeywordDef("jmp", "Unconditional Jump", enums_1.KeywordType.instruction, "jmp ", 1, enums_1.AllowKinds.label),
-    new structs_1.KeywordDef("call", "Call a procedure", enums_1.KeywordType.instruction, "call ", 1, enums_1.AllowKinds.label),
-    new structs_1.KeywordDef("ret", "Return from procedure", enums_1.KeywordType.instruction, "ret", 0),
-    new structs_1.KeywordDef("enter", "Make stack frame", enums_1.KeywordType.instruction, "enter ", 2),
-    new structs_1.KeywordDef("leave", "High level procedure exit (Destroys stack frame)", enums_1.KeywordType.instruction, "leave", 0),
-    // Unsigned Jumps
-    new structs_1.KeywordDef("je", "Jump if Equal (ZF=1)", enums_1.KeywordType.instruction, "je ", 1, enums_1.AllowKinds.label),
-    new structs_1.KeywordDef("jne", "Jump if Not Equal (ZF=0)", enums_1.KeywordType.instruction, "jne ", 1, enums_1.AllowKinds.label),
-    new structs_1.KeywordDef("ja", "Jump if Above / Greater (Unsigned)", enums_1.KeywordType.instruction, "ja ", 1, enums_1.AllowKinds.label),
-    new structs_1.KeywordDef("jae", "Jump if Above or Equal (Unsigned)", enums_1.KeywordType.instruction, "jae ", 1, enums_1.AllowKinds.label),
-    new structs_1.KeywordDef("jb", "Jump if Below / Less (Unsigned)", enums_1.KeywordType.instruction, "jb ", 1, enums_1.AllowKinds.label),
-    new structs_1.KeywordDef("jbe", "Jump if Below or Equal (Unsigned)", enums_1.KeywordType.instruction, "jbe ", 1, enums_1.AllowKinds.label),
-    // Signed Jumps
-    new structs_1.KeywordDef("jg", "Jump if Greater (Signed)", enums_1.KeywordType.instruction, "jg ", 1, enums_1.AllowKinds.label),
-    new structs_1.KeywordDef("jge", "Jump if Greater or Equal (Signed)", enums_1.KeywordType.instruction, "jge ", 1, enums_1.AllowKinds.label),
-    new structs_1.KeywordDef("jl", "Jump if Less (Signed)", enums_1.KeywordType.instruction, "jl ", 1, enums_1.AllowKinds.label),
-    new structs_1.KeywordDef("jle", "Jump if Less or Equal (Signed)", enums_1.KeywordType.instruction, "jle ", 1, enums_1.AllowKinds.label),
-    // Flag Jumps
-    new structs_1.KeywordDef("jc", "Jump if Carry flag set (CF=1)", enums_1.KeywordType.instruction, "jc ", 1, enums_1.AllowKinds.label),
-    new structs_1.KeywordDef("jnc", "Jump if Carry flag not set (CF=0)", enums_1.KeywordType.instruction, "jnc ", 1, enums_1.AllowKinds.label),
-    new structs_1.KeywordDef("jz", "Jump if Zero flag set (ZF=1)", enums_1.KeywordType.instruction, "jz ", 1, enums_1.AllowKinds.label),
-    new structs_1.KeywordDef("jnz", "Jump if Zero flag not set (ZF=0)", enums_1.KeywordType.instruction, "jnz ", 1, enums_1.AllowKinds.label),
-    new structs_1.KeywordDef("js", "Jump if Sign flag set (SF=1 / Negative)", enums_1.KeywordType.instruction, "js ", 1, enums_1.AllowKinds.label),
-    new structs_1.KeywordDef("jns", "Jump if Sign flag not set (SF=0 / Positive)", enums_1.KeywordType.instruction, "jns ", 1, enums_1.AllowKinds.label),
-    new structs_1.KeywordDef("jo", "Jump if Overflow flag set (OF=1)", enums_1.KeywordType.instruction, "jo ", 1, enums_1.AllowKinds.label),
-    new structs_1.KeywordDef("jno", "Jump if Overflow flag not set (OF=0)", enums_1.KeywordType.instruction, "jno ", 1, enums_1.AllowKinds.label),
-    // Counter Jumps
-    new structs_1.KeywordDef("jcxz", "Jump if CX is 0", enums_1.KeywordType.instruction, "jcxz ", 1, enums_1.AllowKinds.label),
-    new structs_1.KeywordDef("jecxz", "Jump if ECX is 0 (32-bit)", enums_1.KeywordType.instruction, "jecxz ", 1, enums_1.AllowKinds.label),
-    new structs_1.KeywordDef("jrcxz", "Jump if RCX is 0 (64-bit)", enums_1.KeywordType.instruction, "jrcxz ", 1, enums_1.AllowKinds.label),
-
-    // ==========================================
-    // String Operations (Complete Support)
-    // ==========================================
-    new structs_1.KeywordDef("rep", "Repeat string operation while RCX/ECX/CX != 0", enums_1.KeywordType.instruction, "rep ", 1),
-    new structs_1.KeywordDef("repz", "Repeat while Zero/Equal", enums_1.KeywordType.instruction, "repz ", 1),
-    new structs_1.KeywordDef("repnz", "Repeat while Not Zero/Not Equal", enums_1.KeywordType.instruction, "repnz ", 1),
-    new structs_1.KeywordDef("cld", "Clear Direction Flag (String ops increment)", enums_1.KeywordType.instruction, "cld", 0),
-    new structs_1.KeywordDef("std", "Set Direction Flag (String ops decrement)", enums_1.KeywordType.instruction, "std", 0),
-    // SCAS
-    new structs_1.KeywordDef("scasb", "Compare ES:DI with AL (8-bit)", enums_1.KeywordType.instruction, "scasb", 0),
-    new structs_1.KeywordDef("scasw", "Compare ES:DI with AX (16-bit)", enums_1.KeywordType.instruction, "scasw", 0),
-    new structs_1.KeywordDef("scasd", "Compare ES:EDI with EAX (32-bit)", enums_1.KeywordType.instruction, "scasd", 0),
-    new structs_1.KeywordDef("scasq", "Compare ES:RDI with RAX (64-bit)", enums_1.KeywordType.instruction, "scasq", 0),
-    // CMPS
-    new structs_1.KeywordDef("cmpsb", "Compare ES:DI with DS:SI (8-bit)", enums_1.KeywordType.instruction, "cmpsb", 0),
-    new structs_1.KeywordDef("cmpsw", "Compare ES:DI with DS:SI (16-bit)", enums_1.KeywordType.instruction, "cmpsw", 0),
-    new structs_1.KeywordDef("cmpsd", "Compare ES:EDI with DS:ESI (32-bit)", enums_1.KeywordType.instruction, "cmpsd", 0),
-    new structs_1.KeywordDef("cmpsq", "Compare ES:RDI with DS:RSI (64-bit)", enums_1.KeywordType.instruction, "cmpsq", 0),
-    // STOS
-    new structs_1.KeywordDef("stosb", "Store AL at ES:DI (8-bit)", enums_1.KeywordType.instruction, "stosb", 0),
-    new structs_1.KeywordDef("stosw", "Store AX at ES:DI (16-bit)", enums_1.KeywordType.instruction, "stosw", 0),
-    new structs_1.KeywordDef("stosd", "Store EAX at ES:EDI (32-bit)", enums_1.KeywordType.instruction, "stosd", 0),
-    new structs_1.KeywordDef("stosq", "Store RAX at ES:RDI (64-bit)", enums_1.KeywordType.instruction, "stosq", 0),
-    // LODS
-    new structs_1.KeywordDef("lodsb", "Load byte at DS:SI into AL (8-bit)", enums_1.KeywordType.instruction, "lodsb", 0),
-    new structs_1.KeywordDef("lodsw", "Load word at DS:SI into AX (16-bit)", enums_1.KeywordType.instruction, "lodsw", 0),
-    new structs_1.KeywordDef("lodsd", "Load dword at DS:ESI into EAX (32-bit)", enums_1.KeywordType.instruction, "lodsd", 0),
-    new structs_1.KeywordDef("lodsq", "Load qword at DS:RSI into RAX (64-bit)", enums_1.KeywordType.instruction, "lodsq", 0),
-    // MOVS
-    new structs_1.KeywordDef("movsb", "Move byte from DS:SI to ES:DI (8-bit)", enums_1.KeywordType.instruction, "movsb", 0),
-    new structs_1.KeywordDef("movsw", "Move word from DS:SI to ES:DI (16-bit)", enums_1.KeywordType.instruction, "movsw", 0),
-    new structs_1.KeywordDef("movsd", "Move dword from DS:ESI to ES:EDI (32-bit)", enums_1.KeywordType.instruction, "movsd", 0),
-    new structs_1.KeywordDef("movsq", "Move qword from DS:RSI to ES:RDI (64-bit)", enums_1.KeywordType.instruction, "movsq", 0),
-
-    // ==========================================
-    // Loops
-    // ==========================================
-    new structs_1.KeywordDef("loop", "Decrement CX/ECX/RCX and Jump if not 0", enums_1.KeywordType.instruction, "loop ", 1, enums_1.AllowKinds.label),
-    new structs_1.KeywordDef("loope", "Loop while Equal", enums_1.KeywordType.instruction, "loope ", 1, enums_1.AllowKinds.label),
-    new structs_1.KeywordDef("loopne", "Loop while Not Equal", enums_1.KeywordType.instruction, "loopne ", 1, enums_1.AllowKinds.label),
-
-    // ==========================================
-    // Flag Operations
-    // ==========================================
-    new structs_1.KeywordDef("stc", "Set Carry Flag (CF=1)", enums_1.KeywordType.instruction, "stc", 0),
-    new structs_1.KeywordDef("clc", "Clear Carry Flag (CF=0)", enums_1.KeywordType.instruction, "clc", 0),
-    new structs_1.KeywordDef("cmc", "Complement Carry Flag (CF=!CF)", enums_1.KeywordType.instruction, "cmc", 0),
-    new structs_1.KeywordDef("sti", "Set Interrupt Flag (Enable Interrupts)", enums_1.KeywordType.instruction, "sti", 0),
-    new structs_1.KeywordDef("cli", "Clear Interrupt Flag (Disable Interrupts)", enums_1.KeywordType.instruction, "cli", 0),
-    new structs_1.KeywordDef("lahf", "Load AH from Flags", enums_1.KeywordType.instruction, "lahf", 0),
-    new structs_1.KeywordDef("sahf", "Store AH into Flags", enums_1.KeywordType.instruction, "sahf", 0),
-
-    // ==========================================
-    // Legacy / Decimal Arithmetic
-    // ==========================================
-    new structs_1.KeywordDef("daa", "Decimal Adjust AL after Addition", enums_1.KeywordType.instruction, "daa", 0),
-    new structs_1.KeywordDef("das", "Decimal Adjust AL after Subtraction", enums_1.KeywordType.instruction, "das", 0),
-    new structs_1.KeywordDef("aaa", "ASCII Adjust AL after Addition", enums_1.KeywordType.instruction, "aaa", 0),
-    new structs_1.KeywordDef("aas", "ASCII Adjust AL after Subtraction", enums_1.KeywordType.instruction, "aas", 0),
-    new structs_1.KeywordDef("aam", "ASCII Adjust AX after Multiplication", enums_1.KeywordType.instruction, "aam", 0),
-    new structs_1.KeywordDef("aad", "ASCII Adjust AX before Division", enums_1.KeywordType.instruction, "aad", 0),
-
-    // ==========================================
-    // Structure & Procedure Declarations (TASM/MASM)
-    // ==========================================
-    new structs_1.KeywordDef("proc", "Creates a new procedure", enums_1.KeywordType.precompiled, "proc", 0),
-    new structs_1.KeywordDef("endp", "Ends a procedure definition", enums_1.KeywordType.precompiled, "endp", 0),
-    new structs_1.KeywordDef("struc", "Creates a new structure", enums_1.KeywordType.precompiled, "struc", 0),
-    new structs_1.KeywordDef("ends", "Ends a structure or segment definition", enums_1.KeywordType.precompiled, "ends", 0),
-
-    // ==========================================
-    // FPU (Floating Point Coprocessor) Registers
-    // ==========================================
-    new structs_1.KeywordDef("st0", "Floating point register 0", enums_1.KeywordType.register, "st0", 0),
-    new structs_1.KeywordDef("st1", "Floating point register 1", enums_1.KeywordType.register, "st1", 0),
-    new structs_1.KeywordDef("st2", "Floating point register 2", enums_1.KeywordType.register, "st2", 0),
-    new structs_1.KeywordDef("st3", "Floating point register 3", enums_1.KeywordType.register, "st3", 0),
-    new structs_1.KeywordDef("st4", "Floating point register 4", enums_1.KeywordType.register, "st4", 0),
-    new structs_1.KeywordDef("st5", "Floating point register 5", enums_1.KeywordType.register, "st5", 0),
-    new structs_1.KeywordDef("st6", "Floating point register 6", enums_1.KeywordType.register, "st6", 0),
-    new structs_1.KeywordDef("st7", "Floating point register 7", enums_1.KeywordType.register, "st7", 0),
-    new structs_1.KeywordDef("fwait", "Check for pending FPU exceptions", enums_1.KeywordType.instruction, "fwait", 0)
+    INST("fwait","Wait for FPU",0)
 ];
+
+exports.KEYWORD_MAP = new Map(
+    exports.KEYWORD_DICTIONARY.map(k => [k.name.toLowerCase(), k])
+);
+exports.getKeyword = function(word) {
+    if (!word) return undefined;
+    return exports.KEYWORD_MAP.get(word.toLowerCase());
+};

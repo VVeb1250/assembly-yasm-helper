@@ -1,3 +1,16 @@
+## 1.1.0
+- add advanced syntax grammar system
+- improve syntax highlight structure using repository rules
+- add bracket scope highlight for [], (), {}
+- add auto closing bracket support
+- fix language configuration path issue
+- improve punctuation token detection
+- improve directive highlight (.text .data .bss)
+- improve register highlight coverage (xmm/ymm/zmm/debug/segment)
+- add block comment support /* */
+- improve string detection system
+- prepare grammar structure for future memory expression parsing
+
 ## 1.0.6
 - fix theme can useable
 - adjust syntax hilight
@@ -13,7 +26,7 @@
 
 ## 1.0.3
 - Not use AutoSuggestion when TAB 
-- Adjust KEYWORD_DICONTARY
+- Adjust KEYWORD_DICTIONARY
 
 ## [1.0.2] - Custom YASM Smart Release
 ### Added

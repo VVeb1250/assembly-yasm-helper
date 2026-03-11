@@ -1,0 +1,49 @@
+{
+    "comments": {
+        "lineComment": ";",
+        "blockComment": ["/*", "*/"]
+    },
+
+    "brackets": [
+        ["{", "}"],
+        ["[", "]"],
+        ["(", ")"],
+        ["<", ">"]
+    ],
+
+    "autoClosingPairs": [
+        ["{", "}"],
+        ["[", "]"],
+        ["(", ")"],
+        ["<", ">"],
+        ["\"", "\""],
+        ["'", "'"],
+        ["`", "`"]
+    ],
+
+    "surroundingPairs": [
+        ["{", "}"],
+        ["[", "]"],
+        ["(", ")"],
+        ["<", ">"],
+        ["\"", "\""],
+        ["'", "'"],
+        ["`", "`"]
+    ],
+
+    "autoCloseBefore": ";:.,=}])>` \n\t",
+
+    "folding": {
+        "markers": {
+            "start": "^\\s*;\\s*#?region\\b",
+            "end": "^\\s*;\\s*#?endregion\\b"
+        }
+    },
+
+    "wordPattern": "[A-Za-z_.$?][\\w.$?]*",
+
+    "indentationRules": {
+        "increaseIndentPattern": "^\\s*(proc|macro|struc|section).*",
+        "decreaseIndentPattern": "^\\s*(endp|endm|ends).*"
+    }
+}
