@@ -99,9 +99,9 @@ class AsmCompletionProvider {
 
     _completePreprocessor(completions) {
         for (const p of PREPROCESSOR)
-            completions.items.push(this.createItem(p.name, KeywordType.precompiled, p.detail, p.doc));
+            completions.items.push(this.createItem(p.name, KeywordType.precompiled, p.detail, p.doc, null, "01"));
         for (const m of this.registry.macros)
-            completions.items.push(this.createItem(m.name, KeywordType.macro, "(Macro)"));
+            completions.items.push(this.createItem(m.name, KeywordType.macro, "(Macro)", '', null, "05"));
         return completions;
     }
 
@@ -126,9 +126,9 @@ class AsmCompletionProvider {
         switch (state) {
             case "BASE":
                 for (const v of this.registry.vars)
-                    completions.items.push(this.createItem(v.name, KeywordType.variable));
+                    completions.items.push(this.createItem(v.name, KeywordType.variable, '', '', null, "01"));
                 for (const r of REGISTERS)
-                    completions.items.push(this.createItem(r, KeywordType.register));
+                    completions.items.push(this.createItem(r, KeywordType.register, '', '', null, "02"));
                 break;
             case "BASE_DONE":
                 completions.items.push(this.createItem("+", KeywordType.operator, "(Offset)"));
@@ -157,24 +157,25 @@ class AsmCompletionProvider {
         const allowed = this.getAllowedOperandTypes(firstWord, this.getOperandIndex(line));
         if (allowed === undefined) return completions;
 
-        if (allowed & OperandType.REG) {
-            REGISTERS.forEach(r     => completions.items.push(this.createItem(r, KeywordType.register)));
-            AVX_REGISTERS.forEach(r => completions.items.push(this.createItem(r, KeywordType.register)));
-        }
         if (allowed & OperandType.MEM) {
             for (const s of this.sizeKeywords)
-                completions.items.push(this.createItem(s, KeywordType.size, "(Size)"));
+                completions.items.push(this.createItem(s, KeywordType.size, "(Size)", '', null, "01"));
             for (const v of this.registry.vars)
-                completions.items.push(this.createItem(v.name, KeywordType.variable));
+                completions.items.push(this.createItem(v.name, KeywordType.variable, '', '', null, "02"));
+        }
+        if (allowed & OperandType.REG) {
+            REGISTERS.forEach(r     => completions.items.push(this.createItem(r, KeywordType.register, '', '', null, this._regPrefix(r))));
+            AVX_REGISTERS.forEach(r => completions.items.push(this.createItem(r, KeywordType.register, '', '', null, "05")));
         }
         if (allowed & OperandType.IMM) {
-            completions.items.push(this.createItem("0", KeywordType.constant, "(Immediate)"));
+            completions.items.push(this.createItem("0", KeywordType.constant, "(Immediate)", '', null, "04"));
             for (const d of this.registry.defines || [])
-                completions.items.push(this.createItem(d, KeywordType.constant, "(%define)"));
+                completions.items.push(this.createItem(d, KeywordType.constant, "(%define)", '', null, "04"));
         }
         if (allowed & OperandType.LABEL) {
-            this.registry.labels.forEach(l => completions.items.push(this.createItem(l.name, KeywordType.label)));
-            this.registry.procs.forEach(p  => completions.items.push(this.createItem(p.name, KeywordType.method)));
+            const labelPrefix = (allowed === OperandType.LABEL) ? "01" : "02";
+            this.registry.labels.forEach(l => completions.items.push(this.createItem(l.name, KeywordType.label, '', '', null, labelPrefix)));
+            this.registry.procs.forEach(p  => completions.items.push(this.createItem(p.name, KeywordType.method, '', '', null, labelPrefix)));
         }
         return completions;
     }
@@ -247,11 +248,20 @@ class AsmCompletionProvider {
         return kinds[kind] || vscode.CompletionItemKind.Text;
     }
 
-    createItem(name, type, detail = '', doc = "", insertText = null) {
+    // 03 = 64/32-bit GP,  04 = 16/8-bit + segment + other,  05 = SIMD (xmm/ymm/zmm/k)
+    _regPrefix(reg) {
+        const r = reg.toLowerCase();
+        if (/^(xmm|ymm|zmm)\d+$/.test(r) || /^k\d+$/.test(r)) return "05";
+        if (/^(r(ax|bx|cx|dx|si|di|bp|sp)|r\d+)$/.test(r))    return "03"; // 64-bit GP
+        if (/^(e(ax|bx|cx|dx|si|di|bp|sp)|r\d+d)$/.test(r))   return "03"; // 32-bit GP
+        return "04"; // 16-bit, 8-bit, segment, cr/dr, rip, flags
+    }
+
+    createItem(name, type, detail = '', doc = "", insertText = null, sortPrefix = "02") {
         const item       = new vscode.CompletionItem(name, this.getItemKind(type));
         item.detail      = detail;
         item.documentation = doc;
-        item.sortText    = "00_" + name;
+        item.sortText    = sortPrefix + "_" + name;
         if (insertText) item.insertText = insertText;
         return item;
     }

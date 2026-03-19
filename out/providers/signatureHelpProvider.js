@@ -23,11 +23,17 @@ class AsmSignatureHelpProvider {
 
         const sig = new vscode.SignatureInformation(kw.data, kw.def || '');
 
-        // parse parameters from syntax string, e.g. "mov operand, operand"
+        // parse parameters using index pairs so VS Code highlights the correct
+        // parameter even when multiple params share the same name
         const paramStr = kw.data.slice(opcode.length).trim();
         if (paramStr) {
+            let searchFrom = kw.data.length - paramStr.length;
             for (const p of paramStr.split(',')) {
-                sig.parameters.push(new vscode.ParameterInformation(p.trim()));
+                const label = p.trim();
+                const start = kw.data.indexOf(label, searchFrom);
+                const end   = start + label.length;
+                sig.parameters.push(new vscode.ParameterInformation([start, end]));
+                searchFrom = end + 1;
             }
         }
 

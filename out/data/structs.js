@@ -17,7 +17,7 @@ class KeywordDef {
         if (data !== undefined) {
             this.data = data;
         } else {
-            this.data = this.generateSyntax(name, count);
+            this.data = this.generateSyntax(name, count, allow);
         }
 
         // better default
@@ -29,12 +29,12 @@ class KeywordDef {
 
     }
 
-    generateSyntax(name, count) {
+    generateSyntax(name, count, allow) {
+        const { AllowKinds } = require("./enums");
         if (count === 0) return name;
-        if (count === 1) return name + " operand";
-        if (count === 2) return name + " operand, operand";
+        if (count === 1) return name + (allow === AllowKinds.label ? " target" : " operand");
+        if (count === 2) return name + " dst, src";
         return name + " ...";
-
     }
 
 }
