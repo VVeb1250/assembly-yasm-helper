@@ -1,3 +1,14 @@
+## 1.2.0
+- add Go to Definition (F12) for labels, variables, and procedures
+- add Document Symbol outline (Outline panel and breadcrumb navigation)
+- add Signature Help — shows operand hints while typing instructions
+- add settings to toggle each navigation feature individually
+- fix space after completed operand showing unwanted autocomplete suggestions
+- improve syntax highlighting — extended instruction and register coverage
+- fix syntax scope names for registers, preprocessor directives, and sections
+- add hex-suffix (1Fh) and binary (1010b) number highlighting
+- refactor scanner and completion provider for readability
+
 ## 1.1.2
 - fix memory leak on activation
 - fix false positive "undefined" warnings for size keywords (QWORD, rel, near, far, short)
