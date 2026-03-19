@@ -16,6 +16,8 @@ var KeywordType;
     KeywordType[KeywordType["structure"] = 10] = "structure";
     KeywordType[KeywordType["macro"] = 11] = "macro";
     KeywordType[KeywordType["label"] = 12] = "label";
+    KeywordType[KeywordType["constant"] = 13] = "constant";
+    KeywordType[KeywordType["operator"] = 14] = "operator";
 })(KeywordType = exports.KeywordType || (exports.KeywordType = {}));
 var AllowKinds;
 (function (AllowKinds) {
