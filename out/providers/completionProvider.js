@@ -254,6 +254,19 @@ class AsmCompletionProvider {
            OPERANDS
         ======================================= */
         if (isTypingOperand) {
+            // Suppress space-triggered completions when operand slot already has content
+            // e.g. "mov rdi, msg " → don't re-suggest after trailing space
+            if (context.triggerCharacter === ' ') {
+                const noComment = line.split(';')[0];
+                const commaIdx = noComment.lastIndexOf(',');
+                const slotText = commaIdx !== -1
+                    ? noComment.slice(commaIdx + 1)
+                    : noComment.slice(noComment.search(/\S/) + words[0].length);
+                if (slotText.trim().length > 0) {
+                    return completions;
+                }
+            }
+
             const firstWord = words[0].toLowerCase();
             if (!INSTRUCTION_SIGNATURES[firstWord]) {
                 const MEM_DIRECTIVES = ['db','dw','dd','dq','dt','resb','resw','resd','resq','equ'];
@@ -321,7 +334,7 @@ class AsmCompletionProvider {
             if (allowed & OperandType.LABEL) {
                 this.registry.labels.forEach(l =>
                     completions.items.push(
-                        this.createItem(l, KeywordType.label)
+                        this.createItem(l.name, KeywordType.label)
                     )
                 );
                 this.registry.procs.forEach(p =>

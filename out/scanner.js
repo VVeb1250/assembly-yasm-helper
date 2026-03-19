@@ -77,7 +77,7 @@ class DocumentScanner {
                 const labelName = labelMatch[1];
 
                 if (!this.registry.findLabel(labelName)) {
-                    this.registry.addLabel(labelName);
+                    this.registry.addLabel(labelName, x);
                 }
 
             }
@@ -119,7 +119,8 @@ class DocumentScanner {
                 this.registry.addVariable({
                     name: name,
                     type: type,
-                    section: this.currentSection
+                    section: this.currentSection,
+                    line: x
                 });
 
             }
@@ -187,6 +188,7 @@ class DocumentScanner {
 
                     let proc = new Procedure(name, des);
                     proc.section = this.currentSection;
+                    proc.line = x;
 
                     this.registry.addProcedure(proc);
 
@@ -294,7 +296,7 @@ class DocumentScanner {
                     const externName = words[1];
 
                     if (!this.registry.findLabel(externName)) {
-                        this.registry.addLabel(externName);
+                        this.registry.addLabel(externName, x);
                     }
 
                 }

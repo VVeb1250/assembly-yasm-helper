@@ -46,7 +46,10 @@ class TasmHoverProvider {
                         { language: "assembly", value: "Syntax: " + keyword.data }
                     );
                 } else if (label) {
-                    output.push({ language: 'assembly', value: '(Label) ' + label.name + " => " + label.value });
+                    const lineInfo = label.line !== undefined
+                        ? `  [line ${label.line + 1}]`
+                        : (label.value ? ` => ${label.value}` : '');
+                    output.push({ language: 'assembly', value: '(Label) ' + label.name + lineInfo });
                 }
             }
         }

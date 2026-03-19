@@ -123,7 +123,7 @@ class DiagnosticProvider {
                          "jcxz","jecxz","jrcxz","loop","loope","loopne"];
 
         const knownLabels = new Set([
-            ...this.registry.labels.map(l => l.toLowerCase()),
+            ...this.registry.labels.map(l => l.name.toLowerCase()),
             ...this.registry.procs.map(p => p.name.toLowerCase())
         ]);
         const knownVars = new Set(this.registry.vars.map(v => v.name.toLowerCase()));
@@ -218,7 +218,7 @@ class DiagnosticProvider {
 
     _checkOperandType(lineIdx, rawLine, operand, opcode, allowType, diagnostics) {
         const knownLabels = new Set([
-            ...this.registry.labels.map(l => l.toLowerCase()),
+            ...this.registry.labels.map(l => l.name.toLowerCase()),
             ...this.registry.procs.map(p => p.name.toLowerCase())
         ]);
 
