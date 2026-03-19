@@ -1,3 +1,10 @@
+## 1.2.1
+- fix false 'endp without proc' diagnostic — MASM proc format is 'name proc' not 'proc name'
+- fix false 'endm without macro' diagnostic — same issue for TASM 'name macro' format
+- fix macro hover showing object instead of name
+- add macro support in Go to Definition (F12), Document Symbol outline, and hover line info
+- fix extern detection matching words starting with 'extern' (e.g. external)
+
 ## 1.2.0
 - add Go to Definition (F12) for labels, variables, and procedures
 - add Document Symbol outline (Outline panel and breadcrumb navigation)
