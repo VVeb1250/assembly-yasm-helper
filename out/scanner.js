@@ -281,6 +281,25 @@ class DocumentScanner {
                 }
             }
 
+            // ==========================================
+            // 8. Extern detection
+            // ==========================================
+
+            if (lowerCleanLine.startsWith("extern")) {
+
+                let words = this.tokenizer.tokenize(line);
+
+                if (words.length > 1) {
+
+                    const externName = words[1];
+
+                    if (!this.registry.findLabel(externName)) {
+                        this.registry.addLabel(externName);
+                    }
+
+                }
+            }
+
         }
     }
 }

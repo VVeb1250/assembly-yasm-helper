@@ -50,14 +50,6 @@ class ExtensionManager {
             vscode.workspace.onDidSaveTextDocument(doc => this.triggerScan(doc, true))
         );
 
-        vscode.workspace.onDidOpenTextDocument(doc => this.triggerScan(doc));
-        vscode.window.onDidChangeActiveTextEditor(editor => {
-            if (editor) this.triggerScan(editor.document);
-        });
-
-        // compiler รันเฉพาะตอน save
-        vscode.workspace.onDidSaveTextDocument(doc => this.triggerScan(doc, true));
-
         if (vscode.window.activeTextEditor) {
             this.triggerScan(vscode.window.activeTextEditor.document);
         }

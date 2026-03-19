@@ -11,7 +11,7 @@ class TasmHoverProvider {
         let output = [];
         let line = document.getText(new vscode.Range(position.line, 0, position.line, position.character));
         let quotes = line.match(/(\")/g) || line.match(/(\')/g);
-        let comment = line.match(/^[^\;]*#.*$/);
+        let comment = line.match(/^[^\;]*\;.*$/);
 
         if (!quotes && !comment) {
             let range = document.getWordRangeAtPosition(position);
@@ -32,7 +32,7 @@ class TasmHoverProvider {
                         { language: "assembly", value: proc.description.outputs() }
                     );
                 } else if (macro) {
-                    output.push({ language: "assembly", value: "(Macro) " + macro.name });
+                    output.push({ language: "assembly", value: "(Macro) " + macro });
                 } else if (keyword) {
                     output.push(
                         { language: "assembly", value: Utils.getType(keyword.type) + " " + keyword.name },

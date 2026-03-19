@@ -314,7 +314,7 @@ class DiagnosticProvider {
     }
 
     _isSizeKeyword(word) {
-        return ["byte","word","dword","qword","tbyte","oword","yword","zword","ptr"].includes(word);
+        return ["byte","word","dword","qword","tbyte","oword","yword","zword","ptr","rel","near","far","short"].includes(word);
     }
 
     dispose() {
