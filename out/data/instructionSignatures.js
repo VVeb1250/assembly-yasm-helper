@@ -16,12 +16,32 @@ const INSTRUCTION_SIGNATURES = {
         [SIG.REG, SIG.IMM],
         [SIG.MEM, SIG.IMM]
     ],
+    movzx: [
+        [SIG.REG, SIG.REG],
+        [SIG.REG, SIG.MEM]
+    ],
+    movsx: [
+        [SIG.REG, SIG.REG],
+        [SIG.REG, SIG.MEM]
+    ],
+    movsxd: [
+        [SIG.REG, SIG.REG],
+        [SIG.REG, SIG.MEM]
+    ],
     lea: [
         [SIG.REG, SIG.MEM]
     ],
     xchg: [
         [SIG.REG, SIG.REG],
         [SIG.REG, SIG.MEM],
+        [SIG.MEM, SIG.REG]
+    ],
+    xadd: [
+        [SIG.REG, SIG.REG],
+        [SIG.MEM, SIG.REG]
+    ],
+    cmpxchg: [
+        [SIG.REG, SIG.REG],
         [SIG.MEM, SIG.REG]
     ],
     push: [
@@ -123,7 +143,9 @@ const INSTRUCTION_SIGNATURES = {
     test: [
         [SIG.REG, SIG.REG],
         [SIG.REG, SIG.MEM],
-        [SIG.REG, SIG.IMM]
+        [SIG.REG, SIG.IMM],
+        [SIG.MEM, SIG.REG],
+        [SIG.MEM, SIG.IMM]
     ],
 
     /* =======================
@@ -135,6 +157,11 @@ const INSTRUCTION_SIGNATURES = {
         [SIG.MEM, SIG.IMM]
     ],
     shr: [
+        [SIG.REG, SIG.IMM],
+        [SIG.REG, SIG.REG],
+        [SIG.MEM, SIG.IMM]
+    ],
+    sal: [
         [SIG.REG, SIG.IMM],
         [SIG.REG, SIG.REG],
         [SIG.MEM, SIG.IMM]
@@ -152,6 +179,20 @@ const INSTRUCTION_SIGNATURES = {
         [SIG.REG, SIG.IMM],
         [SIG.MEM, SIG.IMM]
     ],
+    rcl: [
+        [SIG.REG, SIG.IMM],
+        [SIG.MEM, SIG.IMM]
+    ],
+    rcr: [
+        [SIG.REG, SIG.IMM],
+        [SIG.MEM, SIG.IMM]
+    ],
+    shld: [
+        [SIG.REG, SIG.REG, SIG.IMM]
+    ],
+    shrd: [
+        [SIG.REG, SIG.REG, SIG.IMM]
+    ],
 
     /* =======================
        CONTROL FLOW
@@ -165,26 +206,6 @@ const INSTRUCTION_SIGNATURES = {
     ret: [
         []
     ],
-
-    /* =======================
-       CONDITIONAL JUMPS
-    ======================== */
-    je: [[SIG.LABEL]],
-    jne: [[SIG.LABEL]],
-    jz: [[SIG.LABEL]],
-    jnz: [[SIG.LABEL]],
-    jg: [[SIG.LABEL]],
-    jl: [[SIG.LABEL]],
-    jge: [[SIG.LABEL]],
-    jle: [[SIG.LABEL]],
-    ja: [[SIG.LABEL]],
-    jb: [[SIG.LABEL]],
-    jae: [[SIG.LABEL]],
-    jbe: [[SIG.LABEL]],
-
-    loop: [[SIG.LABEL]],
-    loope: [[SIG.LABEL]],
-    loopne: [[SIG.LABEL]],
 
     /* =======================
        STACK FRAME
@@ -233,9 +254,46 @@ const INSTRUCTION_SIGNATURES = {
     int: [
         [SIG.IMM]
     ],
+    in: [
+        [SIG.REG, SIG.REG],
+        [SIG.REG, SIG.IMM]
+    ],
+    out: [
+        [SIG.REG, SIG.REG],
+        [SIG.IMM, SIG.REG]
+    ],
 
     nop: [[]],
-    hlt: [[]]
+    hlt: [[]],
+
+    /* =======================
+       CONDITIONAL JUMPS
+    ======================== */
+    je:    [[SIG.LABEL]],
+    jne:   [[SIG.LABEL]],
+    jz:    [[SIG.LABEL]],
+    jnz:   [[SIG.LABEL]],
+    jg:    [[SIG.LABEL]],
+    jl:    [[SIG.LABEL]],
+    jge:   [[SIG.LABEL]],
+    jle:   [[SIG.LABEL]],
+    ja:    [[SIG.LABEL]],
+    jb:    [[SIG.LABEL]],
+    jae:   [[SIG.LABEL]],
+    jbe:   [[SIG.LABEL]],
+    jc:    [[SIG.LABEL]],
+    jnc:   [[SIG.LABEL]],
+    js:    [[SIG.LABEL]],
+    jns:   [[SIG.LABEL]],
+    jo:    [[SIG.LABEL]],
+    jno:   [[SIG.LABEL]],
+    jcxz:  [[SIG.LABEL]],
+    jecxz: [[SIG.LABEL]],
+    jrcxz: [[SIG.LABEL]],
+
+    loop:   [[SIG.LABEL]],
+    loope:  [[SIG.LABEL]],
+    loopne: [[SIG.LABEL]],
 
 };
 

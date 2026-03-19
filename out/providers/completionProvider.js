@@ -53,7 +53,8 @@ class AsmCompletionProvider {
             [KeywordType.label]: vscode.CompletionItemKind.Unit,
             [KeywordType.macro]: vscode.CompletionItemKind.Color,
             [KeywordType.file]: vscode.CompletionItemKind.File,
-            [KeywordType.constant]: vscode.CompletionItemKind.Value
+            [KeywordType.constant]: vscode.CompletionItemKind.Value,
+            [KeywordType.operator]: vscode.CompletionItemKind.Operator,
         };
 
         return kinds[kind] || vscode.CompletionItemKind.Text;
@@ -96,11 +97,12 @@ class AsmCompletionProvider {
 
     async provideCompletionItems(document, position, token, context) {
 
-        const completions = new vscode.CompletionList();
+        const completions = new vscode.CompletionList([], false);
 
         // scan document only when trigger manually
         if (context.triggerKind === vscode.CompletionTriggerKind.Invoke) {
-            await this.scanner.scan(document);
+            const docLines = document.getText().split(/\r?\n/);
+            await this.scanner.scan(docLines);
         }
 
         const line = document.lineAt(position.line).text.slice(0, position.character);
@@ -214,9 +216,9 @@ class AsmCompletionProvider {
                     }
                     break;
 
-                case "PLUS":
+                case "BASE_DONE":
                     completions.items.push(
-                        this.createItem("+", KeywordType.operator)
+                        this.createItem("+", KeywordType.operator, "(Offset)")
                     );
                     break;
 
@@ -226,23 +228,23 @@ class AsmCompletionProvider {
                             this.createItem(r, KeywordType.register)
                         );
                     }
+                    break;
+
+                case "INDEX_DONE":
                     completions.items.push(
-                        this.createItem("0", KeywordType.constant)
+                        this.createItem("*", KeywordType.operator, "(Scale)")
                     );
                     break;
 
-                case "STAR":
-                    completions.items.push(
-                        this.createItem("*", KeywordType.operator)
-                    );
-                    break;
-
-                case "SCALE":
+                case "SCALE_INPUT":
                     for (const s of ["1","2","4","8"]) {
                         completions.items.push(
-                            this.createItem(s, KeywordType.constant)
+                            this.createItem(s, KeywordType.constant, "(Scale)")
                         );
                     }
+                    break;
+
+                case "SCALE_DONE":
                     break;
             }
             return completions;
@@ -253,8 +255,17 @@ class AsmCompletionProvider {
         ======================================= */
         if (isTypingOperand) {
             const firstWord = words[0].toLowerCase();
-            // ถ้ายังไม่มี signature ของ instruction
             if (!INSTRUCTION_SIGNATURES[firstWord]) {
+                const MEM_DIRECTIVES = ['db','dw','dd','dq','dt','resb','resw','resd','resq','equ'];
+                const secondWord = words.filter(w => w.length > 0)[1] || '';
+                if (!MEM_DIRECTIVES.includes(secondWord)) {
+                    for (const d of MEM_DIRECTIVES) {
+                        const kw = KEYWORD_MAP.get(d);
+                        completions.items.push(
+                            this.createItem(d, KeywordType.memoryAllocation, kw ? kw.def : '(Memory)')
+                        );
+                    }
+                }
                 return completions;
             }
             const operandIndex = this.getOperandIndex(line);
@@ -320,6 +331,7 @@ class AsmCompletionProvider {
         ======================================= */
 
         if (trimmed.length > 0) {
+            const partial = (words[0] || '').toLowerCase();
 
             for (const k of this.keywordList) {
 
@@ -328,10 +340,11 @@ class AsmCompletionProvider {
                     k.type === KeywordType.memoryAllocation ||
                     k.type === KeywordType.precompiled
                 ) {
-
-                    completions.items.push(
-                        this.createItem(k.name, k.type, Utils.getType(k.type), k.def)
-                    );
+                    if (k.name.toLowerCase().startsWith(partial)) {
+                        completions.items.push(
+                            this.createItem(k.name, k.type, Utils.getType(k.type), k.def)
+                        );
+                    }
                 }
             }
         }

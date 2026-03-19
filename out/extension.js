@@ -83,6 +83,7 @@ class ExtensionManager {
 }
 
 function activate(context) {
+    console.log("MY VERSION LOADED ✅");
     const manager = new ExtensionManager(context);
     manager.activate();
 }
