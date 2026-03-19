@@ -53,7 +53,8 @@ class AsmCompletionProvider {
             [KeywordType.label]: vscode.CompletionItemKind.Unit,
             [KeywordType.macro]: vscode.CompletionItemKind.Color,
             [KeywordType.file]: vscode.CompletionItemKind.File,
-            [KeywordType.constant]: vscode.CompletionItemKind.Value
+            [KeywordType.constant]: vscode.CompletionItemKind.Value,
+            [KeywordType.operator]: vscode.CompletionItemKind.Operator,
         };
 
         return kinds[kind] || vscode.CompletionItemKind.Text;
@@ -100,7 +101,8 @@ class AsmCompletionProvider {
 
         // scan document only when trigger manually
         if (context.triggerKind === vscode.CompletionTriggerKind.Invoke) {
-            await this.scanner.scan(document);
+            const docLines = document.getText().split(/\r?\n/);
+            await this.scanner.scan(docLines);
         }
 
         const line = document.lineAt(position.line).text.slice(0, position.character);
@@ -202,6 +204,7 @@ class AsmCompletionProvider {
 
             switch (state) {
                 case "BASE":
+                    // ยังไม่มีอะไร → แนะนำ register และ variable
                     for (const v of this.registry.vars) {
                         completions.items.push(
                             this.createItem(v.name, KeywordType.variable)
@@ -214,35 +217,40 @@ class AsmCompletionProvider {
                     }
                     break;
 
-                case "PLUS":
+                case "BASE_DONE":
+                    // พิมพ์ base เสร็จแล้ว → แนะนำ + เพื่อต่อ index
                     completions.items.push(
-                        this.createItem("+", KeywordType.operator)
+                        this.createItem("+", KeywordType.operator, "(Offset)")
                     );
                     break;
 
                 case "INDEX":
+                    // หลัง + → แนะนำ index register
                     for (const r of REGISTERS) {
                         completions.items.push(
                             this.createItem(r, KeywordType.register)
                         );
                     }
+                    break;
+
+                case "INDEX_DONE":
+                    // พิมพ์ index เสร็จแล้ว → แนะนำ * เพื่อใส่ scale
                     completions.items.push(
-                        this.createItem("0", KeywordType.constant)
+                        this.createItem("*", KeywordType.operator, "(Scale)")
                     );
                     break;
 
-                case "STAR":
-                    completions.items.push(
-                        this.createItem("*", KeywordType.operator)
-                    );
-                    break;
-
-                case "SCALE":
+                case "SCALE_INPUT":
+                    // หลัง * → แนะนำค่า scale
                     for (const s of ["1","2","4","8"]) {
                         completions.items.push(
-                            this.createItem(s, KeywordType.constant)
+                            this.createItem(s, KeywordType.constant, "(Scale)")
                         );
                     }
+                    break;
+
+                case "SCALE_DONE":
+                    // scale เสร็จแล้ว → ไม่แนะนำอะไร
                     break;
             }
             return completions;
