@@ -3,7 +3,7 @@
 	"publisher": "VVeb1250",
 	"displayName": "Assembly YASM Helper",
 	"description": "Language support and smart autocomplete for YASM/NASM Assembler",
-	"version": "1.1.2",
+	"version": "1.2.0",
 	"license": "MIT",
 	"icon": "icon.png",
 	"repository": {
@@ -98,6 +98,21 @@
 					"type": "boolean",
 					"default": true,
 					"description": "Enable compiler-based error checking on save"
+				},
+				"assembly.enableGoToDefinition": {
+					"type": "boolean",
+					"default": true,
+					"description": "Enable Go to Definition (F12) for labels, variables, and procedures"
+				},
+				"assembly.enableDocumentSymbols": {
+					"type": "boolean",
+					"default": true,
+					"description": "Enable Document Symbol outline (Outline panel and breadcrumb)"
+				},
+				"assembly.enableSignatureHelp": {
+					"type": "boolean",
+					"default": true,
+					"description": "Enable Signature Help (operand hints while typing instructions)"
 				}
 			}
 		},

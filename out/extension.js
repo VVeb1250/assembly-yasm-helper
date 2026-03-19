@@ -6,6 +6,9 @@ const { TasmHoverProvider } = require("./providers/hoverProvider");
 const { AsmCompletionProvider } = require("./providers/completionProvider");
 const { DiagnosticProvider } = require("./providers/diagnosticProvider");
 const { CompilerProvider } = require("./providers/compilerProvider");
+const { AsmDefinitionProvider } = require("./providers/definitionProvider");
+const { AsmDocumentSymbolProvider } = require("./providers/symbolProvider");
+const { AsmSignatureHelpProvider } = require("./providers/signatureHelpProvider");
 
 class ExtensionManager {
     constructor(context) {
@@ -27,6 +30,22 @@ class ExtensionManager {
                 'assembly',
                 new AsmCompletionProvider(this.registry, this.scanner),
                 ' ', '.', '[', ',', '\t', '+', '*', '('
+            )
+        );
+
+        this.context.subscriptions.push(
+            vscode.languages.registerDefinitionProvider('assembly', new AsmDefinitionProvider(this.registry))
+        );
+
+        this.context.subscriptions.push(
+            vscode.languages.registerDocumentSymbolProvider('assembly', new AsmDocumentSymbolProvider(this.registry))
+        );
+
+        this.context.subscriptions.push(
+            vscode.languages.registerSignatureHelpProvider(
+                'assembly',
+                new AsmSignatureHelpProvider(),
+                ' ', ','
             )
         );
 

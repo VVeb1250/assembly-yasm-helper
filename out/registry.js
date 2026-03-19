@@ -126,7 +126,7 @@ class SymbolRegistry {
     // LABELS
     // --------------------------------
 
-    addLabel(name) {
+    addLabel(name, line) {
 
         const key = name.toLowerCase();
 
@@ -134,8 +134,9 @@ class SymbolRegistry {
 
         this.labelSet.add(key);
 
-        this.labels.push(name);
-        this.labelMap.set(key, name);
+        const sym = { name, line };
+        this.labels.push(sym);
+        this.labelMap.set(key, sym);
     }
 
     findLabel(name) {

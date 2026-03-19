@@ -2,290 +2,68 @@
 
 Advanced language support for **YASM / NASM Assembly** in Visual Studio Code.
 
-Assembly YASM Helper provides **smart autocomplete, syntax highlighting, diagnostics, and optional compiler integration** to improve productivity when writing assembly code.
-
 ---
 
 # 🚀 Features
 
 ## Intelligent Autocomplete
 
-Context-aware suggestions depending on where you type.
+Context-aware suggestions based on cursor position:
 
-### Data Sections
+- **Data sections** — suggests `db`, `dw`, `dd`, `dq`, `resb`, `resw`, `resd`, `resq` after the variable name
+- **Text sections** — suggests instructions, registers, variables, and pointer sizes (`byte`, `word`, `dword`, `qword`…)
+- **Memory brackets `[...]`** — suggests registers, variables, and `+` / `*` operators in the correct order
+- **Root level** — suggests `section .text/data/bss`, `global`, `extern` only at line start
+- **Preprocessor** — typing `%` suggests all YASM directives (`%include`, `%macro`, `%define`, `%if`, `%rep`…)
 
-Inside `.data` and `.bss` sections the extension suggests memory allocation directives:
+## 🧭 Navigation
 
-```
-db   dw   dd   dq
-resb resw resd resq
-```
+- **Go to Definition (F12)** — jump to any label, variable, or procedure declaration
+- **Document Symbol Outline** — labels, variables, and procedures listed in the Outline panel and breadcrumb
+- **Signature Help** — shows operand hints while typing (e.g. `mov <dst>, <src>`), active parameter highlighted
 
-Suggestions appear **only after finishing the variable name**, preventing interruptions while typing.
+## 🎨 Syntax Highlighting
 
-Example:
+Instructions, registers (GP / SSE / AVX / AVX-512), labels, variables, directives, numbers, operators, and preprocessor directives are all distinctly colored. Numbers support `0x1F`, `1Fh`, and `1010b` formats.
 
-```asm
-msg db "Hello World"
-buffer resb 64
-```
+Three built-in themes: **Assembly Dark**, **Assembly Light**, **Assembly High Contrast**.
 
----
+## 🔍 Hover Information
 
-### Instruction Awareness
+Hover over instructions, registers, variables, or numbers for details. Numbers show automatic decimal / hex / binary conversions.
 
-Inside `.text` sections the extension suggests:
+## 🔴 Code Diagnostics
 
-- Instructions
-- Registers
-- Defined variables
-- Pointer sizes
+Real-time static analysis detects:
+- Duplicate labels and jumps to undefined labels
+- Unclosed blocks (`proc/endp`, `%macro/%endmacro`, `%if/%endif`)
+- Operand errors — missing operands, invalid types, size mismatches
 
-Supported pointer sizes:
+## ⚙ Compiler Integration (Optional)
 
-```
-byte word dword qword oword yword zword
-```
-
-Example:
-
-```asm
-mov eax, dword [buffer]
-```
-
----
-
-### Bracket Intelligence
-
-Inside memory brackets:
-
-```
-[ ... ]
-```
-
-Suggestions are filtered to show only relevant symbols:
-
-- Registers
-- Variables
-
-Example:
-
-```asm
-mov eax, [rbx + buffer]
-```
-
----
-
-### Root-Level Suggestions
-
-Structural keywords are suggested only at the start of a line:
-
-```
-section .text
-section .data
-section .bss
-global
-extern
-```
-
----
-
-### YASM Preprocessor Support
-
-Typing `%` triggers suggestions for YASM preprocessor directives.
-
-Supported directives include:
-
-```
-%include
-%macro
-%define
-%ifdef
-%ifndef
-%if
-%elif
-%else
-%endif
-%rep
-%endrep
-```
-
----
-
-# 🎨 Syntax Highlighting
-
-Custom syntax highlighting for Assembly code:
-
-- Instructions
-- Registers
-- Labels
-- Variables
-- Numbers
-- Directives
-- Operators
-- Brackets `[] () {}`
-
-Example:
-
-```asm
-section .text
-global _start
-
-_start:
-    mov rax, 1
-    mov rdi, 1
-    mov rsi, msg
-    mov rdx, 13
-    syscall
-```
-
-Memory expressions are also highlighted correctly:
-
-```asm
-mov eax, [rbx + var*4]
-```
-
----
-
-# 🖥 Register Support
-
-Full register coverage including modern SIMD extensions.
-
-### General Purpose Registers
-- 8-bit
-- 16-bit
-- 32-bit
-- 64-bit
-
-### SSE Registers
-```
-xmm0 – xmm15
-```
-
-### AVX Registers
-```
-ymm0 – ymm15
-```
-
-### AVX-512 Registers
-```
-zmm0 – zmm31
-k0 – k7
-```
-
----
-
-# 🔍 Hover Information
-
-Hover over instructions, registers, variables, or numbers to see additional information.
-
-Numbers display automatic conversions:
-
-- Decimal
-- Hexadecimal
-- Binary
-
-Supported formats:
-
-```
-0x1F
-1Fh
-```
-
----
-
-# 🔴 Code Diagnostics
-
-Real-time analysis detects common assembly mistakes.
-
-### Label Problems
-- Duplicate labels
-- Jump to undefined labels
-
-### Unclosed Blocks
-
-Detects missing block endings:
-
-```
-proc / endp
-%macro / %endmacro
-%if / %endif
-macro / endm
-```
-
-### Operand Validation
-
-Examples:
-
-```asm
-mov rax        ; missing operand
-jmp 42         ; invalid operand
-mov eax, rbx   ; size mismatch
-mov dword[var], ax
-```
-
----
-
-# ⚙ Compiler Integration (Optional)
-
-Compile automatically on save using **YASM or NASM**.
-
-Compiler errors appear directly inside VS Code.
-
-Features:
-
-- Automatic compiler detection from system PATH
-- Inline compiler diagnostics
-- Status bar compile results
-
-Status indicators:
-
-```
-✓ ok
-✗ N error(s)
-⚠ compiler not found
-```
+Compile on save using YASM or NASM. Errors appear inline in VS Code and in the status bar (`✓ ok` / `✗ N error(s)` / `⚠ compiler not found`).
 
 ---
 
 # ⚙ Configuration
 
-Configure in **VS Code Settings**.
-
 | Setting | Default | Description |
-|-------|-------|-------------|
+|---------|---------|-------------|
 | assembly.enableCompilerCheck | true | Enable compiler check on save |
 | assembly.compilerPath | auto | Path to compiler executable |
-| assembly.compilerType | yasm | yasm or nasm |
+| assembly.compilerType | yasm | `yasm` or `nasm` |
 | assembly.compilerFormat | elf64 | Output format |
-| assembly.compilerDebugInfo | dwarf2 | Debug information format |
+| assembly.compilerDebugInfo | dwarf2 | Debug info format |
 | assembly.outputExtension | o | Output file extension |
+| assembly.enableGoToDefinition | true | Enable Go to Definition (F12) |
+| assembly.enableDocumentSymbols | true | Enable Outline panel symbols |
+| assembly.enableSignatureHelp | true | Enable operand hints while typing |
 
 ---
 
 # 📂 Supported File Types
 
-The extension activates automatically for:
-
-```
-.asm
-.s
-.S
-```
-
----
-
-# 📦 Manual Installation
-
-Install manually using a `.vsix` file.
-
-1. Download the `.vsix`
-2. Open VS Code
-3. Go to **Extensions** (`Ctrl+Shift+X`)
-4. Click **...**
-5. Select **Install from VSIX**
-6. Choose the downloaded file
-7. Restart VS Code
+`.asm` `.s` `.S`
 
 ---
 
@@ -298,5 +76,5 @@ Install manually using a `.vsix` file.
 
 # 👨‍💻 Publisher
 
-Developed by **Roncho**  
+Developed by **Roncho**
 Extended and maintained by **VVeb1250**
