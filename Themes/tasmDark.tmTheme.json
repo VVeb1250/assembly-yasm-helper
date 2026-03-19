@@ -14,72 +14,68 @@
             "settings": { "foreground": "#7AA04B" }
         },
         {
-            "scope": "constant.numeric",
-            "settings": { "foreground": "#A3D98C" }
-        },
-        {
-            "scope": "constant",
-            "settings": { "foreground": "#BBCBCB" }
-        },
-        {
-            "scope": "string.quoted.single",
-            "settings": { "foreground": "#5C9962" }
-        },
-        {
-            "scope": "string.quoted.double",
-            "settings": { "foreground": "#D28E8E" }
-        },
-        {
-            "scope": "string.quoted.other.assembly",
+            "scope": "string",
             "settings": { "foreground": "#CE9178" }
         },
         {
-            "scope": "keyword",
+            "scope": "string.quoted.single.asm",
+            "settings": { "foreground": "#5C9962" }
+        },
+        {
+            "scope": "string.quoted.double.asm",
+            "settings": { "foreground": "#D28E8E" }
+        },
+        {
+            "scope": "constant.character.escape.asm",
+            "settings": { "foreground": "#D7BA7D" }
+        },
+        {
+            "scope": "constant.numeric.asm",
+            "settings": { "foreground": "#A3D98C" }
+        },
+        {
+            "scope": "keyword.control.asm",
             "settings": { "foreground": "#3794CD" }
         },
         {
-            "scope": "keyword.control.less",
-            "settings": { "foreground": "#4275B3", "fontStyle": "bold" }
-        },
-        {
-            "scope": "keyword.less",
-            "settings": { "foreground": "#9EC8E5" }
-        },
-        {
-            "scope": "keyword.size",
-            "settings": { "foreground": "#B351EC" }
-        },
-        {
-            "scope": "keyword.control.preprocessor.assembly",
+            "scope": "keyword.control.preprocessor.asm",
             "settings": { "foreground": "#C586C0" }
         },
         {
-            "scope": "variable.register",
+            "scope": "keyword.operator.asm",
+            "settings": { "foreground": "#9CDCFE" }
+        },
+        {
+            "scope": "storage.type.asm",
+            "settings": { "foreground": "#3794CD" }
+        },
+        {
+            "scope": "storage.modifier.asm",
+            "settings": { "foreground": "#B351EC" }
+        },
+        {
+            "scope": "variable.other.register.asm",
             "settings": { "foreground": "#A2C3BB" }
         },
         {
-            "scope": "keyword.valued",
-            "settings": { "foreground": "#B2B1B4" }
+            "scope": "variable.name.asm",
+            "settings": { "foreground": "#d4d4d4" }
         },
         {
-            "scope": "support.function",
+            "scope": "support.function.label.asm",
+            "settings": { "foreground": "#FFE291", "fontStyle": "bold" }
+        },
+        {
+            "scope": "entity.name.function.asm",
             "settings": { "foreground": "#FFE291" }
         },
         {
-            "scope": "support.class",
+            "scope": "entity.name.section.asm",
             "settings": { "foreground": "#5FC0CF" }
         },
         {
-            "scope": "support.other",
-            "settings": { "foreground": "#cf3dff" }
-        },
-        {
-            "scope": "variable.parameter",
-            "settings": { "foreground": "#a2a2a2" }
-        },
-        {
-            "scope": "entity.name.section.assembly",
-            "settings": { "foreground": "#5FC0CF" }
+            "scope": "punctuation.separator.asm",
+            "settings": { "foreground": "#808080" }
         }
     ]
 }

@@ -5,6 +5,7 @@
 
 	"patterns": [
 		{ "include": "#comments" },
+		{ "include": "#preprocessor" },
 		{ "include": "#strings" },
 		{ "include": "#labels" },
 		{ "include": "#globals" },
@@ -22,15 +23,24 @@
 
 		"comments": {
 			"patterns": [
-			{
-				"name": "comment.line.asm",
-				"match": "[;#].*$"
-			},
-			{
-				"name": "comment.block.asm",
-				"begin": "/\\*",
-				"end": "\\*/"
-			}
+				{
+					"name": "comment.line.asm",
+					"match": ";.*$"
+				},
+				{
+					"name": "comment.block.asm",
+					"begin": "/\\*",
+					"end": "\\*/"
+				}
+			]
+		},
+
+		"preprocessor": {
+			"patterns": [
+				{
+					"name": "keyword.control.preprocessor.asm",
+					"match": "(?i)^\\s*(%define|%redefine|%undef|%assign|%macro|%endmacro|%include|%if|%ifdef|%ifndef|%elif|%else|%endif|%rep|%endrep|%error|%warning|%use|%push|%pop|%repl|%local|%exitrep|%rotate|%line|%xdefine|%idefine|%ixdefine|%imacro|%unmacro)\\b"
+				}
 			]
 		},
 
@@ -75,11 +85,9 @@
 		"labels": {
 			"patterns": [
 				{
-					"match": "^\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*:",
+					"match": "^\\s*([A-Za-z_.$?][\\w.$?]*)\\s*:",
 					"captures": {
-						"1": {
-							"name": "support.function.label.asm"
-						}
+						"1": { "name": "support.function.label.asm" }
 					}
 				}
 			]
@@ -88,15 +96,15 @@
 		"globals": {
 			"patterns": [
 				{
-					"match": "(?i)\\b(global|extern)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+					"match": "(?i)\\b(global|extern)\\s+([A-Za-z_.$?][\\w.$?]*)",
 					"captures": {
-						"1": {
-						"name": "keyword.control.asm"
-						},
-						"2": {
-						"name": "entity.name.function.asm"
-						}
+						"1": { "name": "keyword.control.asm" },
+						"2": { "name": "entity.name.function.asm" }
 					}
+				},
+				{
+					"match": "(?i)^\\s*\\b(bits|default|cpu|org|absolute|use16|use32|use64)\\b",
+					"name": "keyword.control.asm"
 				}
 			]
 		},
@@ -104,46 +112,40 @@
 		"call_targets": {
 			"patterns": [
 				{
-					"match": "(?i)\\b(jmp|je|jne|jg|jge|jl|jle|ja|jb|call)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+					"match": "(?i)\\b(jmp|je|jne|jz|jnz|jg|jge|jl|jle|ja|jae|jb|jbe|jc|jnc|js|jns|jo|jno|jp|jnp|jcxz|jecxz|jrcxz|loop|loope|loopne|loopz|loopnz|call)\\s+([A-Za-z_.$?][\\w.$?]*)",
 					"captures": {
-						"1": {
-						"name": "keyword.control.asm"
-						},
-						"2": {
-						"name": "entity.name.function.asm"
-						}
+						"1": { "name": "keyword.control.asm" },
+						"2": { "name": "entity.name.function.asm" }
 					}
 				}
 			]
 		},
 
-
 		"directives": {
 			"patterns": [
 				{
-					"match": "(?i)\\b(db|dw|dd|dq|dt|resb|resw|resd|resq|equ)\\b",
-					"name": "keyword.control.asm"
+					"match": "(?i)\\b(db|dw|dd|dq|dt|resb|resw|resd|resq|equ|times|align)\\b",
+					"name": "storage.type.asm"
 				},
 				{
-					"match": "(?i)\\b(byte|word|dword|qword|tbyte|ptr)\\b",
-					"name": "keyword.control.asm"
+					"match": "(?i)\\b(byte|word|dword|qword|tbyte|tword|oword|yword|zword|ptr|near|far|short|rel)\\b",
+					"name": "storage.modifier.asm"
 				}
 			]
 		},
+
 		"sections": {
 			"patterns": [
 				{
 					"begin": "(?i)\\b(section|segment)\\b",
 					"beginCaptures": {
-						"1": {
-						"name": "keyword.control.asm"
-						}
+						"1": { "name": "keyword.control.asm" }
 					},
 					"end": "$",
 					"patterns": [
 						{
-						"match": "\\.[A-Za-z_][A-Za-z0-9_]*",
-						"name": "entity.name.section.asm"
+							"match": "\\.[A-Za-z_][A-Za-z0-9_]*",
+							"name": "entity.name.section.asm"
 						}
 					]
 				}
@@ -154,7 +156,27 @@
 			"patterns": [
 				{
 					"name": "keyword.control.asm",
-					"match": "(?i)\\b(mov|lea|push|pop|add|sub|mul|imul|div|idiv|inc|dec|and|or|xor|not|test|cmp|jmp|je|jne|jg|jge|jl|jle|ja|jb|call|ret|int|syscall|sysret|nop|hlt)\\b"
+					"match": "(?i)\\b(mov|movzx|movsx|movsxd|lea|push|pop|add|sub|mul|imul|div|idiv|inc|dec|and|or|xor|not|neg|test|cmp|xchg|xadd|cmpxchg|cmpxchg8b|cmpxchg16b|nop|hlt|int|int3|syscall|sysret|cpuid|rdtsc|rdtscp|lfence|mfence|sfence|pause|enter|leave|ret|retn|retf|iret|iretd|iretq|pushf|popf|pushfd|popfd|pushfq|popfq|lahf|sahf|clc|stc|cmc|cld|std|cli|sti|cbw|cwde|cdqe|cwd|cdq|cqo|bswap|bt|bts|btr|btc|bsr|bsf|popcnt|lzcnt|tzcnt|shr|shl|sar|sal|ror|rol|rcr|rcl|shld|shrd)\\b"
+				},
+				{
+					"name": "keyword.control.asm",
+					"match": "(?i)\\b(rep|repe|repne|repz|repnz|stosb|stosw|stosd|stosq|lodsb|lodsw|lodsd|lodsq|movsb|movsw|movsd|movsq|scasb|scasw|scasd|scasq|cmpsb|cmpsw|cmpsd|cmpsq)\\b"
+				},
+				{
+					"name": "keyword.control.asm",
+					"match": "(?i)\\b(jmp|je|jne|jz|jnz|jg|jge|jl|jle|ja|jae|jb|jbe|jc|jnc|js|jns|jo|jno|jp|jnp|jcxz|jecxz|jrcxz|loop|loope|loopne|loopz|loopnz|call)\\b"
+				},
+				{
+					"name": "keyword.control.asm",
+					"match": "(?i)\\b(cmova|cmovae|cmovb|cmovbe|cmovc|cmove|cmovg|cmovge|cmovl|cmovle|cmovnc|cmovne|cmovng|cmovnge|cmovnl|cmovnle|cmovno|cmovnp|cmovns|cmovnz|cmovo|cmovp|cmovs|cmovz)\\b"
+				},
+				{
+					"name": "keyword.control.asm",
+					"match": "(?i)\\b(seta|setae|setb|setbe|setc|sete|setg|setge|setl|setle|setnc|setne|setng|setnge|setnl|setnle|setno|setnp|setns|setnz|seto|setp|sets|setz)\\b"
+				},
+				{
+					"name": "keyword.control.asm",
+					"match": "(?i)\\b(fld|fst|fstp|fild|fist|fistp|fadd|faddp|fsub|fsubp|fsubr|fsubrp|fmul|fmulp|fdiv|fdivp|fdivr|fdivrp|fcom|fcomp|fcompp|fucom|fucomp|fabs|fchs|fsqrt|fxch|finit|fninit|fclex|fnclex|fldz|fld1|fldpi|fsin|fcos|fptan|fpatan)\\b"
 				}
 			]
 		},
@@ -162,24 +184,40 @@
 		"registers": {
 			"patterns": [
 				{
-					"name": "variable.name.asm",
-					"match": "(?i)\\b(al|bl|cl|dl|ah|bh|ch|dh)\\b"
+					"name": "variable.other.register.asm",
+					"match": "(?i)\\b(rax|rbx|rcx|rdx|rsi|rdi|rbp|rsp|rip|r8|r9|r10|r11|r12|r13|r14|r15)\\b"
 				},
 				{
-					"name": "variable.name.asm",
-					"match": "(?i)\\b(ax|bx|cx|dx|sp|bp|si|di)\\b"
+					"name": "variable.other.register.asm",
+					"match": "(?i)\\b(eax|ebx|ecx|edx|esi|edi|ebp|esp|eip)\\b"
 				},
 				{
-					"name": "variable.name.asm",
-					"match": "(?i)\\b(eax|ebx|ecx|edx|esp|ebp|esi|edi)\\b"
+					"name": "variable.other.register.asm",
+					"match": "(?i)\\b(ax|bx|cx|dx|si|di|bp|sp)\\b"
 				},
 				{
-					"name": "variable.name.asm",
-					"match": "(?i)\\b(rax|rbx|rcx|rdx|rsp|rbp|rsi|rdi|rip)\\b"
+					"name": "variable.other.register.asm",
+					"match": "(?i)\\b(al|bl|cl|dl|ah|bh|ch|dh|sil|dil|bpl|spl)\\b"
 				},
 				{
-					"name": "variable.name.asm",
-					"match": "(?i)\\b(r8|r9|r10|r11|r12|r13|r14|r15)\\b"
+					"name": "variable.other.register.asm",
+					"match": "(?i)\\b(r8b|r9b|r10b|r11b|r12b|r13b|r14b|r15b|r8w|r9w|r10w|r11w|r12w|r13w|r14w|r15w|r8d|r9d|r10d|r11d|r12d|r13d|r14d|r15d)\\b"
+				},
+				{
+					"name": "variable.other.register.asm",
+					"match": "(?i)\\b(xmm([0-9]|1[0-5])|ymm([0-9]|1[0-5])|zmm([0-9]|[12][0-9]|3[01]))\\b"
+				},
+				{
+					"name": "variable.other.register.asm",
+					"match": "(?i)\\b(cs|ds|es|fs|gs|ss)\\b"
+				},
+				{
+					"name": "variable.other.register.asm",
+					"match": "(?i)\\b(cr[02348]|dr[0-367])\\b"
+				},
+				{
+					"name": "variable.other.register.asm",
+					"match": "(?i)\\b(eflags|rflags)\\b"
 				}
 			]
 		},
@@ -189,6 +227,14 @@
 				{
 					"name": "constant.numeric.asm",
 					"match": "\\b0x[0-9A-Fa-f]+\\b"
+				},
+				{
+					"name": "constant.numeric.asm",
+					"match": "\\b[0-9][0-9A-Fa-f]*[hH]\\b"
+				},
+				{
+					"name": "constant.numeric.asm",
+					"match": "\\b[01]+[bB]\\b"
 				},
 				{
 					"name": "constant.numeric.asm",
@@ -216,7 +262,7 @@
 		},
 
 		"variables": {
-			"match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b",
+			"match": "\\b[A-Za-z_.$?][\\w.$?]*\\b",
 			"name": "variable.name.asm"
 		}
 
