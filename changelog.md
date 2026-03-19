@@ -1,3 +1,6 @@
+## 1.1.0.1
+- fix autocomplete issue
+
 ## 1.1.0
 - add advanced syntax grammar system
 - improve syntax highlight structure using repository rules

@@ -204,7 +204,6 @@ class AsmCompletionProvider {
 
             switch (state) {
                 case "BASE":
-                    // ยังไม่มีอะไร → แนะนำ register และ variable
                     for (const v of this.registry.vars) {
                         completions.items.push(
                             this.createItem(v.name, KeywordType.variable)
@@ -218,14 +217,12 @@ class AsmCompletionProvider {
                     break;
 
                 case "BASE_DONE":
-                    // พิมพ์ base เสร็จแล้ว → แนะนำ + เพื่อต่อ index
                     completions.items.push(
                         this.createItem("+", KeywordType.operator, "(Offset)")
                     );
                     break;
 
                 case "INDEX":
-                    // หลัง + → แนะนำ index register
                     for (const r of REGISTERS) {
                         completions.items.push(
                             this.createItem(r, KeywordType.register)
@@ -234,14 +231,12 @@ class AsmCompletionProvider {
                     break;
 
                 case "INDEX_DONE":
-                    // พิมพ์ index เสร็จแล้ว → แนะนำ * เพื่อใส่ scale
                     completions.items.push(
                         this.createItem("*", KeywordType.operator, "(Scale)")
                     );
                     break;
 
                 case "SCALE_INPUT":
-                    // หลัง * → แนะนำค่า scale
                     for (const s of ["1","2","4","8"]) {
                         completions.items.push(
                             this.createItem(s, KeywordType.constant, "(Scale)")
@@ -250,7 +245,6 @@ class AsmCompletionProvider {
                     break;
 
                 case "SCALE_DONE":
-                    // scale เสร็จแล้ว → ไม่แนะนำอะไร
                     break;
             }
             return completions;
@@ -261,10 +255,8 @@ class AsmCompletionProvider {
         ======================================= */
         if (isTypingOperand) {
             const firstWord = words[0].toLowerCase();
-            // ถ้ายังไม่มี signature ของ instruction → น่าจะเป็น variable declaration
             if (!INSTRUCTION_SIGNATURES[firstWord]) {
                 const MEM_DIRECTIVES = ['db','dw','dd','dq','dt','resb','resw','resd','resq','equ'];
-                // แนะนำ directive เฉพาะตอนที่ยังไม่ได้พิมพ์ directive (word ที่ 2 ยังว่าง หรือกำลังพิมพ์อยู่)
                 const secondWord = words.filter(w => w.length > 0)[1] || '';
                 if (!MEM_DIRECTIVES.includes(secondWord)) {
                     for (const d of MEM_DIRECTIVES) {
@@ -348,7 +340,6 @@ class AsmCompletionProvider {
                     k.type === KeywordType.memoryAllocation ||
                     k.type === KeywordType.precompiled
                 ) {
-                    // แสดงเฉพาะ keyword ที่ขึ้นต้นด้วย partial word ที่กำลังพิมพ์
                     if (k.name.toLowerCase().startsWith(partial)) {
                         completions.items.push(
                             this.createItem(k.name, k.type, Utils.getType(k.type), k.def)
