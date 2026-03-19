@@ -18,12 +18,18 @@ class TasmHoverProvider {
             if (range) {
                 let word = document.getText(range);
                 let proc = this.registry.findProcedure(word);
+                let variable = this.registry.findVariable(word);
                 let keyword = this.registry.getKeyword(word);
                 let macro = this.registry.findMacro(word);
                 let label = this.registry.findLabel(word);
 
                 if (Utils.isNumberStr(word)) {
                     output.push({ language: "assembly", value: Utils.getNumMsg(word) });
+                } else if (variable) {
+                    output.push({
+                        language: "assembly",
+                        value: `(Variable) ${variable.name}: ${variable.type}${variable.section ? "  [section " + variable.section + "]" : ""}`
+                    });
                 } else if (proc) {
                     output.push(
                         { language: "assembly", value: "(Procedure) " + proc.name },

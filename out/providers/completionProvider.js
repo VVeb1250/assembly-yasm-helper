@@ -309,6 +309,13 @@ class AsmCompletionProvider {
                 completions.items.push(
                     this.createItem("0", KeywordType.constant, "(Immediate)")
                 );
+                if (this.registry.defines) {
+                    for (const d of this.registry.defines) {
+                        completions.items.push(
+                            this.createItem(d, KeywordType.constant, "(%define)")
+                        );
+                    }
+                }
             }
             /* LABEL */
             if (allowed & OperandType.LABEL) {

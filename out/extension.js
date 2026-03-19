@@ -14,7 +14,7 @@ class ExtensionManager {
         this.scanner = new DocumentScanner(this.registry);
         this.diagnostics = new DiagnosticProvider(this.registry);
         this.compiler = new CompilerProvider();
-        this.isScanning = false;
+        this._debounceTimer = null;
     }
 
     activate() {
@@ -36,7 +36,7 @@ class ExtensionManager {
         // scan + analyze ทุกครั้งที่ไฟล์เปลี่ยน
         // use subscriptions for fix Memory Leak
         this.context.subscriptions.push(
-            vscode.workspace.onDidChangeTextDocument(e => this.triggerScan(e.document))
+            vscode.workspace.onDidChangeTextDocument(e => this.scheduleScan(e.document))
         );
         this.context.subscriptions.push(
             vscode.workspace.onDidOpenTextDocument(doc => this.triggerScan(doc))
@@ -55,21 +55,22 @@ class ExtensionManager {
         }
     }
 
-    async triggerScan(document, runCompiler = false) {
-        // if (this.isScanning) return;
-        this.isScanning = true;
+    scheduleScan(document) {
+        if (this._debounceTimer) clearTimeout(this._debounceTimer);
+        this._debounceTimer = setTimeout(() => {
+            this._debounceTimer = null;
+            this.triggerScan(document);
+        }, 300);
+    }
 
-        try {
-            if (!document || document.languageId !== 'assembly' || document.uri.scheme !== 'file') return;
-            const docText = document.getText().split(/\r?\n/);
-            await this.scanner.scan(docText);
-            this.diagnostics.analyze(document);
-    
-            if (runCompiler) {
-                await this.compiler.analyze(document);
-            }
-        } finally {
-            this.isScanning = false;
+    async triggerScan(document, runCompiler = false) {
+        if (!document || document.languageId !== 'assembly' || document.uri.scheme !== 'file') return;
+        const docText = document.getText().split(/\r?\n/);
+        await this.scanner.scan(docText);
+        this.diagnostics.analyze(document);
+
+        if (runCompiler) {
+            await this.compiler.analyze(document);
         }
     }
 }
