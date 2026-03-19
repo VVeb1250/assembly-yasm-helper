@@ -101,7 +101,7 @@ class AsmCompletionProvider {
         for (const p of PREPROCESSOR)
             completions.items.push(this.createItem(p.name, KeywordType.precompiled, p.detail, p.doc));
         for (const m of this.registry.macros)
-            completions.items.push(this.createItem(m, KeywordType.macro, "(Macro)"));
+            completions.items.push(this.createItem(m.name, KeywordType.macro, "(Macro)"));
         return completions;
     }
 

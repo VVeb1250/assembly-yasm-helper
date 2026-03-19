@@ -106,7 +106,7 @@ class SymbolRegistry {
     // MACROS
     // --------------------------------
 
-    addMacro(name) {
+    addMacro(name, line) {
 
         const key = name.toLowerCase();
 
@@ -114,8 +114,9 @@ class SymbolRegistry {
 
         this.macroSet.add(key);
 
-        this.macros.push(name);
-        this.macroMap.set(key, name);
+        const sym = { name, line };
+        this.macros.push(sym);
+        this.macroMap.set(key, sym);
     }
 
     findMacro(name) {

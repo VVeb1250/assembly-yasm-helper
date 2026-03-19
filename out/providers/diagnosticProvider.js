@@ -84,13 +84,17 @@ class DiagnosticProvider {
         for (let i = 0; i < lines.length; i++) {
             const clean = lines[i].split(';')[0].trim().toLowerCase();
             if (!clean) continue;
-            const first = clean.split(/\s+/)[0];
+            const words  = clean.split(/\s+/);
+            const first  = words[0];
+            const second = words[1] || '';
 
-            if (first === "proc")      procStack.push(i);
+            // MASM: "name proc" / "endp"
+            if (second === "proc")     procStack.push(i);
             if (first === "endp") {
                 if (procStack.length === 0) diagnostics.push(this._makeDiagnostic(i, 0, 4, "'endp' without matching 'proc'", vscode.DiagnosticSeverity.Error));
                 else procStack.pop();
             }
+            // YASM/NASM: "%macro name n" / "%endmacro"
             if (first === "%macro")    macroStack.push(i);
             if (first === "%endmacro") {
                 if (macroStack.length === 0) diagnostics.push(this._makeDiagnostic(i, 0, 8, "'%endmacro' without matching '%macro'", vscode.DiagnosticSeverity.Error));
@@ -101,7 +105,8 @@ class DiagnosticProvider {
                 if (ifStack.length === 0) diagnostics.push(this._makeDiagnostic(i, 0, 6, "'%endif' without matching '%if'", vscode.DiagnosticSeverity.Error));
                 else ifStack.pop();
             }
-            if (first === "macro")  tasmMacStack.push(i);
+            // TASM/MASM: "name macro" / "endm"
+            if (second === "macro")  tasmMacStack.push(i);
             if (first === "endm") {
                 if (tasmMacStack.length === 0) diagnostics.push(this._makeDiagnostic(i, 0, 4, "'endm' without matching 'macro'", vscode.DiagnosticSeverity.Error));
                 else tasmMacStack.pop();

@@ -29,6 +29,11 @@ class AsmDefinitionProvider {
             return new vscode.Location(document.uri, new vscode.Position(proc.line, 0));
         }
 
+        const macro = this.registry.findMacro(word);
+        if (macro && macro.line !== undefined) {
+            return new vscode.Location(document.uri, new vscode.Position(macro.line, 0));
+        }
+
         return null;
     }
 }

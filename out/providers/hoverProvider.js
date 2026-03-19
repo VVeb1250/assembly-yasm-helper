@@ -38,7 +38,8 @@ class TasmHoverProvider {
                         { language: "assembly", value: proc.description.outputs() }
                     );
                 } else if (macro) {
-                    output.push({ language: "assembly", value: "(Macro) " + macro });
+                    const macroLine = macro.line !== undefined ? `  [line ${macro.line + 1}]` : '';
+                    output.push({ language: "assembly", value: "(Macro) " + macro.name + macroLine });
                 } else if (keyword) {
                     output.push(
                         { language: "assembly", value: Utils.getType(keyword.type) + " " + keyword.name },

@@ -35,6 +35,18 @@ class AsmDocumentSymbolProvider {
             ));
         }
 
+        for (const macro of this.registry.macros) {
+            if (macro.line === undefined) continue;
+            const range = new vscode.Range(macro.line, 0, macro.line, 0);
+            symbols.push(new vscode.DocumentSymbol(
+                macro.name,
+                '(Macro)',
+                vscode.SymbolKind.Module,
+                range,
+                range
+            ));
+        }
+
         for (const label of this.registry.labels) {
             if (label.line === undefined) continue;
             const range = new vscode.Range(label.line, 0, label.line, 0);

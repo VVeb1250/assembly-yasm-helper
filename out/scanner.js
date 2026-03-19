@@ -40,7 +40,7 @@ class DocumentScanner {
             this._detectVariable(ctx, x, clearPrevious);
             await this._detectProcedure(ctx, x, documentLines);
             await this._detectInclude(ctx);
-            this._detectMacro(ctx);
+            this._detectMacro(ctx, x);
             this._detectDefine(ctx);
             this._detectExtern(ctx, x);
         }
@@ -150,10 +150,10 @@ class DocumentScanner {
         this.currentSection = oldSection;
     }
 
-    _detectMacro(ctx) {
+    _detectMacro(ctx, x) {
         if (!this.macroRegex.test(ctx.raw) || ctx.words.length <= 1) return;
         const macroName = ctx.words[1];
-        if (!this.registry.findMacro(macroName)) this.registry.addMacro(macroName);
+        if (!this.registry.findMacro(macroName)) this.registry.addMacro(macroName, x);
     }
 
     _detectDefine(ctx) {
@@ -164,7 +164,7 @@ class DocumentScanner {
     }
 
     _detectExtern(ctx, x) {
-        if (!ctx.lower.startsWith("extern") || ctx.words.length <= 1) return;
+        if (ctx.words[0]?.toLowerCase() !== "extern" || ctx.words.length <= 1) return;
         const externName = ctx.words[1];
         if (!this.registry.findLabel(externName)) this.registry.addLabel(externName, x);
     }
