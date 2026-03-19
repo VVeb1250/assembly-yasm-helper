@@ -1,3 +1,13 @@
+## 1.1.2
+- fix memory leak on activation
+- fix false positive "undefined" warnings for size keywords (QWORD, rel, near, far, short)
+- fix macro hover showing undefined instead of macro name
+- fix comment detection in hover provider
+- fix extern symbols triggering false "undefined label" warnings
+- add hover tooltip for variables
+- add %define / %assign symbols to autocomplete suggestions
+- add debounce on keystroke scan to prevent pile-up on fast typing
+
 ## 1.1.1
 - fix autocomplete issue
 
