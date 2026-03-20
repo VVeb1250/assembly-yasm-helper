@@ -1,3 +1,8 @@
+## 2.0.1
+- add **Build & Run** command — assembles the current file, links with `ld`, and runs the result in an integrated terminal
+- add `assembly.linkerPath` setting — path to linker executable (auto-detects `ld` if empty)
+- add `assembly.entryPoint` setting — entry point symbol for linker (default `_start`)
+
 ## 2.0.0
 - add **LSP server** — full language server for Neovim and any LSP-compatible editor
 - install via `npm install -g assembly-yasm-helper`, run as `assembly-yasm-lsp --stdio`

@@ -13,6 +13,7 @@ const { AsmSemanticTokensProvider, SEMANTIC_TOKENS_LEGEND } = require("./provide
 const { AsmFoldingProvider }    = require("./providers/foldingProvider");
 const { AsmReferencesProvider } = require("./providers/referencesProvider");
 const { AsmRenameProvider }     = require("./providers/renameProvider");
+const { RunProvider }           = require("./providers/runProvider");
 
 class ExtensionManager {
     constructor(context) {
@@ -21,6 +22,7 @@ class ExtensionManager {
         this.scanner = new DocumentScanner(this.registry);
         this.diagnostics = new DiagnosticProvider(this.registry);
         this.compiler = new CompilerProvider();
+        this.runner   = new RunProvider();
         this.semanticTokens = new AsmSemanticTokensProvider(this.registry);
         this._debounceTimer = null;
     }
@@ -76,6 +78,18 @@ class ExtensionManager {
 
         this.context.subscriptions.push(this.diagnostics.collection);
         this.context.subscriptions.push(this.compiler.collection);
+
+        this.context.subscriptions.push(
+            vscode.commands.registerCommand('assembly.buildAndRun', async () => {
+                const editor = vscode.window.activeTextEditor;
+                if (!editor || editor.document.languageId !== 'assembly') {
+                    vscode.window.showWarningMessage('Open an assembly file first.');
+                    return;
+                }
+                await this.runner.buildAndRun(editor.document);
+            })
+        );
+        this.context.subscriptions.push(this.runner);
 
         // scan + analyze ทุกครั้งที่ไฟล์เปลี่ยน
         // use subscriptions for fix Memory Leak

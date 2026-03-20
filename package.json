@@ -3,7 +3,7 @@
 	"publisher": "VVeb1250",
 	"displayName": "Assembly YASM Helper",
 	"description": "Language support and smart autocomplete for YASM/NASM Assembler",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"license": "MIT",
 	"icon": "icon.png",
 	"bin": {
@@ -24,6 +24,23 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
+		"commands": [
+			{
+				"command": "assembly.buildAndRun",
+				"title": "Build & Run",
+				"category": "Assembly",
+				"icon": "$(run-all)"
+			}
+		],
+		"menus": {
+			"editor/title": [
+				{
+					"command": "assembly.buildAndRun",
+					"when": "editorLangId == assembly",
+					"group": "navigation"
+				}
+			]
+		},
 		"configurationDefaults": {
 			"[assembly]": {
 				"editor.wordBasedSuggestions": "off",
@@ -139,6 +156,16 @@
 						"8 spaces (classic assembly style)"
 					],
 					"description": "Indentation width (in spaces) for assembly files"
+				},
+				"assembly.linkerPath": {
+					"type": "string",
+					"default": "",
+					"description": "Path to linker executable for Build & Run (e.g. /usr/bin/ld). Leave empty to auto-detect 'ld'."
+				},
+				"assembly.entryPoint": {
+					"type": "string",
+					"default": "_start",
+					"description": "Entry point symbol passed to linker (e.g. _start or main)"
 				}
 			}
 		},
