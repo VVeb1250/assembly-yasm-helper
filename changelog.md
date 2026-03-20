@@ -1,3 +1,10 @@
+## 1.3.3
+- add semantic token highlighting for user-defined macro calls (instruction position)
+- add semantic token highlighting for registers — distinct color in any VS Code theme
+- fix syntax grammar scopes: %%labels, %1..%N params, %macro name, %define constants
+- enable semanticHighlighting in all Assembly themes
+- add semanticTokenColors in Assembly themes and semanticTokenScopes for built-in theme compatibility
+
 ## 1.3.2
 - add macro hover shows argument count (e.g. "aver — 3 args [line 5]")
 - add signature help for user-defined macros showing %1, %2, %3 with active parameter highlight
