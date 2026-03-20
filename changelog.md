@@ -1,3 +1,11 @@
+## 1.5.0
+- add **Find All References** (Shift+F12) — shows every usage of a label, variable, proc, or macro in the current file
+- add **Rename Symbol** (F2) — renames all occurrences at once; guards against renaming keywords or registers
+- add **Semantic Code Folding** — fold `proc`/`endp`, `%macro`/`%endmacro`, `struc`/`ends`, and `section` blocks with the standard VS Code fold gutter
+
+## 1.4.0
+*(skipped — merged into 1.5.0)*
+
 ## 1.3.4
 - fix auto-indent: `section`, `global`, `extern` now de-indent automatically when typed on an indented line
 - add `assembly.tabSize` setting — choose indent width 2/4/8 (default 8, classic assembly style); applied instantly without reload
