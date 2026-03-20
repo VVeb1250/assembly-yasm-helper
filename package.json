@@ -6,6 +6,9 @@
 	"version": "1.4.0",
 	"license": "MIT",
 	"icon": "icon.png",
+	"bin": {
+		"assembly-yasm-lsp": "./dist/server.js"
+	},
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/VVeb1250/assembly-yasm-helper.git"
