@@ -25,7 +25,10 @@
 			"[assembly]": {
 				"editor.wordBasedSuggestions": "off",
 				"editor.autoClosingBrackets": "always",
-				"editor.bracketPairColorization.enabled": true
+				"editor.bracketPairColorization.enabled": true,
+				"editor.tabSize": 8,
+				"editor.insertSpaces": false,
+				"editor.detectIndentation": false
 			}
 		},
 		"configuration": {

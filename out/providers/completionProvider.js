@@ -151,8 +151,11 @@ class AsmCompletionProvider {
     _completeOperands(words, line, completions) {
         const firstWord = words[0].toLowerCase();
 
-        if (!INSTRUCTION_SIGNATURES[firstWord])
+        if (!INSTRUCTION_SIGNATURES[firstWord]) {
+            if (this.registry.findMacro(firstWord))
+                return this._completeMacroOperands(completions);
             return this._completeMemoryDirectives(words, completions);
+        }
 
         const allowed = this.getAllowedOperandTypes(firstWord, this.getOperandIndex(line));
         if (allowed === undefined) return completions;
@@ -180,6 +183,20 @@ class AsmCompletionProvider {
         return completions;
     }
 
+    _completeMacroOperands(completions) {
+        for (const s of this.sizeKeywords)
+            completions.items.push(this.createItem(s, KeywordType.size, "(Size)", '', null, "01"));
+        for (const v of this.registry.vars)
+            completions.items.push(this.createItem(v.name, KeywordType.variable, '', '', null, "02"));
+        REGISTERS.forEach(r     => completions.items.push(this.createItem(r, KeywordType.register, '', '', null, this._regPrefix(r))));
+        AVX_REGISTERS.forEach(r => completions.items.push(this.createItem(r, KeywordType.register, '', '', null, "05")));
+        completions.items.push(this.createItem("0", KeywordType.constant, "(Immediate)", '', null, "04"));
+        for (const d of this.registry.defines || [])
+            completions.items.push(this.createItem(d, KeywordType.constant, "(%define)", '', null, "04"));
+        this.registry.labels.forEach(l => completions.items.push(this.createItem(l.name, KeywordType.label, '', '', null, "04")));
+        return completions;
+    }
+
     _completeMemoryDirectives(words, completions) {
         const secondWord = words.filter(w => w.length > 0)[1] || '';
         if (!MEM_DIRECTIVES.includes(secondWord)) {
@@ -196,6 +213,10 @@ class AsmCompletionProvider {
         for (const k of this.keywordList) {
             if (INSTRUCTION_TYPES.has(k.type) && k.name.toLowerCase().startsWith(partial))
                 completions.items.push(this.createItem(k.name, k.type, Utils.getType(k.type), k.def));
+        }
+        for (const m of this.registry.macros) {
+            if (m.name.toLowerCase().startsWith(partial))
+                completions.items.push(this.createItem(m.name, KeywordType.macro, "(Macro)", m.doc || '', null, "01"));
         }
     }
 
@@ -240,7 +261,7 @@ class AsmCompletionProvider {
             [KeywordType.method]:           vscode.CompletionItemKind.Method,
             [KeywordType.structure]:        vscode.CompletionItemKind.Struct,
             [KeywordType.label]:            vscode.CompletionItemKind.Unit,
-            [KeywordType.macro]:            vscode.CompletionItemKind.Color,
+            [KeywordType.macro]:            vscode.CompletionItemKind.Function,
             [KeywordType.file]:             vscode.CompletionItemKind.File,
             [KeywordType.constant]:         vscode.CompletionItemKind.Value,
             [KeywordType.operator]:         vscode.CompletionItemKind.Operator,
