@@ -157,6 +157,14 @@
 				"path": "./snippets.json"
 			}
 		],
+		"semanticTokenScopes": [
+			{
+				"language": "assembly",
+				"scopes": {
+					"macro": ["entity.name.function.asm"]
+				}
+			}
+		],
 		"themes": [
 			{
 				"label": "Assembly Dark (YASM)",

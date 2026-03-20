@@ -9,6 +9,7 @@ const { CompilerProvider } = require("./providers/compilerProvider");
 const { AsmDefinitionProvider } = require("./providers/definitionProvider");
 const { AsmDocumentSymbolProvider } = require("./providers/symbolProvider");
 const { AsmSignatureHelpProvider } = require("./providers/signatureHelpProvider");
+const { AsmSemanticTokensProvider, SEMANTIC_TOKENS_LEGEND } = require("./providers/semanticTokensProvider");
 
 class ExtensionManager {
     constructor(context) {
@@ -17,6 +18,7 @@ class ExtensionManager {
         this.scanner = new DocumentScanner(this.registry);
         this.diagnostics = new DiagnosticProvider(this.registry);
         this.compiler = new CompilerProvider();
+        this.semanticTokens = new AsmSemanticTokensProvider(this.registry);
         this._debounceTimer = null;
     }
 
@@ -46,6 +48,14 @@ class ExtensionManager {
                 'assembly',
                 new AsmSignatureHelpProvider(this.registry),
                 ' ', ','
+            )
+        );
+
+        this.context.subscriptions.push(
+            vscode.languages.registerDocumentSemanticTokensProvider(
+                'assembly',
+                this.semanticTokens,
+                SEMANTIC_TOKENS_LEGEND
             )
         );
 
@@ -87,6 +97,7 @@ class ExtensionManager {
         const docText = document.getText().split(/\r?\n/);
         await this.scanner.scan(docText);
         this.diagnostics.analyze(document);
+        this.semanticTokens.fire();
 
         if (runCompiler) {
             await this.compiler.analyze(document);

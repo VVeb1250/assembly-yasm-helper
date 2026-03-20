@@ -128,5 +128,6 @@
                 "foreground": "#808080"
             }
         }
-    ]
+    ],
+    "semanticHighlighting": true
 }
