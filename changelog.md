@@ -1,3 +1,8 @@
+## 1.3.2
+- add macro hover shows argument count (e.g. "aver — 3 args [line 5]")
+- add signature help for user-defined macros showing %1, %2, %3 with active parameter highlight
+- add %1..%N completion suggestions when typing % inside a macro body
+
 ## 1.3.1
 - add macro autocomplete in instruction position (user-defined macros appear alongside instructions)
 - add operand suggestions (vars/registers/labels/imm) when typing macro arguments
