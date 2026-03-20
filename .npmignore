@@ -1,0 +1,12 @@
+node_modules/
+.vscode/
+.claude/
+*.vsix
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+CLAUDE.md
+*.plan.md
+*-plan.md
+out/test/
