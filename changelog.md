@@ -1,3 +1,9 @@
+## 2.0.0
+- add **LSP server** — full language server for Neovim and any LSP-compatible editor
+- install via `npm install -g assembly-yasm-helper`, run as `assembly-yasm-lsp --stdio`
+- supports: completion, hover, go to definition, document symbols, signature help, references, diagnostics, semantic tokens, compiler check on save
+- add npm `bin` entry: `assembly-yasm-lsp` command available after global install
+
 ## 1.4.0
 - add **Find All References** (Shift+F12) — shows every usage of a label, variable, proc, or macro in the current file
 - add **Rename Symbol** (F2) — renames all occurrences at once; guards against renaming keywords or registers
