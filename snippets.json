@@ -1,66 +1,141 @@
 {
-    "If macro":{
-        "prefix":"if",
-        "body":[
-            "if ${1:compare}",
+    "If": {
+        "prefix": "if",
+        "body": [
+            "%if ${1:condition}",
             "\t$0",
-            "endif"
+            "%endif"
         ],
-        "description":"A macro if statement that comapre a value to 0"
+        "description": "YASM/NASM %if preprocessor block"
     },
-    "If else macro":{
-        "prefix":"ifelse",
-        "body":[
-            "if ${1:compare}",
+    "If Else": {
+        "prefix": "ifelse",
+        "body": [
+            "%if ${1:condition}",
             "\t$2",
-            "else",
+            "%else",
             "\t$0",
-            "endif"
+            "%endif"
         ],
-        "description":"A macro if statement that comapre a value to 0"
+        "description": "YASM/NASM %if/%else preprocessor block"
     },
-    "If Defined macro":{
-        "prefix":"ifdef",
-        "body":[
-            "ifdef ${1:compare}",
+    "If Defined": {
+        "prefix": "ifdef",
+        "body": [
+            "%ifdef ${1:SYMBOL}",
             "\t$0",
-            "endif"
+            "%endif"
         ],
-        "description":"A macro if statement that comapre a value to 0"
+        "description": "YASM/NASM %ifdef preprocessor block"
     },
-    "Repeat":{
-        "prefix":"repeat",
-        "body":[
-            "rept ${1:times}",
+    "Repeat": {
+        "prefix": "rep",
+        "body": [
+            "%rep ${1:count}",
             "\t$0",
-            "endm"
+            "%endrep"
         ],
-        "description":"A macro statement that repeat code"
+        "description": "YASM/NASM %rep repeat block"
     },
-    "Macro":{
-        "prefix":"macro",
-        "body":[
-            "macro ${1:name} ${2:params}",
+    "Macro": {
+        "prefix": "macro",
+        "body": [
+            "%macro ${1:name} ${2:0}",
             "\t$0",
-            "endm ${1:name}"
-        ]
+            "%endmacro"
+        ],
+        "description": "YASM/NASM %macro definition — arg count after name"
     },
-    "Procedure":{
-        "prefix":"proc",
-        "body":[
-            ";${2:description}",
-            "proc ${1:name}",
+    "Procedure": {
+        "prefix": "proc",
+        "body": [
+            "; ${2:description}",
+            "; @arg: ${3:rdi - first argument}",
+            "; @out: ${4:rax - return value}",
+            "${1:name} proc",
+            "\tpush rbp",
+            "\tmov rbp, rsp",
             "\t$0",
+            "\tpop rbp",
+            "\tret",
             "endp ${1:name}"
-        ]
-    },
-    "DOS print Char":{
-        "prefix":"cprint",
-        "body":[
-            "mov dl, '${1:char}'",
-            "mov ah, 2h",
-            "int 21h"
         ],
-        "description":"Prints a charcters"
+        "description": "Procedure with doc-comment (@arg/@out) and stack frame"
+    },
+    "Linux Write": {
+        "prefix": "write",
+        "body": [
+            "mov rax, 1          ; sys_write",
+            "mov rdi, ${1:1}     ; fd (1=stdout)",
+            "mov rsi, ${2:msg}   ; buffer",
+            "mov rdx, ${3:len}   ; length",
+            "syscall"
+        ],
+        "description": "Linux sys_write syscall"
+    },
+    "Linux Exit": {
+        "prefix": "exit",
+        "body": [
+            "mov rax, 60         ; sys_exit",
+            "xor rdi, rdi        ; exit code 0",
+            "syscall"
+        ],
+        "description": "Linux sys_exit syscall"
+    },
+    "Program Skeleton": {
+        "prefix": "start",
+        "body": [
+            "global _start",
+            "",
+            "section .data",
+            "\t${1:msg db \"Hello, World!\", 10}",
+            "",
+            "section .bss",
+            "\t${2:; resb 64}",
+            "",
+            "section .text",
+            "_start:",
+            "\t$0",
+            "",
+            "\tmov rax, 60",
+            "\txor rdi, rdi",
+            "\tsyscall"
+        ],
+        "description": "YASM/NASM 64-bit Linux program skeleton"
+    },
+    "Byte Variable": {
+        "prefix": "db",
+        "body": ["${1:name} db ${2:0}"],
+        "description": "Byte (8-bit) variable declaration"
+    },
+    "Word Variable": {
+        "prefix": "dw",
+        "body": ["${1:name} dw ${2:0}"],
+        "description": "Word (16-bit) variable declaration"
+    },
+    "Dword Variable": {
+        "prefix": "dd",
+        "body": ["${1:name} dd ${2:0}"],
+        "description": "Dword (32-bit) variable declaration"
+    },
+    "Qword Variable": {
+        "prefix": "dq",
+        "body": ["${1:name} dq ${2:0}"],
+        "description": "Qword (64-bit) variable declaration"
+    },
+    "String Variable": {
+        "prefix": "str",
+        "body": ["${1:name} db \"${2:text}\", 0"],
+        "description": "Null-terminated string"
+    },
+    "Counted Loop": {
+        "prefix": "loopn",
+        "body": [
+            "mov rcx, ${1:count}",
+            "${2:loopLabel}:",
+            "\t$0",
+            "\tloop ${2:loopLabel}"
+        ],
+        "description": "Counted loop — uses rcx as counter, decrements until zero"
     }
 }

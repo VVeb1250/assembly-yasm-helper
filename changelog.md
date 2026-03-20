@@ -1,3 +1,13 @@
+## 1.3.0
+- add hover shows all valid operand forms per instruction (e.g. mov reg, reg / mov mem, reg)
+- add diagnostic warning for invalid operand combinations (catches mem-to-mem mov [a],[b])
+- add signature help shows all overload forms per instruction with active form tracking
+- fix completion sort order: size keywords → variables → GP registers → extended → SIMD → constants
+- fix signature help active parameter highlight (index pairs + correct dst/src labels)
+- fix imul operand count — valid with 1, 2, or 3 operands
+- update snippets to YASM/NASM syntax (%macro/%endmacro, %if/%endif, %rep/%endrep)
+- add snippets: program skeleton, db/dw/dd/dq/str variable declarations, counted loop, Linux syscalls
+
 ## 1.2.2
 - fix false "undefined label" warning for macro-local labels (%%label syntax)
 - fix macro-local labels incorrectly flagged as duplicate labels
