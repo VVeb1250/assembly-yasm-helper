@@ -1,3 +1,8 @@
+## 1.2.2
+- fix false "undefined label" warning for macro-local labels (%%label syntax)
+- fix macro-local labels incorrectly flagged as duplicate labels
+- fix imul false-positive operand count error — valid with 1, 2, or 3 operands
+
 ## 1.2.1
 - fix false 'endp without proc' diagnostic — MASM proc format is 'name proc' not 'proc name'
 - fix false 'endm without macro' diagnostic — same issue for TASM 'name macro' format

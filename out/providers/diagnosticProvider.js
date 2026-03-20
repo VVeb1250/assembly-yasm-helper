@@ -68,6 +68,7 @@ class DiagnosticProvider {
             if (!lineNoComment.trimStart().endsWith(':')) continue;
             const name = lineNoComment.trim().slice(0, -1).trim().toLowerCase();
             if (!name) continue;
+            if (name.startsWith('%%')) continue; // macro-local labels are scoped per invocation
             if (seen.has(name)) {
                 diagnostics.push(this._makeDiagnostic(
                     i, lines[i].indexOf(name.charAt(0)), name.length,
@@ -242,11 +243,6 @@ class DiagnosticProvider {
     }
 
     _checkOperandType(lineIdx, rawLine, operand, opcode, allowType, diagnostics) {
-        const knownLabels = new Set([
-            ...this.registry.labels.map(l => l.name.toLowerCase()),
-            ...this.registry.procs.map(p => p.name.toLowerCase())
-        ]);
-
         // AllowKinds.label = 8 → ต้องเป็น label เท่านั้น
         if (allowType === AllowKinds.label) {
             if (this._isRegister(operand) || this._isNumber(operand)) {

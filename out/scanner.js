@@ -16,7 +16,7 @@ class DocumentScanner {
 
         // regex cache
         this.varRegex    = /\b(db|dw|dd|dq|dt|resb|resw|resd|resq|equ)\b/i;
-        this.labelRegex  = /^\s*([A-Za-z_.$?][\w.$?]*):/;
+        this.labelRegex  = /^\s*((?:%%)?[A-Za-z_.$?][\w.$?]*):/;
         this.procRegex   = /^\s*([A-Za-z_.$?][\w.$?]*)\s+proc\b/i;
         this.macroRegex  = /^\s*%macro\b/i;
         this.defineRegex = /^\s*%(define|assign)\b/i;
