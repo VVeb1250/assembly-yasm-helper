@@ -11,71 +11,122 @@
     "tokenColors": [
         {
             "scope": "comment",
-            "settings": { "foreground": "#6A9955" }
+            "settings": {
+                "foreground": "#6A9955"
+            }
         },
         {
             "scope": "string",
-            "settings": { "foreground": "#A05C2C" }
+            "settings": {
+                "foreground": "#A05C2C"
+            }
         },
         {
             "scope": "string.quoted.single.asm",
-            "settings": { "foreground": "#5C9962" }
+            "settings": {
+                "foreground": "#5C9962"
+            }
         },
         {
             "scope": "string.quoted.double.asm",
-            "settings": { "foreground": "#914040" }
+            "settings": {
+                "foreground": "#914040"
+            }
         },
         {
             "scope": "constant.character.escape.asm",
-            "settings": { "foreground": "#795E26" }
+            "settings": {
+                "foreground": "#795E26"
+            }
         },
         {
             "scope": "constant.numeric.asm",
-            "settings": { "foreground": "#D18100" }
+            "settings": {
+                "foreground": "#D18100"
+            }
         },
         {
             "scope": "keyword.control.asm",
-            "settings": { "foreground": "#066289", "fontStyle": "bold" }
+            "settings": {
+                "foreground": "#066289",
+                "fontStyle": "bold"
+            }
         },
         {
             "scope": "keyword.control.preprocessor.asm",
-            "settings": { "foreground": "#7B3F9E", "fontStyle": "bold" }
+            "settings": {
+                "foreground": "#7B3F9E",
+                "fontStyle": "bold"
+            }
         },
         {
             "scope": "keyword.operator.asm",
-            "settings": { "foreground": "#000000" }
+            "settings": {
+                "foreground": "#000000"
+            }
         },
         {
             "scope": "storage.type.asm",
-            "settings": { "foreground": "#066289" }
+            "settings": {
+                "foreground": "#066289"
+            }
         },
         {
             "scope": "storage.modifier.asm",
-            "settings": { "foreground": "#28289F" }
+            "settings": {
+                "foreground": "#28289F"
+            }
         },
         {
             "scope": "variable.other.register.asm",
-            "settings": { "foreground": "#4B65B4", "fontStyle": "italic" }
+            "settings": {
+                "foreground": "#4B65B4",
+                "fontStyle": "italic"
+            }
         },
         {
             "scope": "variable.name.asm",
-            "settings": { "foreground": "#001080" }
+            "settings": {
+                "foreground": "#001080"
+            }
         },
         {
             "scope": "support.function.label.asm",
-            "settings": { "foreground": "#795E26", "fontStyle": "bold" }
+            "settings": {
+                "foreground": "#795E26",
+                "fontStyle": "bold"
+            }
         },
         {
             "scope": "entity.name.function.asm",
-            "settings": { "foreground": "#795E26" }
+            "settings": {
+                "foreground": "#795E26"
+            }
         },
         {
             "scope": "entity.name.section.asm",
-            "settings": { "foreground": "#267F99" }
+            "settings": {
+                "foreground": "#267F99"
+            }
+        },
+        {
+            "scope": "entity.name.constant.asm",
+            "settings": {
+                "foreground": "#795E26"
+            }
+        },
+        {
+            "scope": "variable.language.asm",
+            "settings": {
+                "foreground": "#AF00DB",
+                "fontStyle": "italic"
+            }
         },
         {
             "scope": "punctuation.separator.asm",
-            "settings": { "foreground": "#808080" }
+            "settings": {
+                "foreground": "#808080"
+            }
         }
     ]
 }

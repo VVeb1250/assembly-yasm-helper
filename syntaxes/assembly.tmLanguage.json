@@ -7,6 +7,7 @@
 		{ "include": "#comments" },
 		{ "include": "#preprocessor" },
 		{ "include": "#strings" },
+		{ "include": "#macro_params" },
 		{ "include": "#labels" },
 		{ "include": "#globals" },
 		{ "include": "#call_targets" },
@@ -38,8 +39,33 @@
 		"preprocessor": {
 			"patterns": [
 				{
+					"comment": "%macro name N — color macro name as function",
+					"match": "(?i)^\\s*(%macro|%imacro)\\s+([A-Za-z_.$?][\\w.$?]*)",
+					"captures": {
+						"1": { "name": "keyword.control.preprocessor.asm" },
+						"2": { "name": "entity.name.function.asm" }
+					}
+				},
+				{
+					"comment": "%define NAME — color defined name as constant",
+					"match": "(?i)^\\s*(%define|%redefine|%xdefine|%idefine|%ixdefine|%assign|%undef)\\s+([A-Za-z_.$?][\\w.$?]*)",
+					"captures": {
+						"1": { "name": "keyword.control.preprocessor.asm" },
+						"2": { "name": "entity.name.constant.asm" }
+					}
+				},
+				{
+					"comment": "%include — color path as string",
+					"match": "(?i)^\\s*(%include)\\s+(\"[^\"]*\"|'[^']*')",
+					"captures": {
+						"1": { "name": "keyword.control.preprocessor.asm" },
+						"2": { "name": "string.quoted.asm" }
+					}
+				},
+				{
+					"comment": "all other preprocessor directives",
 					"name": "keyword.control.preprocessor.asm",
-					"match": "(?i)^\\s*(%define|%redefine|%undef|%assign|%macro|%endmacro|%include|%if|%ifdef|%ifndef|%elif|%else|%endif|%rep|%endrep|%error|%warning|%use|%push|%pop|%repl|%local|%exitrep|%rotate|%line|%xdefine|%idefine|%ixdefine|%imacro|%unmacro)\\b"
+					"match": "(?i)^\\s*(%endmacro|%unmacro|%if|%ifdef|%ifndef|%elif|%elifdef|%elifndef|%else|%endif|%rep|%endrep|%exitrep|%rotate|%local|%error|%warning|%use|%push|%pop|%repl|%line)\\b"
 				}
 			]
 		},
@@ -51,10 +77,7 @@
 					"begin": "\"",
 					"end": "\"|\\n",
 					"patterns": [
-						{
-							"name": "constant.character.escape.asm",
-							"match": "\\\\."
-						}
+						{ "name": "constant.character.escape.asm", "match": "\\\\." }
 					]
 				},
 				{
@@ -62,10 +85,7 @@
 					"begin": "'",
 					"end": "'|\\n",
 					"patterns": [
-						{
-							"name": "constant.character.escape.asm",
-							"match": "\\\\."
-						}
+						{ "name": "constant.character.escape.asm", "match": "\\\\." }
 					]
 				},
 				{
@@ -73,11 +93,18 @@
 					"begin": "`",
 					"end": "`|\\n",
 					"patterns": [
-						{
-							"name": "constant.character.escape.asm",
-							"match": "\\\\."
-						}
+						{ "name": "constant.character.escape.asm", "match": "\\\\." }
 					]
+				}
+			]
+		},
+
+		"macro_params": {
+			"comment": "%1..%9 and %0 macro parameters inside macro body",
+			"patterns": [
+				{
+					"name": "variable.language.asm",
+					"match": "%[0-9]+"
 				}
 			]
 		},
@@ -85,6 +112,14 @@
 		"labels": {
 			"patterns": [
 				{
+					"comment": "%%local_label: inside macros",
+					"match": "^\\s*(%%[A-Za-z_.$?][\\w.$?]*)\\s*:",
+					"captures": {
+						"1": { "name": "support.function.label.asm" }
+					}
+				},
+				{
+					"comment": "regular label:",
 					"match": "^\\s*([A-Za-z_.$?][\\w.$?]*)\\s*:",
 					"captures": {
 						"1": { "name": "support.function.label.asm" }
@@ -112,6 +147,15 @@
 		"call_targets": {
 			"patterns": [
 				{
+					"comment": "jump/call to %%local_label",
+					"match": "(?i)\\b(jmp|je|jne|jz|jnz|jg|jge|jl|jle|ja|jae|jb|jbe|jc|jnc|js|jns|jo|jno|jp|jnp|jcxz|jecxz|jrcxz|loop|loope|loopne|loopz|loopnz|call)\\s+(%%[A-Za-z_.$?][\\w.$?]*)",
+					"captures": {
+						"1": { "name": "keyword.control.asm" },
+						"2": { "name": "support.function.label.asm" }
+					}
+				},
+				{
+					"comment": "jump/call to regular label or procedure",
 					"match": "(?i)\\b(jmp|je|jne|jz|jnz|jg|jge|jl|jle|ja|jae|jb|jbe|jc|jnc|js|jns|jo|jno|jp|jnp|jcxz|jecxz|jrcxz|loop|loope|loopne|loopz|loopnz|call)\\s+([A-Za-z_.$?][\\w.$?]*)",
 					"captures": {
 						"1": { "name": "keyword.control.asm" },
@@ -257,7 +301,7 @@
 		},
 
 		"operators": {
-			"match": "[+\\-*/<>|&^=~%]",
+			"match": "[+\\-*/<>|&^=~]",
 			"name": "keyword.operator.asm"
 		},
 
