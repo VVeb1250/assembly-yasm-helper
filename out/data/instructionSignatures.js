@@ -94,6 +94,7 @@ const INSTRUCTION_SIGNATURES = {
         [SIG.MEM],
         [SIG.REG, SIG.REG],
         [SIG.REG, SIG.MEM],
+        [SIG.REG, SIG.IMM],
         [SIG.REG, SIG.REG, SIG.IMM],
         [SIG.REG, SIG.MEM, SIG.IMM]
     ],
