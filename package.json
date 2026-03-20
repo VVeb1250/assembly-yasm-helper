@@ -24,6 +24,7 @@
 		"configurationDefaults": {
 			"[assembly]": {
 				"editor.wordBasedSuggestions": "off",
+				"editor.tabCompletion": "off",
 				"editor.autoClosingBrackets": "always",
 				"editor.bracketPairColorization.enabled": true,
 				"editor.tabSize": 8,
@@ -116,6 +117,11 @@
 					"type": "boolean",
 					"default": true,
 					"description": "Enable Signature Help (operand hints while typing instructions)"
+				},
+				"assembly.tabTriggerCompletions": {
+					"type": "boolean",
+					"default": false,
+					"description": "Show completion suggestions when Tab is pressed (off by default to avoid interfering with indentation)"
 				}
 			}
 		},

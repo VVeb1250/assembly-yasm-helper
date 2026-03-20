@@ -28,6 +28,12 @@ class AsmCompletionProvider {
     async provideCompletionItems(document, position, token, context) {
         const completions = new vscode.CompletionList([], false);
 
+        // suppress when triggered by Tab unless user enables it
+        if (context.triggerCharacter === '\t') {
+            const cfg = vscode.workspace.getConfiguration('assembly');
+            if (!cfg.get('tabTriggerCompletions')) return completions;
+        }
+
         if (context.triggerKind === vscode.CompletionTriggerKind.Invoke) {
             await this.scanner.scan(document.getText().split(/\r?\n/));
         }
