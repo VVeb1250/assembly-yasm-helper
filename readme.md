@@ -74,6 +74,59 @@ Compile on save using YASM or NASM. Errors appear inline in VS Code and in the s
 
 ---
 
+# 🖥 Neovim Setup
+
+This extension also ships an LSP server that works with Neovim (and any editor supporting LSP).
+
+### 1. Install the LSP server
+
+```sh
+npm install -g assembly-yasm-helper
+```
+
+### 2. Add to your Neovim config
+
+For **LazyVim** / **NvChad** (nvim-lspconfig v2.x):
+
+```lua
+-- ~/.config/nvim/lua/plugins/asm-lsp.lua
+return {
+  {
+    "neovim/nvim-lspconfig",
+    opts = function(_, opts)
+      vim.lsp.config('assembly_yasm', {
+        cmd = { 'assembly-yasm-lsp', '--stdio' },
+        filetypes = { 'asm' },
+        root_markers = { '.git' },
+      })
+      vim.lsp.enable('assembly_yasm')
+    end,
+  },
+}
+```
+
+### 3. Filetype detection (if `.asm` files aren't recognized)
+
+```lua
+vim.filetype.add({ extension = { asm = 'asm', s = 'asm', S = 'asm' } })
+```
+
+### Supported features in Neovim
+
+| Feature | Status |
+|---------|--------|
+| Completion | ✓ |
+| Hover | ✓ |
+| Go to Definition | ✓ |
+| Document Symbols | ✓ |
+| Signature Help | ✓ |
+| References | ✓ |
+| Diagnostics | ✓ |
+| Semantic Tokens | ✓ |
+| Compiler Check (on save) | ✓ |
+
+---
+
 # 👨‍💻 Publisher
 
 Developed by **Roncho**
