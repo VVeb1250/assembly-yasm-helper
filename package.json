@@ -3,7 +3,7 @@
 	"publisher": "VVeb1250",
 	"displayName": "Assembly YASM Helper",
 	"description": "Language support and smart autocomplete for YASM/NASM Assembler",
-	"version": "1.3.3",
+	"version": "1.3.4",
 	"license": "MIT",
 	"icon": "icon.png",
 	"repository": {
@@ -27,7 +27,6 @@
 				"editor.tabCompletion": "off",
 				"editor.autoClosingBrackets": "always",
 				"editor.bracketPairColorization.enabled": true,
-				"editor.tabSize": 8,
 				"editor.insertSpaces": false,
 				"editor.detectIndentation": false
 			}
@@ -122,6 +121,17 @@
 					"type": "boolean",
 					"default": false,
 					"description": "Show completion suggestions when Tab is pressed (off by default to avoid interfering with indentation)"
+				},
+				"assembly.tabSize": {
+					"type": "number",
+					"default": 8,
+					"enum": [2, 4, 8],
+					"enumDescriptions": [
+						"2 spaces",
+						"4 spaces",
+						"8 spaces (classic assembly style)"
+					],
+					"description": "Indentation width (in spaces) for assembly files"
 				}
 			}
 		},

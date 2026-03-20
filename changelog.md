@@ -1,3 +1,7 @@
+## 1.3.4
+- fix auto-indent: `section`, `global`, `extern` now de-indent automatically when typed on an indented line
+- add `assembly.tabSize` setting — choose indent width 2/4/8 (default 8, classic assembly style); applied instantly without reload
+
 ## 1.3.3
 - add semantic token highlighting for user-defined macro calls (instruction position)
 - add semantic token highlighting for registers — distinct color in any VS Code theme

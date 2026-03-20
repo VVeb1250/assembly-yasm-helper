@@ -79,9 +79,23 @@ class ExtensionManager {
             vscode.workspace.onDidSaveTextDocument(doc => this.triggerScan(doc, true))
         );
 
+        this.context.subscriptions.push(
+            vscode.workspace.onDidChangeConfiguration(e => {
+                if (e.affectsConfiguration('assembly.tabSize')) this._applyTabSize();
+            })
+        );
+
+        this._applyTabSize();
+
         if (vscode.window.activeTextEditor) {
             this.triggerScan(vscode.window.activeTextEditor.document);
         }
+    }
+
+    _applyTabSize() {
+        const size = vscode.workspace.getConfiguration('assembly').get('tabSize', 8);
+        vscode.workspace.getConfiguration('editor', { languageId: 'assembly' })
+            .update('tabSize', size, vscode.ConfigurationTarget.Global, true);
     }
 
     scheduleScan(document) {

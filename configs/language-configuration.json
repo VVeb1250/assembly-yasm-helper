@@ -44,6 +44,6 @@
 
     "indentationRules": {
         "increaseIndentPattern": "^\\s*(proc|macro|struc|section).*",
-        "decreaseIndentPattern": "^\\s*(endp|endm|ends).*"
+        "decreaseIndentPattern": "^\\s*(endp|endm|ends|section|global|extern).*"
     }
 }
