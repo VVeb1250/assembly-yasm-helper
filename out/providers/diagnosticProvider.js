@@ -202,7 +202,10 @@ class DiagnosticProvider {
                 .filter(o => o.length > 0);
 
             // --- Check 1: operand count ---
-            if (kw.opCount >= 0 && operands.length !== kw.opCount) {
+            // Signatures override kw.opCount for variable-arity instructions (e.g. imul 1/2/3 ops)
+            const sigForms = INSTRUCTION_SIGNATURES[opcode];
+            const validBySig = sigForms?.some(sig => sig.length === operands.length);
+            if (kw.opCount >= 0 && operands.length !== kw.opCount && !validBySig) {
                 const col = lineNoComment.toLowerCase().indexOf(opcode);
                 diagnostics.push(this._makeDiagnostic(i, col, opcode.length,
                     `'${opcode}' requires ${kw.opCount} operand(s), got ${operands.length}`,
@@ -222,8 +225,7 @@ class DiagnosticProvider {
             }
 
             // --- Check 4: signature mismatch (catches mem-to-mem etc.) ---
-            const sigForms = INSTRUCTION_SIGNATURES[opcode];
-            if (sigForms && operands.length >= 2) {
+            if (sigForms && operands.length >= 2) {  // sigForms declared in check 1
                 const types = operands.map(o => this._classifyOperand(o));
                 const matched = sigForms.some(sig =>
                     sig.length === operands.length &&
