@@ -19,8 +19,11 @@ Context-aware suggestions based on cursor position:
 ## 🧭 Navigation
 
 - **Go to Definition (F12)** — jump to any label, variable, or procedure declaration
+- **Find All References (Shift+F12)** — find every usage of a label, variable, or procedure
+- **Rename Symbol (F2)** — rename a label, variable, or procedure across the entire file
 - **Document Symbol Outline** — labels, variables, and procedures listed in the Outline panel and breadcrumb
 - **Signature Help** — shows operand hints while typing (e.g. `mov <dst>, <src>`), active parameter highlighted
+- **Code Folding** — fold procedures (`proc/endp`), macros (`%macro/%endmacro`), and `%if` blocks
 
 ## 🎨 Syntax Highlighting
 
@@ -58,6 +61,8 @@ Compile on save using YASM or NASM. Errors appear inline in VS Code and in the s
 | assembly.enableGoToDefinition | true | Enable Go to Definition (F12) |
 | assembly.enableDocumentSymbols | true | Enable Outline panel symbols |
 | assembly.enableSignatureHelp | true | Enable operand hints while typing |
+| assembly.tabTriggerCompletions | false | Show completions when Tab is pressed |
+| assembly.tabSize | 8 | Indentation width (2, 4, or 8) |
 
 ---
 
