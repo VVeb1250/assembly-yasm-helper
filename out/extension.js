@@ -109,6 +109,7 @@ class ExtensionManager {
     async triggerScan(document, runCompiler = false) {
         if (!document || document.languageId !== 'assembly' || document.uri.scheme !== 'file') return;
         const docText = document.getText().split(/\r?\n/);
+        this.scanner.currentFilePath = document.uri.fsPath;
         await this.scanner.scan(docText);
         this.diagnostics.analyze(document);
         this.semanticTokens.fire();

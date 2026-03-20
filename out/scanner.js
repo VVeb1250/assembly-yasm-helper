@@ -1,6 +1,5 @@
 "use strict";
 
-const vscode = require("vscode");
 const fs = require("fs");
 const path = require("path");
 const { AsmTokenizer } = require("./tokenizer");
@@ -9,9 +8,10 @@ const { Info, Procedure, Label } = require("./data/structs");
 
 class DocumentScanner {
 
-    constructor(registry) {
+    constructor(registry, currentFilePath = null) {
         this.tokenizer = new AsmTokenizer();
         this.registry = registry;
+        this.currentFilePath = currentFilePath;
         this.currentSection = "";
 
         // regex cache
@@ -25,9 +25,8 @@ class DocumentScanner {
     async scan(documentLines, clearPrevious = true) {
         if (clearPrevious) {
             this.registry.clear();
-            if (vscode.window.activeTextEditor) {
-                const file = vscode.window.activeTextEditor.document.uri.fsPath;
-                this.registry.includedFiles.push(path.normalize(file));
+            if (this.currentFilePath) {
+                this.registry.includedFiles.push(path.normalize(this.currentFilePath));
             }
         }
         this.currentSection = "";
@@ -135,9 +134,9 @@ class DocumentScanner {
         if (!ctx.lower.startsWith("%include") && !ctx.lower.startsWith("include")) return;
 
         const fileMatch = ctx.raw.match(/['"](.*?)['"]/);
-        if (!fileMatch || !vscode.window.activeTextEditor) return;
+        if (!fileMatch || !this.currentFilePath) return;
 
-        const baseDir    = path.dirname(vscode.window.activeTextEditor.document.uri.fsPath);
+        const baseDir    = path.dirname(this.currentFilePath);
         const normalized = path.normalize(path.resolve(baseDir, fileMatch[1]));
 
         if (!fs.existsSync(normalized) || this.registry.includedFiles.includes(normalized)) return;
