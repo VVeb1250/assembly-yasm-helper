@@ -1,3 +1,11 @@
+## 2.1.0
+- add **workspace symbol index** — scans all `.asm`/`.s` files in workspace, caches `global` symbols per file with `FileSystemWatcher` for live updates
+- add **cross-file extern completion** — typing `extern ` suggests `global` symbols from other files, deduplicated by name with source file(s) shown in detail
+- add **cross-file Go to Definition** (F12) — jumps to the label definition in the declaring file instead of the local `extern` line
+- fix **global completion** — typing `global ` now suggests labels and procs from current file
+- fix **directive value completion** — after `db`/`dw`/`equ`/`resb`/etc. suggests vars, labels, procs, and defines as values
+- improve **Build & Run** — auto-detects dependency files from `extern` declarations and assembles + links all required files together
+
 ## 2.0.1
 - add **Build & Run** command — assembles the current file, links with `ld`, and runs the result in an integrated terminal
 - add `assembly.linkerPath` setting — path to linker executable (auto-detects `ld` if empty)

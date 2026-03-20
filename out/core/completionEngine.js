@@ -43,7 +43,7 @@ function getCompletionItems(ctx, registry) {
         return _completeBracketMemory(line, registry);
 
     if (isTypingOperand)
-        return _completeOperands(words, line, registry, items);
+        return _completeOperands(words, line, registry, items, ctx.externSymbols || []);
 
     if (trimmed.length > 0)
         _completeInstructions(words, registry, items);
@@ -146,12 +146,23 @@ function _completeBracketMemory(line, registry) {
     return items;
 }
 
-function _completeOperands(words, line, registry, items) {
+function _completeOperands(words, line, registry, items, externSymbols = []) {
     const firstWord = words[0].toLowerCase();
 
-    if (firstWord === 'global' || firstWord === 'extern') {
+    if (firstWord === 'global') {
         registry.labels.forEach(l => items.push(_makeItem(l.name, KeywordType.label,  '', '', null, "01")));
         registry.procs.forEach(p  => items.push(_makeItem(p.name, KeywordType.method, '', '', null, "01")));
+        return items;
+    }
+
+    if (firstWord === 'extern') {
+        const byName = new Map();
+        for (const s of externSymbols) {
+            if (!byName.has(s.name)) byName.set(s.name, new Set());
+            byName.get(s.name).add(s.file);
+        }
+        for (const [name, files] of byName)
+            items.push(_makeItem(name, KeywordType.method, `(${[...files].join(', ')})`, '', null, "01"));
         return items;
     }
 

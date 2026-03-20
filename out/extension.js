@@ -14,6 +14,7 @@ const { AsmFoldingProvider }    = require("./providers/foldingProvider");
 const { AsmReferencesProvider } = require("./providers/referencesProvider");
 const { AsmRenameProvider }     = require("./providers/renameProvider");
 const { RunProvider }           = require("./providers/runProvider");
+const { WorkspaceIndex }        = require("./vsc/workspaceIndex");
 
 class ExtensionManager {
     constructor(context) {
@@ -21,13 +22,14 @@ class ExtensionManager {
         this.registry = new SymbolRegistry();
         this.scanner = new DocumentScanner(this.registry);
         this.diagnostics = new DiagnosticProvider(this.registry);
-        this.compiler = new CompilerProvider();
-        this.runner   = new RunProvider();
+        this.compiler        = new CompilerProvider();
+        this.runner          = new RunProvider();
+        this.workspaceIndex  = new WorkspaceIndex();
         this.semanticTokens = new AsmSemanticTokensProvider(this.registry);
         this._debounceTimer = null;
     }
 
-    activate() {
+    async activate() {
         this.context.subscriptions.push(
             vscode.languages.registerHoverProvider('assembly', new TasmHoverProvider(this.registry))
         );
@@ -35,13 +37,13 @@ class ExtensionManager {
         this.context.subscriptions.push(
             vscode.languages.registerCompletionItemProvider(
                 'assembly',
-                new AsmCompletionProvider(this.registry, this.scanner),
+                new AsmCompletionProvider(this.registry, this.scanner, this.workspaceIndex),
                 ' ', '.', '[', ',', '\t', '+', '*', '('
             )
         );
 
         this.context.subscriptions.push(
-            vscode.languages.registerDefinitionProvider('assembly', new AsmDefinitionProvider(this.registry))
+            vscode.languages.registerDefinitionProvider('assembly', new AsmDefinitionProvider(this.registry, this.workspaceIndex))
         );
 
         this.context.subscriptions.push(
@@ -86,7 +88,7 @@ class ExtensionManager {
                     vscode.window.showWarningMessage('Open an assembly file first.');
                     return;
                 }
-                await this.runner.buildAndRun(editor.document);
+                await this.runner.buildAndRun(editor.document, this.workspaceIndex);
             })
         );
         this.context.subscriptions.push(this.runner);
@@ -114,6 +116,7 @@ class ExtensionManager {
             })
         );
 
+        await this.workspaceIndex.activate(this.context);
         this._applyTabSize();
 
         if (vscode.window.activeTextEditor) {

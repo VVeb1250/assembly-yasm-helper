@@ -2,8 +2,9 @@
 const vscode = require("vscode");
 
 class AsmDefinitionProvider {
-    constructor(registry) {
-        this.registry = registry;
+    constructor(registry, workspaceIndex = null) {
+        this.registry       = registry;
+        this.workspaceIndex = workspaceIndex;
     }
 
     provideDefinition(document, position, token) {
@@ -14,9 +15,13 @@ class AsmDefinitionProvider {
 
         const word = document.getText(range);
 
+        // --- local lookups (current file + includes) ---
         const label = this.registry.findLabel(word);
         if (label && label.line !== undefined) {
-            return new vscode.Location(document.uri, new vscode.Position(label.line, 0));
+            const isExternDecl = document.lineAt(label.line).text.trimStart().toLowerCase().startsWith('extern');
+            if (!isExternDecl)
+                return new vscode.Location(document.uri, new vscode.Position(label.line, 0));
+            // extern declaration → fall through to workspace index
         }
 
         const variable = this.registry.findVariable(word);
@@ -32,6 +37,17 @@ class AsmDefinitionProvider {
         const macro = this.registry.findMacro(word);
         if (macro && macro.line !== undefined) {
             return new vscode.Location(document.uri, new vscode.Position(macro.line, 0));
+        }
+
+        // --- cross-file: workspace index ---
+        if (this.workspaceIndex) {
+            const defs = this.workspaceIndex.findAllDefinitions(word);
+            if (defs.length > 0) {
+                return defs.map(d => new vscode.Location(
+                    vscode.Uri.file(d.filePath),
+                    new vscode.Position(d.line, 0)
+                ));
+            }
         }
 
         return null;

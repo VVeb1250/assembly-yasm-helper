@@ -23,9 +23,10 @@ const KIND_MAP = {
 
 class AsmCompletionProvider {
 
-    constructor(registry, scanner) {
-        this.registry = registry;
-        this.scanner  = scanner;
+    constructor(registry, scanner, workspaceIndex = null) {
+        this.registry       = registry;
+        this.scanner        = scanner;
+        this.workspaceIndex = workspaceIndex;
     }
 
     async provideCompletionItems(document, position, _token, context) {
@@ -56,7 +57,11 @@ class AsmCompletionProvider {
         const lines = [];
         for (let i = 0; i < document.lineCount; i++) lines.push(document.lineAt(i).text);
 
-        const plain = getCompletionItems({ line, lineIdx: position.line, lines }, this.registry);
+        const externSymbols = this.workspaceIndex
+            ? this.workspaceIndex.getExternSuggestions(document.uri.fsPath)
+            : [];
+
+        const plain = getCompletionItems({ line, lineIdx: position.line, lines, externSymbols }, this.registry);
         completions.items = plain.map(p => {
             const item = new vscode.CompletionItem(p.label, KIND_MAP[p.kindType] ?? vscode.CompletionItemKind.Text);
             item.detail        = p.detail;
