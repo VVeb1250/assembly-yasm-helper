@@ -1,6 +1,7 @@
 "use strict";
 const vscode = require("vscode");
 const { Utils } = require("../utils");
+const { INSTRUCTION_SIGNATURES } = require("../data/instructionSignatures");
 
 class TasmHoverProvider {
     constructor(registry) {
@@ -46,6 +47,14 @@ class TasmHoverProvider {
                         { language: "plainText", value: keyword.def },
                         { language: "assembly", value: "Syntax: " + keyword.data }
                     );
+                    const sigs = INSTRUCTION_SIGNATURES[word.toLowerCase()];
+                    if (sigs?.length) {
+                        const ts = b => ((b&3)===3)?'r/m':(b&1)?'reg':(b&2)?'mem':(b&4)?'imm':(b&8)?'label':'?';
+                        const forms = sigs.map(f =>
+                            f.length ? `${word.toLowerCase()} ${f.map(ts).join(', ')}` : word.toLowerCase()
+                        ).join('\n');
+                        output.push({ language: 'assembly', value: forms });
+                    }
                 } else if (label) {
                     const lineInfo = label.line !== undefined
                         ? `  [line ${label.line + 1}]`

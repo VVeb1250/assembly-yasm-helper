@@ -2,6 +2,8 @@
 const vscode = require("vscode");
 const { KEYWORD_DICTIONARY } = require("../data/keywords");
 const { KeywordType, AllowKinds } = require("../data/enums");
+const { INSTRUCTION_SIGNATURES } = require("../data/instructionSignatures");
+const { OperandType } = require("../data/operandTypes");
 
 // Register size groups for size mismatch detection
 const REG_SIZE = {
@@ -218,6 +220,22 @@ class DiagnosticProvider {
             if (kw.opCount === 2 && operands.length === 2) {
                 this._checkSizeMismatch(i, lineNoComment, opcode, operands, diagnostics);
             }
+
+            // --- Check 4: signature mismatch (catches mem-to-mem etc.) ---
+            const sigForms = INSTRUCTION_SIGNATURES[opcode];
+            if (sigForms && operands.length >= 2) {
+                const types = operands.map(o => this._classifyOperand(o));
+                const matched = sigForms.some(sig =>
+                    sig.length === operands.length &&
+                    sig.every((expected, j) => types[j] & expected)
+                );
+                if (!matched) {
+                    const col = lineNoComment.toLowerCase().indexOf(opcode);
+                    diagnostics.push(this._makeDiagnostic(i, col, opcode.length,
+                        `'${opcode}' has no valid form for (${types.map(t => this._typeName(t)).join(', ')})`,
+                        vscode.DiagnosticSeverity.Warning));
+                }
+            }
         }
     }
 
@@ -305,6 +323,23 @@ class DiagnosticProvider {
         const safeCol = Math.max(0, col);
         const range = new vscode.Range(line, safeCol, line, safeCol + length);
         return new vscode.Diagnostic(range, message, severity);
+    }
+
+    _classifyOperand(op) {
+        if (op.includes('[')) return OperandType.MEM;
+        const tokens = op.split(/\s+/).filter(t => t.length > 0);
+        if (tokens.some(t => this._isRegister(t))) return OperandType.REG;
+        if (tokens.length === 1 && this._isNumber(tokens[0])) return OperandType.IMM;
+        return OperandType.LABEL | OperandType.IMM; // bare identifier: label or var address
+    }
+
+    _typeName(bits) {
+        if ((bits & 3) === 3) return 'r/m';
+        if (bits & OperandType.REG)   return 'reg';
+        if (bits & OperandType.MEM)   return 'mem';
+        if (bits & OperandType.IMM)   return 'imm';
+        if (bits & OperandType.LABEL) return 'label';
+        return '?';
     }
 
     _isRegister(word) {
