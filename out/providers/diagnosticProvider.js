@@ -2,6 +2,7 @@
 const vscode = require("vscode");
 const { KEYWORD_DICTIONARY } = require("../data/keywords");
 const { KeywordType, AllowKinds } = require("../data/enums");
+const { INSTRUCTION_SIGNATURES } = require("../data/instructionSignatures");
 
 // Register size groups for size mismatch detection
 const REG_SIZE = {
@@ -66,6 +67,7 @@ class DiagnosticProvider {
             if (!lineNoComment.trimStart().endsWith(':')) continue;
             const name = lineNoComment.trim().slice(0, -1).trim().toLowerCase();
             if (!name) continue;
+            if (name.startsWith('%%')) continue; // macro-local labels are scoped per invocation
             if (seen.has(name)) {
                 diagnostics.push(this._makeDiagnostic(
                     i, lines[i].indexOf(name.charAt(0)), name.length,
@@ -200,7 +202,10 @@ class DiagnosticProvider {
                 .filter(o => o.length > 0);
 
             // --- Check 1: operand count ---
-            if (kw.opCount >= 0 && operands.length !== kw.opCount) {
+            // Signatures override kw.opCount for variable-arity instructions (e.g. imul 1/2/3 ops)
+            const sigForms = INSTRUCTION_SIGNATURES[opcode];
+            const validBySig = sigForms?.some(sig => sig.length === operands.length);
+            if (kw.opCount >= 0 && operands.length !== kw.opCount && !validBySig) {
                 const col = lineNoComment.toLowerCase().indexOf(opcode);
                 diagnostics.push(this._makeDiagnostic(i, col, opcode.length,
                     `'${opcode}' requires ${kw.opCount} operand(s), got ${operands.length}`,
@@ -222,11 +227,6 @@ class DiagnosticProvider {
     }
 
     _checkOperandType(lineIdx, rawLine, operand, opcode, allowType, diagnostics) {
-        const knownLabels = new Set([
-            ...this.registry.labels.map(l => l.name.toLowerCase()),
-            ...this.registry.procs.map(p => p.name.toLowerCase())
-        ]);
-
         // AllowKinds.label = 8 → ต้องเป็น label เท่านั้น
         if (allowType === AllowKinds.label) {
             if (this._isRegister(operand) || this._isNumber(operand)) {
