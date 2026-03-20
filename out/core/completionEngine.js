@@ -149,10 +149,16 @@ function _completeBracketMemory(line, registry) {
 function _completeOperands(words, line, registry, items) {
     const firstWord = words[0].toLowerCase();
 
+    if (firstWord === 'global' || firstWord === 'extern') {
+        registry.labels.forEach(l => items.push(_makeItem(l.name, KeywordType.label,  '', '', null, "01")));
+        registry.procs.forEach(p  => items.push(_makeItem(p.name, KeywordType.method, '', '', null, "01")));
+        return items;
+    }
+
     if (!INSTRUCTION_SIGNATURES[firstWord]) {
         if (registry.findMacro(firstWord))
             return _completeMacroOperands(registry);
-        return _completeMemoryDirectives(words);
+        return _completeMemoryDirectives(words, registry);
     }
 
     const allowed = getAllowedOperandTypes(firstWord, getOperandIndex(line));
@@ -193,7 +199,7 @@ function _completeMacroOperands(registry) {
     return items;
 }
 
-function _completeMemoryDirectives(words) {
+function _completeMemoryDirectives(words, registry) {
     const items = [];
     const secondWord = words.filter(w => w.length > 0)[1] || '';
     if (!MEM_DIRECTIVES.includes(secondWord)) {
@@ -201,6 +207,17 @@ function _completeMemoryDirectives(words) {
             const kw = KEYWORD_MAP.get(d);
             items.push(_makeItem(d, KeywordType.memoryAllocation, kw ? kw.def : '(Memory)'));
         }
+        return items;
+    }
+
+    // After directive (db/dw/equ/etc.) — suggest symbols as values
+    if (registry) {
+        for (const v of registry.vars)
+            items.push(_makeItem(v.name, KeywordType.variable, `(${v.type})`, '', null, "01"));
+        registry.labels.forEach(l => items.push(_makeItem(l.name, KeywordType.label,  '', '', null, "02")));
+        registry.procs.forEach(p  => items.push(_makeItem(p.name, KeywordType.method, '', '', null, "02")));
+        for (const d of (registry.defines || []))
+            items.push(_makeItem(d, KeywordType.constant, "(%define)", '', null, "03"));
     }
     return items;
 }
