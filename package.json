@@ -161,7 +161,8 @@
 			{
 				"language": "assembly",
 				"scopes": {
-					"macro": ["entity.name.function.asm"]
+					"macro": ["entity.name.function.asm"],
+					"register": ["entity.name.type.asm"]
 				}
 			}
 		],

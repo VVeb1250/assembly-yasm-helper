@@ -1,11 +1,20 @@
 "use strict";
 const vscode = require("vscode");
-const { KEYWORD_MAP } = require("../data/keywords");
+const { KEYWORD_MAP, REGISTERS, AVX_REGISTERS } = require("../data/keywords");
 const { INSTRUCTION_SIGNATURES } = require("../data/instructionSignatures");
 
-const TOKEN_TYPES    = ['macro'];
+const TOKEN_TYPES    = ['macro', 'register'];
 const TOKEN_MODIFIERS = [];
 const LEGEND = new vscode.SemanticTokensLegend(TOKEN_TYPES, TOKEN_MODIFIERS);
+
+// Fast register lookup set (all lowercase)
+const REGISTER_SET = new Set([
+    ...REGISTERS.map(r => r.toLowerCase()),
+    ...AVX_REGISTERS.map(r => r.toLowerCase())
+]);
+
+// Word-token regex: matches identifier-like tokens in a line
+const WORD_RE = /\b([A-Za-z][A-Za-z0-9]*)\b/g;
 
 class AsmSemanticTokensProvider {
 
@@ -29,27 +38,33 @@ class AsmSemanticTokensProvider {
             // skip comment-only lines and preprocessor directives
             if (trimmed.startsWith(';') || trimmed.startsWith('%')) continue;
 
-            // strip inline comment
+            // strip inline comment and string literals for cleaner token scan
             const noComment = text.split(';')[0];
 
-            // match first identifier at instruction position (after optional indent)
-            const m = noComment.match(/^(\s*)([A-Za-z_.$?][A-Za-z0-9_.$?]*)/);
-            if (!m) continue;
+            // --- Macro call at instruction position (type 0 = 'macro') ---
+            const firstToken = noComment.match(/^(\s*)([A-Za-z_.$?][A-Za-z0-9_.$?]*)/);
+            if (firstToken) {
+                const col  = firstToken[1].length;
+                const word = firstToken[2];
+                const key  = word.toLowerCase();
+                const rest = noComment.slice(col + word.length).trimStart();
 
-            const col  = m[1].length;
-            const word = m[2];
-            const key  = word.toLowerCase();
+                if (!rest.startsWith(':') &&
+                    !KEYWORD_MAP.has(key) &&
+                    !INSTRUCTION_SIGNATURES[key] &&
+                    !REGISTER_SET.has(key) &&
+                    this.registry.findMacro(key)) {
+                    builder.push(i, col, word.length, 0, 0);
+                }
+            }
 
-            // skip label definitions (word followed by colon)
-            const rest = noComment.slice(col + word.length).trimStart();
-            if (rest.startsWith(':')) continue;
-
-            // skip known built-in keywords and instructions
-            if (KEYWORD_MAP.has(key) || INSTRUCTION_SIGNATURES[key]) continue;
-
-            // emit token if this matches a user-defined macro
-            if (this.registry.findMacro(key)) {
-                builder.push(i, col, word.length, 0, 0); // type 0 = 'macro'
+            // --- Registers anywhere on the line (type 1 = 'register') ---
+            WORD_RE.lastIndex = 0;
+            let m;
+            while ((m = WORD_RE.exec(noComment)) !== null) {
+                if (REGISTER_SET.has(m[1].toLowerCase())) {
+                    builder.push(i, m.index, m[1].length, 1, 0);
+                }
             }
         }
 

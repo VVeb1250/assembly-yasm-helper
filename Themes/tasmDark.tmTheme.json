@@ -9,7 +9,8 @@
         "sideBarTitle.foreground": "#bbbbbb"
     },
     "semanticTokenColors": {
-        "macro": "#DCDCAA"
+        "macro": "#DCDCAA",
+        "register": "#9CDCFE"
     },
     "tokenColors": [
         {
