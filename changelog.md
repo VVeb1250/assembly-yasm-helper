@@ -1,3 +1,9 @@
+## 1.3.1
+- add macro autocomplete in instruction position (user-defined macros appear alongside instructions)
+- add operand suggestions (vars/registers/labels/imm) when typing macro arguments
+- fix macro completion icon: was Color, now Function
+- add editor defaults for assembly files: tabSize=8, insertSpaces=false
+
 ## 1.3.0
 - add hover shows all valid operand forms per instruction (e.g. mov reg, reg / mov mem, reg)
 - add diagnostic warning for invalid operand combinations (catches mem-to-mem mov [a],[b])
