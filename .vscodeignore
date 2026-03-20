@@ -3,5 +3,8 @@ node_modules/**
 **/*.map
 **/*.ts
 .vscode/**
+.claude/**
 out/test/**
 CLAUDE.md
+*.plan.md
+*-plan.md

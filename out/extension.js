@@ -10,6 +10,9 @@ const { AsmDefinitionProvider } = require("./providers/definitionProvider");
 const { AsmDocumentSymbolProvider } = require("./providers/symbolProvider");
 const { AsmSignatureHelpProvider } = require("./providers/signatureHelpProvider");
 const { AsmSemanticTokensProvider, SEMANTIC_TOKENS_LEGEND } = require("./providers/semanticTokensProvider");
+const { AsmFoldingProvider }    = require("./providers/foldingProvider");
+const { AsmReferencesProvider } = require("./providers/referencesProvider");
+const { AsmRenameProvider }     = require("./providers/renameProvider");
 
 class ExtensionManager {
     constructor(context) {
@@ -57,6 +60,18 @@ class ExtensionManager {
                 this.semanticTokens,
                 SEMANTIC_TOKENS_LEGEND
             )
+        );
+
+        this.context.subscriptions.push(
+            vscode.languages.registerFoldingRangeProvider('assembly', new AsmFoldingProvider())
+        );
+
+        this.context.subscriptions.push(
+            vscode.languages.registerReferenceProvider('assembly', new AsmReferencesProvider(this.registry))
+        );
+
+        this.context.subscriptions.push(
+            vscode.languages.registerRenameProvider('assembly', new AsmRenameProvider(this.registry))
         );
 
         this.context.subscriptions.push(this.diagnostics.collection);
