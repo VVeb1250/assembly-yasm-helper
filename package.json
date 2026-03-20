@@ -7,7 +7,7 @@
 	"license": "MIT",
 	"icon": "icon.png",
 	"bin": {
-		"assembly-yasm-lsp": "./dist/server.js"
+		"assembly-yasm-lsp": "./bin/assembly-yasm-lsp.js"
 	},
 	"repository": {
 		"type": "git",
