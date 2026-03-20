@@ -8,6 +8,9 @@
         "activityBarBadge.background": "#007acc",
         "sideBarTitle.foreground": "#bbbbbb"
     },
+    "semanticTokenColors": {
+        "macro": "#795E26"
+    },
     "tokenColors": [
         {
             "scope": "comment",

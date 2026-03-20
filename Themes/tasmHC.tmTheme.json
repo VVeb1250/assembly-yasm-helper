@@ -10,6 +10,9 @@
         "contrastActiveBorder": "#FFFFFF",
         "contrastBorder": "#DEE7F2"
     },
+    "semanticTokenColors": {
+        "macro": "#DCDCAA"
+    },
     "tokenColors": [
         {
             "scope": "comment",
