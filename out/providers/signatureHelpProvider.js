@@ -8,6 +8,8 @@ const _ts = b => ((b&3)===3)?'r/m':(b&1)?'reg':(b&2)?'mem':(b&4)?'imm':(b&8)?'la
 
 class AsmSignatureHelpProvider {
 
+    constructor(registry) { this.registry = registry; }
+
     provideSignatureHelp(document, position, token, context) {
         if (!vscode.workspace.getConfiguration('assembly').get('enableSignatureHelp')) return null;
 
@@ -23,6 +25,7 @@ class AsmSignatureHelpProvider {
         const opcode = words[0].toLowerCase();
         const kw = KEYWORD_MAP.get(opcode);
         const sigs = INSTRUCTION_SIGNATURES[opcode];
+        const macro = this.registry?.findMacro(opcode);
 
         // count commas after opcode to determine active parameter index
         const afterOpcode = line.slice(line.toLowerCase().indexOf(opcode) + opcode.length);
@@ -81,6 +84,22 @@ class AsmSignatureHelpProvider {
             result.signatures      = [sig];
             result.activeSignature = 0;
             result.activeParameter = Math.min(commaCount, sig.parameters.length - 1);
+
+        } else if (macro?.argCount > 0) {
+            // user-defined macro: build signature from argCount
+            const params = Array.from({ length: macro.argCount }, (_, i) => `%${i + 1}`);
+            const label = `${macro.name} ${params.join(', ')}`;
+            const sig = new vscode.SignatureInformation(label, `(Macro) ${macro.name} — ${macro.argCount} arg${macro.argCount !== 1 ? 's' : ''}`);
+            let searchFrom = macro.name.length + 1;
+            for (const p of params) {
+                const start = label.indexOf(p, searchFrom);
+                const end   = start + p.length;
+                sig.parameters.push(new vscode.ParameterInformation([start, end]));
+                searchFrom = end + 1;
+            }
+            result.signatures      = [sig];
+            result.activeSignature = 0;
+            result.activeParameter = Math.min(commaCount, params.length - 1);
 
         } else {
             return null;

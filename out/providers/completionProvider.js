@@ -43,7 +43,7 @@ class AsmCompletionProvider {
         const isTypingOperand = words.length > 1 || (words.length === 1 && /\s$/.test(line));
 
         if (trimmed.startsWith('%'))
-            return this._completePreprocessor(completions);
+            return this._completePreprocessor(completions, document, position);
 
         if (!isTypingOperand)
             this._addRootLevelItems(isRootLevel, completions);
@@ -97,12 +97,35 @@ class AsmCompletionProvider {
     // Completion sections
     // -------------------------------------------------------
 
-    _completePreprocessor(completions) {
+    _completePreprocessor(completions, document, position) {
         for (const p of PREPROCESSOR)
             completions.items.push(this.createItem(p.name, KeywordType.precompiled, p.detail, p.doc, null, "01"));
         for (const m of this.registry.macros)
             completions.items.push(this.createItem(m.name, KeywordType.macro, "(Macro)", '', null, "05"));
+
+        // offer %1..%N inside macro body
+        if (document && position) {
+            const argCount = this._getMacroArgCount(document, position.line);
+            if (argCount > 0) {
+                for (let i = 1; i <= argCount; i++)
+                    completions.items.push(this.createItem(`%${i}`, KeywordType.constant, `(Macro arg ${i})`, '', null, "01"));
+            }
+        }
         return completions;
+    }
+
+    // Scan upward from lineIdx to detect enclosing %macro..%endmacro and return its argCount
+    _getMacroArgCount(document, lineIdx) {
+        for (let i = lineIdx - 1; i >= 0; i--) {
+            const raw = document.lineAt(i).text.trim().toLowerCase();
+            if (raw.startsWith('%endmacro')) return 0;
+            if (raw.startsWith('%macro')) {
+                const parts = raw.split(/\s+/);
+                const n = parseInt(parts[2], 10);
+                return isNaN(n) ? 0 : n;
+            }
+        }
+        return 0;
     }
 
     _addRootLevelItems(isRootLevel, completions) {

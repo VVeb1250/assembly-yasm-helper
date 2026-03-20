@@ -44,7 +44,7 @@ class ExtensionManager {
         this.context.subscriptions.push(
             vscode.languages.registerSignatureHelpProvider(
                 'assembly',
-                new AsmSignatureHelpProvider(),
+                new AsmSignatureHelpProvider(this.registry),
                 ' ', ','
             )
         );

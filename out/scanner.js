@@ -153,7 +153,9 @@ class DocumentScanner {
     _detectMacro(ctx, x) {
         if (!this.macroRegex.test(ctx.raw) || ctx.words.length <= 1) return;
         const macroName = ctx.words[1];
-        if (!this.registry.findMacro(macroName)) this.registry.addMacro(macroName, x);
+        const argCount  = ctx.words.length > 2 ? parseInt(ctx.words[2], 10) : 0;
+        if (!this.registry.findMacro(macroName))
+            this.registry.addMacro(macroName, x, isNaN(argCount) ? 0 : argCount);
     }
 
     _detectDefine(ctx) {

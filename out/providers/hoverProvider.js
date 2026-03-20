@@ -39,8 +39,9 @@ class TasmHoverProvider {
                         { language: "assembly", value: proc.description.outputs() }
                     );
                 } else if (macro) {
-                    const macroLine = macro.line !== undefined ? `  [line ${macro.line + 1}]` : '';
-                    output.push({ language: "assembly", value: "(Macro) " + macro.name + macroLine });
+                    const argStr  = macro.argCount !== undefined ? `  — ${macro.argCount} arg${macro.argCount !== 1 ? 's' : ''}` : '';
+                    const lineStr = macro.line !== undefined ? `  [line ${macro.line + 1}]` : '';
+                    output.push({ language: "assembly", value: "(Macro) " + macro.name + argStr + lineStr });
                 } else if (keyword) {
                     output.push(
                         { language: "assembly", value: Utils.getType(keyword.type) + " " + keyword.name },
