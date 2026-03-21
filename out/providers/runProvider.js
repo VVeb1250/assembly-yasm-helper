@@ -62,6 +62,68 @@ class RunProvider {
         this._getTerminal().show(true);
     }
 
+    async debugWithDDD(document, workspaceIndex = null) {
+        const config       = vscode.workspace.getConfiguration('assembly');
+        const compilerType = config.get('compilerType', 'yasm');
+        const format       = config.get('compilerFormat', 'elf64');
+        const debugInfo    = config.get('compilerDebugInfo', 'dwarf2');
+        const outputExt    = config.get('outputExtension', 'o');
+        const entryPoint   = config.get('entryPoint', '_start');
+        const dddDebugger  = config.get('dddDebugger', 'gdb');
+
+        // Force debug symbols — ddd is useless without them
+        const effectiveDebugInfo = debugInfo === 'none' ? 'dwarf2' : debugInfo;
+
+        let compilerPath = config.get('compilerPath', '');
+        if (!compilerPath) compilerPath = await _findExe(compilerType);
+        if (!compilerPath) {
+            vscode.window.showErrorMessage(
+                `${compilerType.toUpperCase()} not found. Set 'assembly.compilerPath' in settings.`
+            );
+            return;
+        }
+
+        let linkerPath = config.get('linkerPath', '');
+        if (!linkerPath) linkerPath = await _findExe('ld');
+        if (!linkerPath) {
+            vscode.window.showErrorMessage(`Linker 'ld' not found. Set 'assembly.linkerPath' in settings.`);
+            return;
+        }
+
+        let dddPath = config.get('dddPath', '');
+        if (!dddPath) dddPath = await _findExe('ddd');
+        if (!dddPath) {
+            vscode.window.showErrorMessage(`'ddd' not found. Install ddd or set 'assembly.dddPath' in settings.`);
+            return;
+        }
+
+        const srcFile = document.uri.fsPath;
+        const dir     = path.dirname(srcFile);
+        const base    = path.basename(srcFile, path.extname(srcFile));
+
+        const depFiles = _resolveDeps(document.getText(), srcFile, workspaceIndex);
+        const allFiles = [srcFile, ...depFiles];
+
+        const asmCmds = [];
+        const objFiles = [];
+        for (const fp of allFiles) {
+            const objFile = fp.replace(/\.[^.]+$/, `.${outputExt}`);
+            const args = [`-f${format}`, `-g${effectiveDebugInfo}`];
+            args.push(_q(fp), '-o', _q(objFile));
+            asmCmds.push(`${_q(compilerPath)} ${args.join(' ')}`);
+            objFiles.push(_q(objFile));
+        }
+
+        const exeFile = path.join(dir, base);
+        const ldCmd   = `${_q(linkerPath)} ${objFiles.join(' ')} -o ${_q(exeFile)} -e${entryPoint}`;
+        const runCmd  = `${_q(dddPath)} --debugger ${dddDebugger} ${_q(exeFile)}`;
+
+        const fullCmd = [...asmCmds, ldCmd, runCmd].join(' && \\\n  ');
+
+        this._getDebugTerminal().sendText(fullCmd);
+        this._getDebugTerminal().show(true);
+    }
+
     _getTerminal() {
         if (!this._terminal || this._terminal.exitStatus !== undefined) {
             this._terminal = vscode.window.createTerminal('Assembly Run');
@@ -69,8 +131,16 @@ class RunProvider {
         return this._terminal;
     }
 
+    _getDebugTerminal() {
+        if (!this._debugTerminal || this._debugTerminal.exitStatus !== undefined) {
+            this._debugTerminal = vscode.window.createTerminal('Assembly Debug');
+        }
+        return this._debugTerminal;
+    }
+
     dispose() {
         if (this._terminal) this._terminal.dispose();
+        if (this._debugTerminal) this._debugTerminal.dispose();
     }
 }
 

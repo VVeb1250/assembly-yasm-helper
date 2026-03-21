@@ -91,6 +91,16 @@ class ExtensionManager {
                 await this.runner.buildAndRun(editor.document, this.workspaceIndex);
             })
         );
+        this.context.subscriptions.push(
+            vscode.commands.registerCommand('assembly.debug', async () => {
+                const editor = vscode.window.activeTextEditor;
+                if (!editor || editor.document.languageId !== 'assembly') {
+                    vscode.window.showWarningMessage('Open an assembly file first.');
+                    return;
+                }
+                await this.runner.debugWithDDD(editor.document, this.workspaceIndex);
+            })
+        );
         this.context.subscriptions.push(this.runner);
 
         // scan + analyze ทุกครั้งที่ไฟล์เปลี่ยน

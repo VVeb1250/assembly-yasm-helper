@@ -30,12 +30,23 @@
 				"title": "Build & Run",
 				"category": "Assembly",
 				"icon": "$(run-all)"
+			},
+			{
+				"command": "assembly.debug",
+				"title": "Debug with DDD",
+				"category": "Assembly",
+				"icon": "$(debug-alt)"
 			}
 		],
 		"menus": {
 			"editor/title": [
 				{
 					"command": "assembly.buildAndRun",
+					"when": "editorLangId == assembly",
+					"group": "navigation"
+				},
+				{
+					"command": "assembly.debug",
 					"when": "editorLangId == assembly",
 					"group": "navigation"
 				}
@@ -166,6 +177,18 @@
 					"type": "string",
 					"default": "_start",
 					"description": "Entry point symbol passed to linker (e.g. _start or main)"
+				},
+				"assembly.dddPath": {
+					"type": "string",
+					"default": "",
+					"description": "Path to ddd executable. Leave empty to auto-detect."
+				},
+				"assembly.dddDebugger": {
+					"type": "string",
+					"default": "gdb",
+					"enum": ["gdb", "dbx", "wdb"],
+					"enumDescriptions": ["GNU Debugger (default)", "dbx debugger", "HP wdb debugger"],
+					"description": "Debugger backend for ddd (--debugger flag)"
 				}
 			}
 		},
