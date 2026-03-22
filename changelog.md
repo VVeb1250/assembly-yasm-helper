@@ -1,3 +1,7 @@
+## 2.1.1
+- add **Debug with DDD** command — assembles with debug symbols, resolves `extern` dependencies, then launches `ddd --debugger gdb <exe>`; new settings: `assembly.dddPath`, `assembly.dddDebugger`
+- fix false "Duplicate label" error for NASM local labels (`.done`, `.loop`, `.write`, etc.) — local labels are scoped to their parent label and must not be checked globally
+
 ## 2.1.0
 - add **workspace symbol index** — scans all `.asm`/`.s` files in workspace, caches `global` symbols per file with `FileSystemWatcher` for live updates
 - add **cross-file extern completion** — typing `extern ` suggests `global` symbols from other files, deduplicated by name with source file(s) shown in detail
