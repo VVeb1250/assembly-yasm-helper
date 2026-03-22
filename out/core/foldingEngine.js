@@ -1,12 +1,14 @@
 "use strict";
 
-const PROC_START  = /^\s*[A-Za-z_.$?][\w.$?]*\s+proc\b/i;
-const PROC_END    = /^\s*endp\s*(?:;.*)?$/i;
-const MACRO_START = /^\s*%macro\b/i;
-const MACRO_END   = /^\s*%endmacro\s*(?:;.*)?$/i;
-const STRUC_START = /^\s*[A-Za-z_.$?][\w.$?]*\s+struc\b/i;
-const STRUC_END   = /^\s*ends\s*(?:;.*)?$/i;
-const SECTION_RE  = /^\s*(section|segment)\b/i;
+const PROC_START   = /^\s*[A-Za-z_.$?][\w.$?]*\s+proc\b/i;
+const PROC_END     = /^\s*endp\s*(?:;.*)?$/i;
+const MACRO_START  = /^\s*%macro\b/i;
+const MACRO_END    = /^\s*%endmacro\s*(?:;.*)?$/i;
+const STRUC_START  = /^\s*[A-Za-z_.$?][\w.$?]*\s+struc\b/i;
+const STRUC_END    = /^\s*ends\s*(?:;.*)?$/i;
+const SECTION_RE   = /^\s*(section|segment)\b/i;
+// plain-label function: line contains only a non-local label (nothing else after colon)
+const PLAIN_LABEL  = /^([A-Za-z_.$?][\w.$?]*):\s*(?:;.*)?$/;
 
 /**
  * Compute folding ranges for document lines.
@@ -20,12 +22,23 @@ function getFoldingRanges(lines) {
     const procStack  = [];
     const macroStack = [];
     const strucStack = [];
-    let   sectionStart = -1;
+    let   sectionStart    = -1;
+    let   plainLabelStart = -1;
+
+    const _closePlainLabel = (endLine) => {
+        if (plainLabelStart < 0) return;
+        let end = endLine;
+        while (end > plainLabelStart && lines[end].trim() === '') end--;
+        if (end > plainLabelStart) ranges.push({ start: plainLabelStart, end, kind: null });
+        plainLabelStart = -1;
+    };
 
     for (let i = 0; i < count; i++) {
-        const line = lines[i];
+        const line      = lines[i];
+        const noComment = line.replace(/;.*$/, '').trimEnd();
 
         if (SECTION_RE.test(line)) {
+            _closePlainLabel(i - 1);
             if (sectionStart >= 0) {
                 let end = i - 1;
                 while (end > sectionStart && lines[end].trim() === '') end--;
@@ -35,13 +48,22 @@ function getFoldingRanges(lines) {
             continue;
         }
 
-        if (PROC_START.test(line))  { procStack.push(i);  continue; }
+        if (PROC_START.test(line))  { _closePlainLabel(i - 1); procStack.push(i);  continue; }
         if (PROC_END.test(line)  && procStack.length)  { const s = procStack.pop();  if (i > s) ranges.push({ start: s, end: i, kind: null }); continue; }
-        if (MACRO_START.test(line)) { macroStack.push(i); continue; }
+        if (MACRO_START.test(line)) { _closePlainLabel(i - 1); macroStack.push(i); continue; }
         if (MACRO_END.test(line) && macroStack.length) { const s = macroStack.pop(); if (i > s) ranges.push({ start: s, end: i, kind: null }); continue; }
-        if (STRUC_START.test(line)) { strucStack.push(i); continue; }
+        if (STRUC_START.test(line)) { _closePlainLabel(i - 1); strucStack.push(i); continue; }
         if (STRUC_END.test(line) && strucStack.length)  { const s = strucStack.pop();  if (i > s) ranges.push({ start: s, end: i, kind: null }); continue; }
+
+        // plain-label function: non-local label on its own line, outside proc/struc blocks
+        const lm = noComment.match(PLAIN_LABEL);
+        if (lm && !lm[1].startsWith('.') && procStack.length === 0 && strucStack.length === 0) {
+            _closePlainLabel(i - 1);
+            plainLabelStart = i;
+        }
     }
+
+    _closePlainLabel(count - 1);
 
     if (sectionStart >= 0) {
         let end = count - 1;
