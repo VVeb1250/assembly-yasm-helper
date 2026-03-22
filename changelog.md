@@ -1,3 +1,6 @@
+## 2.3.1
+- fix **number hover** — `0x1F`, `1Fh`, `1010b` now correctly show decimal/hex/binary conversions on hover (VS Code default word boundary was splitting the tokens)
+
 ## 2.3.0
 - fix **cross-file Go to Definition** (F12) — now reliably jumps to the defining file by tracking extern symbols in a dedicated `registry.externs` set instead of fragile line-number checks
 - feat **extern hover doc** — hovering an extern symbol with a single source file now shows its JSDoc description, `@arg`, and `@out` comments from the declaring file
