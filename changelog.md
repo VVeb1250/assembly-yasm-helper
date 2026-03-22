@@ -1,3 +1,7 @@
+## 2.2.1
+- fix **extern multi-symbol**: `extern a, b, c` now correctly registers all symbols
+- fix **extern hover**: hovering on an extern-declared symbol now shows source file and line (e.g. `(extern) stats — extern-function.s [line 15]`) instead of a misleading local line number
+
 ## 2.2.0
 - add **hover doc for plain-label functions** — JSDoc comments (`; @arg:`, `; @out:`, description) above any `label:` now appear in hover tooltips, same as `proc`/`endp` style
 - add **scoped Go to Definition for local labels** — F12 on `.done`/`.loop`/`.write` etc. now resolves to the correct parent scope instead of always jumping to the first occurrence in the file

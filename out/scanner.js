@@ -201,8 +201,10 @@ class DocumentScanner {
 
     _detectExtern(ctx, x) {
         if (ctx.words[0]?.toLowerCase() !== "extern" || ctx.words.length <= 1) return;
-        const externName = ctx.words[1];
-        if (!this.registry.findLabel(externName)) this.registry.addLabel(externName, x);
+        const rest = ctx.noComment.replace(/^\s*extern\s+/i, '');
+        for (const sym of rest.split(/[\s,]+/).map(s => s.trim()).filter(s => s && !s.startsWith(';'))) {
+            if (!this.registry.findLabel(sym)) this.registry.addLabel(sym, x);
+        }
     }
 }
 

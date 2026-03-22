@@ -31,7 +31,7 @@ class ExtensionManager {
 
     async activate() {
         this.context.subscriptions.push(
-            vscode.languages.registerHoverProvider('assembly', new TasmHoverProvider(this.registry))
+            vscode.languages.registerHoverProvider('assembly', new TasmHoverProvider(this.registry, this.workspaceIndex))
         );
 
         this.context.subscriptions.push(

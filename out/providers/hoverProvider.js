@@ -1,10 +1,12 @@
 "use strict";
 const vscode = require("vscode");
+const path   = require("path");
 const { getHoverContent } = require("../core/hoverEngine");
 
 class TasmHoverProvider {
-    constructor(registry) {
-        this.registry = registry;
+    constructor(registry, workspaceIndex = null) {
+        this.registry       = registry;
+        this.workspaceIndex = workspaceIndex;
     }
 
     async provideHover(document, position) {
@@ -16,7 +18,24 @@ class TasmHoverProvider {
         const range = document.getWordRangeAtPosition(position);
         if (!range) return null;
 
-        const word   = document.getText(range);
+        const word  = document.getText(range);
+
+        // If symbol was declared extern → show cross-file definition info
+        const label = this.registry.findLabel(word);
+        if (label?.line !== undefined && this.workspaceIndex) {
+            const isExtern = document.lineAt(label.line).text.trimStart().toLowerCase().startsWith('extern');
+            if (isExtern) {
+                const defs = this.workspaceIndex.findAllDefinitions(word);
+                if (defs.length > 0) {
+                    const content = defs.map(d => ({
+                        language: 'assembly',
+                        value: `(extern) ${word}  —  ${path.basename(d.filePath)} [line ${d.line + 1}]`
+                    }));
+                    return new vscode.Hover(content);
+                }
+            }
+        }
+
         const output = getHoverContent(word, this.registry);
         return output ? new vscode.Hover(output) : null;
     }
