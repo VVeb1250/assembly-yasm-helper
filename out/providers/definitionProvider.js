@@ -26,12 +26,11 @@ class AsmDefinitionProvider {
         }
 
         // --- local lookups (current file + includes) ---
-        const label = this.registry.findLabel(word);
-        if (label && label.line !== undefined) {
-            const isExternDecl = document.lineAt(label.line).text.trimStart().toLowerCase().startsWith('extern');
-            if (!isExternDecl)
+        const isExtern = this.registry.externs?.has(word.toLowerCase());
+        if (!isExtern) {
+            const label = this.registry.findLabel(word);
+            if (label && label.line !== undefined)
                 return new vscode.Location(document.uri, new vscode.Position(label.line, 0));
-            // extern declaration → fall through to workspace index
         }
 
         const variable = this.registry.findVariable(word);

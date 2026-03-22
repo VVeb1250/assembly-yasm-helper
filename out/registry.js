@@ -30,6 +30,9 @@ class SymbolRegistry {
         // local label scoped map: 'parentLabel/.local' → { name, line, parent }
         this.localLabelMap = new Map();
 
+        // extern-declared symbol names (lowercase) — set by _detectExtern
+        this.externs = new Set();
+
         // duplicate guard
         this.varSet = new Set();
         this.procSet = new Set();

@@ -203,6 +203,7 @@ class DocumentScanner {
         if (ctx.words[0]?.toLowerCase() !== "extern" || ctx.words.length <= 1) return;
         const rest = ctx.noComment.replace(/^\s*extern\s+/i, '');
         for (const sym of rest.split(/[\s,]+/).map(s => s.trim()).filter(s => s && !s.startsWith(';'))) {
+            this.registry.externs.add(sym.toLowerCase());
             if (!this.registry.findLabel(sym)) this.registry.addLabel(sym, x);
         }
     }
