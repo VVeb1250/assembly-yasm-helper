@@ -59,6 +59,7 @@ function _checkDuplicateLabels(lines, diags) {
         const name = lineNoComment.trim().slice(0, -1).trim().toLowerCase();
         if (!name) continue;
         if (name.startsWith('%%')) continue;
+        if (name.startsWith('.'))  continue; // local labels are scoped — skip duplicate check
         if (seen.has(name)) {
             diags.push(_makeDiag(i, lines[i].indexOf(name.charAt(0)), name.length,
                 `Duplicate label '${name}' (first defined at line ${seen.get(name) + 1})`,
