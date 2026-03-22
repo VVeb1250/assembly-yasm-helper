@@ -15,7 +15,8 @@ class TasmHoverProvider {
         const comment = line.match(/^[^\;]*\;.*$/);
         if (quotes || comment) return null;
 
-        const range = document.getWordRangeAtPosition(position);
+        const WORD_RE = /0x[0-9a-fA-F]+|[0-9][0-9a-fA-F]*[hH]|[01]+[bB]|[0-9]+[dD]?|[A-Za-z_.$?][\w.$?]*/;
+        const range = document.getWordRangeAtPosition(position, WORD_RE);
         if (!range) return null;
 
         const word  = document.getText(range);
