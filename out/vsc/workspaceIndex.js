@@ -101,10 +101,35 @@ function _extractGlobals(text) {
         if (m) labels.set(m[1].toLowerCase(), i);
     }
 
-    return [...globals.values()].map(g => ({
-        name: g.name,
-        line: labels.has(g.name.toLowerCase()) ? labels.get(g.name.toLowerCase()) : g.line,
-    }));
+    return [...globals.values()].map(g => {
+        const labelLine = labels.has(g.name.toLowerCase()) ? labels.get(g.name.toLowerCase()) : g.line;
+        return { name: g.name, line: labelLine, doc: _parseLabelDoc(lines, labelLine) };
+    });
+}
+
+/**
+ * Parse JSDoc-style comments above a label line.
+ * Skips `global` directives between comments and the label definition.
+ * @returns {{ des: string, params: string[], output: string[] } | null}
+ */
+function _parseLabelDoc(lines, labelLine) {
+    const text = [];
+    for (let i = labelLine - 1; i >= 0; i--) {
+        const trimmed = lines[i].trim();
+        if (/^global\b/i.test(trimmed)) continue; // skip `global name` between doc and label
+        if (!trimmed.startsWith(';')) break;
+        text.unshift(trimmed.substring(1).trim());
+    }
+    if (text.length === 0) return null;
+
+    const doc = { des: '', params: [], output: [] };
+    for (const t of text) {
+        if      (t.startsWith('@out: ')) doc.output.push(t.substring(6).trim());
+        else if (t.startsWith('@arg: ')) doc.params.push(t.substring(6).trim());
+        else                             doc.des += t + '\n';
+    }
+    doc.des = doc.des.trim();
+    return (doc.des || doc.params.length || doc.output.length) ? doc : null;
 }
 
 module.exports = { WorkspaceIndex };
