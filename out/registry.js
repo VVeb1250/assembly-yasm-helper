@@ -27,6 +27,9 @@ class SymbolRegistry {
         this.macroMap = new Map();
         this.labelMap = new Map();
 
+        // local label scoped map: 'parentLabel/.local' → { name, line, parent }
+        this.localLabelMap = new Map();
+
         // duplicate guard
         this.varSet = new Set();
         this.procSet = new Set();
@@ -127,7 +130,7 @@ class SymbolRegistry {
     // LABELS
     // --------------------------------
 
-    addLabel(name, line) {
+    addLabel(name, line, doc = null) {
 
         const key = name.toLowerCase();
 
@@ -135,7 +138,7 @@ class SymbolRegistry {
 
         this.labelSet.add(key);
 
-        const sym = { name, line };
+        const sym = { name, line, doc };
         this.labels.push(sym);
         this.labelMap.set(key, sym);
     }

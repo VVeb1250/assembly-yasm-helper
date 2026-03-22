@@ -54,6 +54,11 @@ function getHoverContent(word, registry) {
             ? `  [line ${label.line + 1}]`
             : (label.value ? ` => ${label.value}` : '');
         output.push({ language: 'assembly', value: '(Label) ' + label.name + lineInfo });
+        if (label.doc) {
+            if (label.doc.des?.trim())    output.push({ language: 'plainText', value: label.doc.des.trim() });
+            if (label.doc.params?.length) output.push({ language: 'assembly',  value: label.doc.paramsString() });
+            if (label.doc.output?.length) output.push({ language: 'assembly',  value: 'Output:\n' + label.doc.outputs() });
+        }
     }
 
     return output.length > 0 ? output : null;

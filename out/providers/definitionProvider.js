@@ -15,6 +15,16 @@ class AsmDefinitionProvider {
 
         const word = document.getText(range);
 
+        // --- scoped local label (.done, .loop, etc.) ---
+        if (word.startsWith('.') && this.registry.localLabelMap) {
+            const parent = _findParentLabel(document, position.line);
+            if (parent) {
+                const scoped = this.registry.localLabelMap.get(parent.toLowerCase() + '/' + word.toLowerCase());
+                if (scoped)
+                    return new vscode.Location(document.uri, new vscode.Position(scoped.line, 0));
+            }
+        }
+
         // --- local lookups (current file + includes) ---
         const label = this.registry.findLabel(word);
         if (label && label.line !== undefined) {
@@ -52,6 +62,16 @@ class AsmDefinitionProvider {
 
         return null;
     }
+}
+
+/** Scan upward from lineIdx to find the nearest non-local label name */
+function _findParentLabel(document, lineIdx) {
+    const re = /^\s*([A-Za-z_.$?][\w.$?]*):/;
+    for (let i = lineIdx; i >= 0; i--) {
+        const m = document.lineAt(i).text.match(re);
+        if (m && !m[1].startsWith('.')) return m[1];
+    }
+    return null;
 }
 
 module.exports = { AsmDefinitionProvider };

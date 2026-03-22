@@ -30,6 +30,8 @@ class DocumentScanner {
             }
         }
         this.currentSection = "";
+        this._lines = documentLines;
+        this._currentParentLabel = null;
 
         for (let x = 0; x < documentLines.length; x++) {
             const ctx = this._buildContext(documentLines[x]);
@@ -72,8 +74,22 @@ class DocumentScanner {
 
     _detectLabel(ctx, x) {
         const match = ctx.noComment.match(this.labelRegex);
-        if (match && !this.registry.findLabel(match[1])) {
-            this.registry.addLabel(match[1], x);
+        if (match) {
+            const name = match[1];
+            if (name.startsWith('.')) {
+                // local label — track scoped: 'parent/.local'
+                const key = (this._currentParentLabel || '') + '/' + name.toLowerCase();
+                this.registry.localLabelMap.set(key, { name, line: x, parent: this._currentParentLabel });
+                // add to global map (first occurrence) for completion/hover
+                if (!this.registry.labelSet.has(name.toLowerCase()))
+                    this.registry.addLabel(name, x);
+            } else {
+                this._currentParentLabel = name;
+                if (!this.registry.findLabel(name)) {
+                    const doc = this._parseLabelDocComments(x);
+                    this.registry.addLabel(name, x, doc);
+                }
+            }
         }
 
         // MASM label directive
@@ -108,6 +124,25 @@ class DocumentScanner {
         proc.section  = this.currentSection;
         proc.line     = x;
         this.registry.addProcedure(proc);
+    }
+
+    _parseLabelDocComments(labelLine) {
+        const lines = this._lines || [];
+        const text = [];
+        for (let ptr = labelLine - 1; ptr >= 0; ptr--) {
+            const prev = Utils.clearSpace(lines[ptr]);
+            if (!prev.startsWith(";")) break;
+            text.push(lines[ptr].substring(lines[ptr].indexOf(";") + 1).trim());
+        }
+        if (text.length === 0) return null;
+        const { Info } = require("./data/structs");
+        const des = new Info("", "");
+        for (const t of text) {
+            if      (t.startsWith("@out: ")) des.output.push(t.substring(6).trim());
+            else if (t.startsWith("@arg: ")) des.params.push(t.substring(6).trim());
+            else                             des.des += t + "\n";
+        }
+        return des;
     }
 
     _parseProcDocComments(documentLines, procLine, name) {
