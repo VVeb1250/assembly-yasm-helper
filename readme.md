@@ -4,26 +4,36 @@ Advanced language support for **YASM / NASM Assembly** in Visual Studio Code.
 
 ---
 
+## Preview
+
+![Preview](images/preview.png)
+
+---
+
 # 🚀 Features
 
 ## Intelligent Autocomplete
 
+![Autocomplete](images/Autocomplete.png)
+
 Context-aware suggestions based on cursor position:
 
-- **Data sections** — suggests `db`, `dw`, `dd`, `dq`, `resb`, `resw`, `resd`, `resq` after the variable name
-- **Text sections** — suggests instructions, registers, variables, and pointer sizes (`byte`, `word`, `dword`, `qword`…)
-- **Memory brackets `[...]`** — suggests registers, variables, and `+` / `*` operators in the correct order
-- **Root level** — suggests `section .text/data/bss`, `global`, `extern` only at line start
-- **Preprocessor** — typing `%` suggests all YASM directives (`%include`, `%macro`, `%define`, `%if`, `%rep`…)
+- **Instructions & operands** — suggests registers, variables, labels, and size keywords filtered by the instruction's valid operand types
+- **Memory brackets `[...]`** — walks a state machine (`base + index * scale`) and suggests only what fits at each position
+- **`global` / `extern`** — `global` suggests labels and procs from the current file; `extern` suggests `global` symbols from other workspace files with source file shown in detail
+- **Data sections** — suggests `db`, `dw`, `dd`, `dq`, `resb`, `resw`, `resd`, `resq`, `equ` after a variable name; after the directive, suggests existing vars, labels, and defines as values
+- **Root level** — `section .text/data/bss`, `global`, `extern` only at line start
+- **Preprocessor** — typing `%` suggests all directives (`%include`, `%macro`, `%define`, `%if`, `%rep`…) plus macro arguments `%1`…`%N` inside a macro body
 
 ## 🧭 Navigation
 
-- **Go to Definition (F12)** — jump to any label, variable, or procedure declaration
-- **Find All References (Shift+F12)** — find every usage of a label, variable, or procedure
-- **Rename Symbol (F2)** — rename a label, variable, or procedure across the entire file
-- **Document Symbol Outline** — labels, variables, and procedures listed in the Outline panel and breadcrumb
+- **Go to Definition (F12)** — jumps to labels, variables, procs, and macros; local labels (`.done`, `.loop`) resolve to the correct parent scope; `extern` symbols jump directly to the declaring file
+- **Cross-file extern** — workspace is indexed on activation; `extern` symbols are resolved to their source files via a `FileSystemWatcher`-backed cache
+- **Find All References (Shift+F12)** — every usage of a label, variable, proc, or macro in the file
+- **Rename Symbol (F2)** — renames all occurrences; guards against renaming keywords or registers
+- **Document Symbol Outline** — labels, variables, procs, and macros in the Outline panel and breadcrumb
 - **Signature Help** — shows operand hints while typing (e.g. `mov <dst>, <src>`), active parameter highlighted
-- **Code Folding** — fold procedures (`proc/endp`), macros (`%macro/%endmacro`), and `%if` blocks
+- **Code Folding** — folds `proc`/`endp`, `%macro`/`%endmacro`, `struc`/`ends`, `section` blocks, and plain-label functions (`label:` … `ret`)
 
 ## 🎨 Syntax Highlighting
 
@@ -33,14 +43,32 @@ Three built-in themes: **Assembly Dark**, **Assembly Light**, **Assembly High Co
 
 ## 🔍 Hover Information
 
-Hover over instructions, registers, variables, or numbers for details. Numbers show automatic decimal / hex / binary conversions.
+![hover](images/hover.png)
+
+- **Instructions** — description, syntax, and valid operand forms
+- **Registers & numbers** — size, purpose, auto base conversion (dec / hex / bin)
+- **Variables & labels** — type, section, line number; JSDoc `@arg`/`@out` from comments above the definition
+- **Extern symbols** — when resolved to a single file, shows source file, line, and doc comments from the declaring file; when multiple files declare the same symbol, shows the full list
 
 ## 🔴 Code Diagnostics
 
 Real-time static analysis detects:
+
 - Duplicate labels and jumps to undefined labels
 - Unclosed blocks (`proc/endp`, `%macro/%endmacro`, `%if/%endif`)
 - Operand errors — missing operands, invalid types, size mismatches
+
+## 🏃 Build & Run
+
+Assembles and runs the current file in the integrated terminal. Automatically detects `extern` dependencies, assembles all required files, and links them together.
+
+Command: **Assembly: Build & Run** (via Command Palette)
+
+## 🐛 Debug with DDD
+
+Assembles with debug symbols and launches [DDD](https://www.gnu.org/software/ddd/) for graphical debugging.
+
+Command: **Assembly: Debug with DDD** (via Command Palette)
 
 ## ⚙ Compiler Integration (Optional)
 
@@ -52,17 +80,21 @@ Compile on save using YASM or NASM. Errors appear inline in VS Code and in the s
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| assembly.enableCompilerCheck | true | Enable compiler check on save |
-| assembly.compilerPath | auto | Path to compiler executable |
-| assembly.compilerType | yasm | `yasm` or `nasm` |
-| assembly.compilerFormat | elf64 | Output format |
-| assembly.compilerDebugInfo | dwarf2 | Debug info format |
-| assembly.outputExtension | o | Output file extension |
-| assembly.enableGoToDefinition | true | Enable Go to Definition (F12) |
-| assembly.enableDocumentSymbols | true | Enable Outline panel symbols |
-| assembly.enableSignatureHelp | true | Enable operand hints while typing |
-| assembly.tabTriggerCompletions | false | Show completions when Tab is pressed |
-| assembly.tabSize | 8 | Indentation width (2, 4, or 8) |
+| `assembly.compilerPath` | auto | Path to YASM/NASM executable |
+| `assembly.compilerType` | `yasm` | `yasm` or `nasm` |
+| `assembly.compilerFormat` | `elf64` | Output format (`elf32`, `elf64`, `win64`, `macho64`…) |
+| `assembly.compilerDebugInfo` | `dwarf2` | Debug info format (`none`, `dwarf2`, `stabs`) |
+| `assembly.outputExtension` | `o` | Object file extension (`o` or `obj`) |
+| `assembly.enableCompilerCheck` | `true` | Compiler check on save |
+| `assembly.enableGoToDefinition` | `true` | F12 Go to Definition |
+| `assembly.enableDocumentSymbols` | `true` | Outline panel symbols |
+| `assembly.enableSignatureHelp` | `true` | Operand hints while typing |
+| `assembly.tabTriggerCompletions` | `false` | Show completions when Tab is pressed |
+| `assembly.tabSize` | `8` | Indentation width (2, 4, or 8) |
+| `assembly.linkerPath` | auto | Path to linker (`ld`) for Build & Run |
+| `assembly.entryPoint` | `_start` | Entry point symbol passed to linker |
+| `assembly.dddPath` | auto | Path to `ddd` executable |
+| `assembly.dddDebugger` | `gdb` | Debugger backend for DDD (`gdb`, `dbx`, `wdb`) |
 
 ---
 
@@ -75,13 +107,13 @@ Compile on save using YASM or NASM. Errors appear inline in VS Code and in the s
 # 📋 Requirements
 
 - Visual Studio Code **v1.48.0 or newer**
-- YASM or NASM installed *(optional for compiler integration)*
+- YASM or NASM installed *(optional — required only for compiler check and Build & Run)*
 
 ---
 
 # 🖥 Neovim Setup
 
-This extension also ships an LSP server that works with Neovim (and any editor supporting LSP).
+This extension also ships a standalone LSP server for Neovim and any LSP-compatible editor.
 
 ### 1. Install the LSP server
 
