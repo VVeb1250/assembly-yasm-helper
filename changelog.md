@@ -1,3 +1,8 @@
+## 2.2.0
+- add **hover doc for plain-label functions** — JSDoc comments (`; @arg:`, `; @out:`, description) above any `label:` now appear in hover tooltips, same as `proc`/`endp` style
+- add **scoped Go to Definition for local labels** — F12 on `.done`/`.loop`/`.write` etc. now resolves to the correct parent scope instead of always jumping to the first occurrence in the file
+- add **code folding for plain-label functions** — any non-local label on its own line (`printStr:`, `_start:`, etc.) creates a fold region that closes just before the next label/proc/section
+
 ## 2.1.2
 - fix extension entry point — `main` now correctly points to bundled `dist/extension.js` instead of unbundled source; all previous versions were loading unminified source files
 
