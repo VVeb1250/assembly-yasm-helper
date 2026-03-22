@@ -1,3 +1,6 @@
+## 2.1.2
+- fix extension entry point — `main` now correctly points to bundled `dist/extension.js` instead of unbundled source; all previous versions were loading unminified source files
+
 ## 2.1.1
 - add **Debug with DDD** command — assembles with debug symbols, resolves `extern` dependencies, then launches `ddd --debugger gdb <exe>`; new settings: `assembly.dddPath`, `assembly.dddDebugger`
 - fix false "Duplicate label" error for NASM local labels (`.done`, `.loop`, `.write`, etc.) — local labels are scoped to their parent label and must not be checked globally
