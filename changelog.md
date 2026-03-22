@@ -1,3 +1,7 @@
+## 2.3.0
+- fix **cross-file Go to Definition** (F12) — now reliably jumps to the defining file by tracking extern symbols in a dedicated `registry.externs` set instead of fragile line-number checks
+- feat **extern hover doc** — hovering an extern symbol with a single source file now shows its JSDoc description, `@arg`, and `@out` comments from the declaring file
+
 ## 2.2.1
 - fix **extern multi-symbol**: `extern a, b, c` now correctly registers all symbols
 - fix **extern hover**: hovering on an extern-declared symbol now shows source file and line (e.g. `(extern) stats — extern-function.s [line 15]`) instead of a misleading local line number
