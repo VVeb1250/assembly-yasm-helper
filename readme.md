@@ -45,6 +45,8 @@ Three built-in themes: **Assembly Dark**, **Assembly Light**, **Assembly High Co
 
 ![hover](images/hover.png)
 
+![hover2](images/hover2.png)
+
 - **Instructions** — description, syntax, and valid operand forms
 - **Registers & numbers** — size, purpose, auto base conversion (dec / hex / bin)
 - **Variables & labels** — type, section, line number; JSDoc `@arg`/`@out` from comments above the definition
