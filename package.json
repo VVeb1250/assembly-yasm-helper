@@ -3,7 +3,7 @@
 	"publisher": "VVeb1250",
 	"displayName": "Assembly YASM Helper",
 	"description": "Language support and smart autocomplete for YASM/NASM Assembler",
-	"version": "2.3.1",
+	"version": "2.3.2",
 	"license": "MIT",
 	"icon": "icon.png",
 	"bin": {

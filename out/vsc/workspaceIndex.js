@@ -65,7 +65,7 @@ class WorkspaceIndex {
         const results = [];
         for (const [fp, syms] of this._fileSymbols) {
             const found = syms.find(s => s.name.toLowerCase() === key);
-            if (found) results.push({ filePath: fp, line: found.line });
+            if (found) results.push({ filePath: fp, line: found.line, doc: found.doc });
         }
         return results;
     }

@@ -22,8 +22,8 @@ class TasmHoverProvider {
         const word  = document.getText(range);
 
         // If symbol was declared extern → show cross-file definition info
-        if (this.registry.externs?.has(word.toLowerCase()) && this.workspaceIndex) {
-            const defs = this.workspaceIndex.findAllDefinitions(word);
+        if (this.registry.externs?.has(word.toLowerCase())) {
+            const defs = this.workspaceIndex ? this.workspaceIndex.findAllDefinitions(word) : [];
             if (defs.length === 1) {
                 const d = defs[0];
                 const content = [{ language: 'assembly', value: `(extern) ${word}  —  ${path.basename(d.filePath)} [line ${d.line + 1}]` }];
@@ -40,6 +40,8 @@ class TasmHoverProvider {
                     value: `(extern) ${word}  —  ${path.basename(d.filePath)} [line ${d.line + 1}]`
                 })));
             }
+            // workspaceIndex not ready yet — show placeholder
+            return new vscode.Hover({ language: 'assembly', value: `(extern) ${word}  —  Indexing workspace...` });
         }
 
         const output = getHoverContent(word, this.registry);

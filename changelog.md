@@ -1,3 +1,7 @@
+## 2.3.2
+- fix **extern hover/F12** — race conditions on startup eliminated; hover now consistently shows cross-file doc; F12 no longer requires the target file to have been previously opened
+- fix **doc comment order** — JSDoc above plain-label functions was displayed in reverse
+
 ## 2.3.1
 - fix **number hover** — `0x1F`, `1Fh`, `1010b` now correctly show decimal/hex/binary conversions on hover (VS Code default word boundary was splitting the tokens)
 

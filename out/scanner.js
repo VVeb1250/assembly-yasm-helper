@@ -131,8 +131,9 @@ class DocumentScanner {
         const text = [];
         for (let ptr = labelLine - 1; ptr >= 0; ptr--) {
             const prev = Utils.clearSpace(lines[ptr]);
+            if (/^global\b/i.test(prev)) continue;
             if (!prev.startsWith(";")) break;
-            text.push(lines[ptr].substring(lines[ptr].indexOf(";") + 1).trim());
+            text.unshift(lines[ptr].substring(lines[ptr].indexOf(";") + 1).trim());
         }
         if (text.length === 0) return null;
         const { Info } = require("./data/structs");

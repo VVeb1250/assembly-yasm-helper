@@ -31,6 +31,18 @@ class AsmDefinitionProvider {
             const label = this.registry.findLabel(word);
             if (label && label.line !== undefined)
                 return new vscode.Location(document.uri, new vscode.Position(label.line, 0));
+        } else {
+            // extern: try cross-file first; fall back to local extern declaration line
+            if (this.workspaceIndex) {
+                const defs = this.workspaceIndex.findAllDefinitions(word);
+                if (defs.length > 0)
+                    return defs.map(d => new vscode.Location(vscode.Uri.file(d.filePath), new vscode.Position(d.line, 0)));
+            }
+            // workspaceIndex not ready — jump to the extern declaration line in this file
+            const label = this.registry.findLabel(word);
+            if (label && label.line !== undefined)
+                return new vscode.Location(document.uri, new vscode.Position(label.line, 0));
+            return null;
         }
 
         const variable = this.registry.findVariable(word);

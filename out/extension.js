@@ -130,7 +130,7 @@ class ExtensionManager {
         this._applyTabSize();
 
         if (vscode.window.activeTextEditor) {
-            this.triggerScan(vscode.window.activeTextEditor.document);
+            await this.triggerScan(vscode.window.activeTextEditor.document);
         }
     }
 
@@ -153,6 +153,7 @@ class ExtensionManager {
         const docText = document.getText().split(/\r?\n/);
         this.scanner.currentFilePath = document.uri.fsPath;
         await this.scanner.scan(docText);
+        this.workspaceIndex._indexFile(document.uri.fsPath);
         this.diagnostics.analyze(document);
         this.semanticTokens.fire();
 
@@ -165,7 +166,7 @@ class ExtensionManager {
 function activate(context) {
     console.log("MY VERSION LOADED ✅");
     const manager = new ExtensionManager(context);
-    manager.activate();
+    return manager.activate();
 }
 exports.activate = activate;
 
