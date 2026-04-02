@@ -200,8 +200,25 @@ async function _resolveBuild(srcFile, text, workspaceIndex, vsConfig) {
     const dir      = path.dirname(srcFile);
     const base     = path.basename(srcFile, path.extname(srcFile));
     const depFiles = _resolveDeps(text, srcFile, workspaceIndex);
+
+    let selectedDeps = depFiles;
+    if (depFiles.length > 0) {
+        const items = depFiles.map(f => ({
+            label:       path.basename(f),
+            description: path.relative(dir, f),
+            fsPath:      f,
+            picked:      true
+        }));
+        const picked = await vscode.window.showQuickPick(items, {
+            canPickMany:  true,
+            placeHolder:  `Building: ${path.basename(srcFile)} — select additional files`
+        });
+        if (picked === undefined) return null; // user cancelled
+        selectedDeps = picked.map(i => i.fsPath);
+    }
+
     return {
-        allFiles:    [srcFile, ...depFiles],
+        allFiles:    [srcFile, ...selectedDeps],
         exeFile:     path.join(dir, base),
         entryPoint:  vsConfig.get('entryPoint', '_start'),
         format:      vsConfig.get('compilerFormat', 'elf64'),
