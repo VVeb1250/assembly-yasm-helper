@@ -1,3 +1,8 @@
+## 2.4.0
+- feat **asmconfig.json** — explicit multi-file project config: define `sources`, `output`, `linkerFlags`, `format`, `entryPoint`; extension auto-discovers closest config when building
+- feat **"Assembly: Create asmconfig.json"** command — generates config from current file + detected extern dependencies
+- feat **multi-project quick pick** — when multiple `asmconfig.json` exist in workspace, shows quick pick to select which project to build
+
 ## 2.3.3
 - fix **size mismatch false positive** — `mov al, [rbx]` and similar mixed reg+mem instructions no longer incorrectly reported as size mismatch (address registers inside `[...]` are now ignored when checking data sizes)
 

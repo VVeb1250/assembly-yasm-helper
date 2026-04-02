@@ -3,7 +3,7 @@
 	"publisher": "VVeb1250",
 	"displayName": "Assembly YASM Helper",
 	"description": "Language support and smart autocomplete for YASM/NASM Assembler",
-	"version": "2.3.3",
+	"version": "2.4.0",
 	"license": "MIT",
 	"icon": "icon.png",
 	"bin": {
@@ -36,6 +36,12 @@
 				"title": "Debug with DDD",
 				"category": "Assembly",
 				"icon": "$(debug-alt)"
+			},
+			{
+				"command": "assembly.createConfig",
+				"title": "Create asmconfig.json",
+				"category": "Assembly",
+				"icon": "$(gear)"
 			}
 		],
 		"menus": {
@@ -185,10 +191,10 @@
 				},
 				"assembly.dddDebugger": {
 					"type": "string",
-					"default": "gdb",
-					"enum": ["gdb", "dbx", "wdb"],
-					"enumDescriptions": ["GNU Debugger (default)", "dbx debugger", "HP wdb debugger"],
-					"description": "Debugger backend for ddd (--debugger flag)"
+					"default": "",
+					"enum": ["", "gdb", "dbx", "wdb"],
+					"enumDescriptions": ["Use ddd default (no --debugger flag)", "GNU Debugger", "dbx debugger", "HP wdb debugger"],
+					"description": "Debugger backend for ddd (--debugger flag). Leave empty to use ddd's default."
 				}
 			}
 		},
