@@ -1,3 +1,6 @@
+## 2.3.3
+- fix **size mismatch false positive** — `mov al, [rbx]` and similar mixed reg+mem instructions no longer incorrectly reported as size mismatch (address registers inside `[...]` are now ignored when checking data sizes)
+
 ## 2.3.2
 - fix **extern hover/F12** — race conditions on startup eliminated; hover now consistently shows cross-file doc; F12 no longer requires the target file to have been previously opened
 - fix **doc comment order** — JSDoc above plain-label functions was displayed in reverse

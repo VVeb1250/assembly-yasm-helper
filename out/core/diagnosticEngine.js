@@ -239,12 +239,13 @@ function _checkSizeMismatch(lineIdx, rawLine, opcode, operands, diags) {
     };
 
     const getInfo = (op) => {
+        const isMem = op.includes('[');
         let s = op.replace(/\[/g, ' ').replace(/\]/g, ' ').trim();
         const tokens = s.split(/\s+/).filter(t => t.length > 0);
         let sizeKeyword = null, reg = null;
         for (const t of tokens) {
             if (SIZE_KEYWORD_BITS[t] !== undefined) sizeKeyword = t;
-            else if (REG_BITS[t] !== undefined) reg = t;
+            else if (!isMem && REG_BITS[t] !== undefined) reg = t;
         }
         if (sizeKeyword) return { bits: SIZE_KEYWORD_BITS[sizeKeyword], label: sizeKeyword, token: sizeKeyword };
         if (reg)         return { bits: REG_BITS[reg], label: reg, token: reg };
