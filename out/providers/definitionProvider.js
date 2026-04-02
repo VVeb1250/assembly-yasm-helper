@@ -35,7 +35,9 @@ class AsmDefinitionProvider {
             // extern: try cross-file first; fall back to local extern declaration line
             if (this.workspaceIndex) {
                 const defs = this.workspaceIndex.findAllDefinitions(word);
-                if (defs.length > 0)
+                if (defs.length === 1)
+                    return new vscode.Location(vscode.Uri.file(defs[0].filePath), new vscode.Position(defs[0].line, 0));
+                if (defs.length > 1)
                     return defs.map(d => new vscode.Location(vscode.Uri.file(d.filePath), new vscode.Position(d.line, 0)));
             }
             // workspaceIndex not ready — jump to the extern declaration line in this file
@@ -63,12 +65,10 @@ class AsmDefinitionProvider {
         // --- cross-file: workspace index ---
         if (this.workspaceIndex) {
             const defs = this.workspaceIndex.findAllDefinitions(word);
-            if (defs.length > 0) {
-                return defs.map(d => new vscode.Location(
-                    vscode.Uri.file(d.filePath),
-                    new vscode.Position(d.line, 0)
-                ));
-            }
+            if (defs.length === 1)
+                return new vscode.Location(vscode.Uri.file(defs[0].filePath), new vscode.Position(defs[0].line, 0));
+            if (defs.length > 1)
+                return defs.map(d => new vscode.Location(vscode.Uri.file(d.filePath), new vscode.Position(d.line, 0)));
         }
 
         return null;
