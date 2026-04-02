@@ -254,12 +254,17 @@ function _loadAsmConfig(configPath) {
 
 function _resolveDeps(text, currentFilePath, workspaceIndex) {
     if (!workspaceIndex) return [];
-    const norm  = path.normalize(currentFilePath);
-    const syms  = _extractExterns(text);
+    const norm = path.normalize(currentFilePath);
+    const dir  = path.dirname(norm);
+    const syms = _extractExterns(text);
     const files = new Set();
     for (const sym of syms) {
         for (const def of workspaceIndex.findAllDefinitions(sym)) {
-            if (def.filePath !== norm) files.add(def.filePath);
+            if (def.filePath !== norm &&
+                path.dirname(path.normalize(def.filePath)) === dir)
+            {
+                files.add(def.filePath);
+            }
         }
     }
     return [...files];
