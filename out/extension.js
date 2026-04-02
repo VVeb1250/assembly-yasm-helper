@@ -163,7 +163,7 @@ class ExtensionManager {
         const docText = document.getText().split(/\r?\n/);
         this.scanner.currentFilePath = document.uri.fsPath;
         await this.scanner.scan(docText);
-        this.workspaceIndex._indexFile(document.uri.fsPath);
+        this.workspaceIndex._indexFile(document.uri.fsPath, document.getText());
         this.diagnostics.analyze(document);
         this.semanticTokens.fire();
 

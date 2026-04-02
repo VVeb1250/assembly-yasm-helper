@@ -29,15 +29,15 @@ class WorkspaceIndex {
         context.subscriptions.push(this);
     }
 
-    async _indexFile(filePath) {
+    _indexFile(filePath, text = null) {
         const norm    = path.normalize(filePath);
         const folders = vscode.workspace.workspaceFolders;
         if (folders && !folders.some(f =>
             norm.startsWith(path.normalize(f.uri.fsPath) + path.sep)
         )) return;
         try {
-            const text = fs.readFileSync(filePath, 'utf8');
-            this._fileSymbols.set(norm, _extractGlobals(text));
+            const content = text ?? fs.readFileSync(filePath, 'utf8');
+            this._fileSymbols.set(norm, _extractGlobals(content));
         } catch {}
     }
 
