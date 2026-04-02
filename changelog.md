@@ -1,3 +1,10 @@
+## 2.4.1
+- fix **extern F12 single definition** — jumping to a single cross-file extern definition now works reliably (was silently failing; return `Location` instead of `Location[]` for single result)
+- fix **workspace index uses in-memory content** — extern F12 and hover now reflect unsaved edits immediately, no longer requires saving the target file first
+- fix **auto-detect build scoped to same directory** — multi-file auto-detect only picks up dependency files in the same folder as the current file
+- feat **auto-detect build multi-select** — when dependency files are detected, shows a checkbox picker to confirm/deselect files before building
+- fix **Local History files excluded from index** — VS Code's `.vscode-server/data/User/History/` files are no longer indexed, preventing spurious "multiple definition" linker errors
+
 ## 2.4.0
 - feat **asmconfig.json** — explicit multi-file project config: define `sources`, `output`, `linkerFlags`, `format`, `entryPoint`; extension auto-discovers closest config when building
 - feat **"Assembly: Create asmconfig.json"** command — generates config from current file + detected extern dependencies
